@@ -11,8 +11,11 @@ const {
     getProductById,
     getSources,
     getSourceById,
+    getExecutive,
     changeSourceStatus } = require('../controllers/masterController')
 const { protect } = require('../middleware/authMiddleware')
+
+router.get('/getExecutive', protect, getExecutive)
 
 router.post('/addProduct', protect, addProduct)
 router.post('/editProduct', protect, editProduct)

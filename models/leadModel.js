@@ -24,12 +24,10 @@ const leadSchema = mongoose.Schema(
         Mobile: {
             type: Number,
             required: [true, 'Please add Mobile'],
-            unique: true
         },
         Email: {
             type: String,
             required: [true, 'Please add email'],
-            unique: true
         },
         City: {
             type: String
@@ -62,20 +60,31 @@ const leadSchema = mongoose.Schema(
             type: String
         },
         LeadSince: {
-            type: String
+            //use for getting lead add date
+            type: Date
         },
         Interaction: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'Interaction'
+            ref: 'Interaction',
+            default:null
         },
         NextTalk: {
+            //this will use for appointment
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'NextOn'
+            ref: 'NextOn',
+            default:null
         },
         Status: {
             type: String
         },
-        Stage: {
+        Stage:{
+            type:String
+        },
+        StageDate:{
+            type: Date
+        },
+        ProspectStage: {
+            //this will use for prospect stages
             type: String
         },
         is_active: {
@@ -86,6 +95,10 @@ const leadSchema = mongoose.Schema(
             type: Boolean,
             default: false
         },
+        addedBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        }
     },
     {
         timestamps: true,
@@ -94,11 +107,15 @@ const leadSchema = mongoose.Schema(
 
 const interactionSchema = mongoose.Schema(
     {
+        leadId:{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Leads'
+        },
         date: {
             type: Date
         },
         note: {
-            type: string
+            type: String
         },
         user: {
             type: mongoose.Schema.Types.ObjectId,
@@ -108,11 +125,15 @@ const interactionSchema = mongoose.Schema(
 
 const nextOnSchema = mongoose.Schema(
     {
+        leadId:{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Leads'
+        },
         date: {
             type: Date
         },
         note: {
-            type: string
+            type: String
         },
         user: {
             type: mongoose.Schema.Types.ObjectId,

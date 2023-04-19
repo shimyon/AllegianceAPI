@@ -3,6 +3,7 @@ const Master = require('../models/masterModel')
 const Product = Master.ProductModal;
 const Source = Master.SourceModal;
 const Response = require('../models/responseModel')
+const User = require('../models/userModel')
 
 const addProduct = asyncHandler(async (req, res) => {
     let response = new Response();
@@ -230,6 +231,23 @@ const getSourceById = asyncHandler(async (req, res) => {
         return res.status(400).json(response);
     }
 })
+
+const getExecutive = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let sources = await User.find({is_active:true,role:"executive"});
+
+        response.success = true;
+        response.data = sources;
+        return res.status(200).json(response);
+    }
+    catch (err) {
+        response.message = "Error in getting executive. " + err.message;
+        return res.status(400).json(response);
+    }
+})
+
 module.exports = {
     addProduct,
     editProduct,
@@ -240,5 +258,6 @@ module.exports = {
     getProduct,
     getProductById,
     getSources,
-    getSourceById
+    getSourceById,
+    getExecutive
 }

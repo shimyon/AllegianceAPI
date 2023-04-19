@@ -6,6 +6,7 @@ const { errorHandler } = require('./middleware/errorMiddleware')
 const connectDB = require ('./config/db')
 const port = process.env.port || 5000
 var cors = require('cors');
+var cookieParser = require('cookie-parser');
 const path = require('path')
 connectDB()
 
@@ -14,12 +15,15 @@ const app = express()
 app.use(cors({origin: '*'}));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(cookieParser());
 
 app.options("*", cors());
 
 app.use('/static', express.static( "public/uploads"));
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/master', require('./routes/masterRoutes'));
+app.use('/api/lead', require('./routes/leadRoute'));
+
 
 app.use(errorHandler)
 app.listen(port, () => console.log(`Listening at port ${port}`))
