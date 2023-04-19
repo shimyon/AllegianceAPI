@@ -3,6 +3,12 @@ const LeadModal = require('../models/leadModel')
 const Lead = LeadModal.LeadsModal;
 const Interaction = LeadModal.InteractionModal;
 const NextOn = LeadModal.NextOnModal;
+const Master = require('../models/masterModel')
+const Product = Master.ProductModal;
+const Source = Master.SourceModal;
+const uploadFile = require("../middleware/uploadFileMiddleware");
+const readXlsxFile = require('read-excel-file/node')
+const path = require("path");
 
 const addLead = asyncHandler(async (req, res) => {
     try {
@@ -341,6 +347,101 @@ const moveToProspect = asyncHandler(async (req, res) => {
 
 });
 
+const importExcel = asyncHandler(async (req, res) => {
+    try {
+        process.env.UPLOADFILE = "";
+        await uploadFile(req, res, function (err) {
+            if (err) {
+                return ("Error uploading file.");
+            } else {
+                importFiletoDB(req, res, process.env.UPLOADFILE)
+            }
+        })
+
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in importing data. " + err.message,
+            data: null,
+        });
+
+    }
+})
+
+const importFiletoDB = asyncHandler(async (req, res, fileName) => {
+    try {
+        var exFile = path.join(process.env.UPLOAD_FOLDER, "uploads", fileName.replace(",", ""));
+        var importData = [];
+
+        await readXlsxFile(exFile).then(async (rows) => {
+            var msg = "";
+            for (var idx = 0; idx < rows.length; idx++) {
+                var val = rows[idx];
+                if (idx != 0) {
+                    var sourceId = await Source.findOne({ Name: { $regex: val[10], $options: 'i' } }, { _id: 1 });
+                    if (!sourceId) {
+                        return res.status(400).json({
+                            success: true,
+                            msg: val[10] + " source not found. ",
+                            data: null,
+                        });
+                    }
+                    var productId = await Product.findOne({ Name: { $regex: val[11], $options: 'i' } }, { _id: 1 });
+                    if (!productId) {
+                        return res.status(400).json({
+                            success: true,
+                            msg: val[11] + " product not found. ",
+                            data: null,
+                        });
+
+
+                    }
+                    importData.push({
+                        Company: val[0],
+                        Title: val[1],
+                        FirstName: val[2],
+                        LastName: val[3],
+                        Designation: val[4],
+                        Mobile: val[5],
+                        Email: val[6],
+                        City: val[7],
+                        State: val[8],
+                        Country: val[9],
+                        Source: sourceId._id,
+                        Product: productId._id,
+                        Requirements: val[12],
+                        Notes: val[13],
+                        InCharge: val[14],
+                        NextTalkon: val[16],
+                        NextTalkNotes: val[17],
+                        addedBy: req.cookies["userid"],
+                        Stage: "New",
+                        LeadSince: new Date(),
+                        StageDate: new Date(),
+                        is_active: true
+                    });
+                }
+            }
+
+            const newLead = await Lead.create(importData);
+            return res.status(200).json({
+                success: true,
+                msg: "Data imported successfully. ",
+                data: null,
+            });
+
+        });
+
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in importing data. " + err.message,
+            data: null,
+        });
+
+
+    }
+})
 module.exports = {
     addLead,
     editLead,
@@ -350,5 +451,6 @@ module.exports = {
     addInteraction,
     addNext,
     assignExecutive,
-    moveToProspect
+    moveToProspect,
+    importExcel
 }
