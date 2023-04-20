@@ -38,7 +38,7 @@ const addLead = asyncHandler(async (req, res) => {
             InCharge: req.body.incharge,
             NextTalkon: req.body.nextTalkOn,
             NextTalkNotes: req.body.nextTalkNotes,
-            addedBy: req.cookies["userid"],
+            addedBy: req.user._id,
             Stage: "New",
             LeadSince: new Date(),
             StageDate: new Date(),
@@ -262,7 +262,7 @@ const addInteraction = asyncHandler(async (req, res) => {
             leadId: req.body.id,
             date: req.body.date,
             note: req.body.note,
-            user: req.cookies["userid"]
+            user: req.user._id
         });
 
         let leadExisting = await Lead.findByIdAndUpdate(req.body.id, {
@@ -288,7 +288,7 @@ const addNext = asyncHandler(async (req, res) => {
             leadId: req.body.id,
             date: req.body.date,
             note: req.body.note,
-            user: req.cookies["userid"]
+            user: req.user._id
         });
 
         let leadExisting = await Lead.findByIdAndUpdate(req.body.id, {
@@ -414,7 +414,7 @@ const importFiletoDB = asyncHandler(async (req, res, fileName) => {
                         InCharge: val[14],
                         NextTalkon: val[16],
                         NextTalkNotes: val[17],
-                        addedBy: req.cookies["userid"],
+                        addedBy: req.user._id,
                         Stage: "New",
                         LeadSince: new Date(),
                         StageDate: new Date(),

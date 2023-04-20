@@ -7,12 +7,6 @@ const protect = asyncHandler(async (req, res, next) => {
 
     console.log(req.headers.authorization)
 
-    if(!req.cookies["userid"])
-    {
-        res.status(401)
-        throw new Error("userid not found in cookie!")
-    }
-    
     if(req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
         try {
             //Get token from header
