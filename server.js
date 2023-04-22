@@ -23,6 +23,7 @@ app.use('/static', express.static( "public/uploads"));
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/master', require('./routes/masterRoutes'));
 app.use('/api/lead', require('./routes/leadRoute'));
+app.use('/api/customer', require('./routes/customerRoute'));
 
 
 app.use(errorHandler)

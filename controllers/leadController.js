@@ -58,7 +58,7 @@ const addLead = asyncHandler(async (req, res) => {
 
 const editLead = asyncHandler(async (req, res) => {
     try {
-        const existLead = Lead.findById(req.body.id);
+        const existLead = await Lead.findById(req.body.id);
         if (!existLead) {
             return res.status(200).json({
                 success: false,
@@ -103,7 +103,7 @@ const editLead = asyncHandler(async (req, res) => {
 
 const removeLead = asyncHandler(async (req, res) => {
     try {
-        const existLead = Lead.findById(req.params.id);
+        const existLead = await Lead.findById(req.params.id);
         if (!existLead) {
             return res.status(200).json({
                 success: false,
@@ -331,6 +331,7 @@ const moveToProspect = asyncHandler(async (req, res) => {
     try {
         let leadExisting = await Lead.findByIdAndUpdate(req.params.id, {
             Stage: "Prospect",
+            ProspectStage: "New",
             StageDate: new Date()
         });
         return res.status(200).json({
@@ -347,6 +348,25 @@ const moveToProspect = asyncHandler(async (req, res) => {
 
 });
 
+const changeProspectStage = asyncHandler(async (req, res) => {
+    try {
+        await Lead.findByIdAndUpdate(req.body.id, {
+            ProspectStage: req.body.prospect,
+            StageDate: new Date()
+        });
+        return res.status(200).json({
+            success: true,
+            msg: "Moved to " + req.body.prospect + " successfully",
+        }).end();
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in moving. " + err.message,
+            data: null,
+        });
+    }
+
+});
 const importExcel = asyncHandler(async (req, res) => {
     try {
         process.env.UPLOADFILE = "";
@@ -452,5 +472,6 @@ module.exports = {
     addNext,
     assignExecutive,
     moveToProspect,
-    importExcel
+    importExcel,
+    changeProspectStage
 }
