@@ -100,7 +100,7 @@ const getProduct = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let products = await Product.find({is_active:"true"});
+        let products = await Product.find({is_active:req.body.active});
 
         response.success = true;
         response.data = products;

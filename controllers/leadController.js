@@ -132,7 +132,7 @@ const removeLead = asyncHandler(async (req, res) => {
 });
 
 const getAllLead = asyncHandler(async (req, res) => {
-    var condition = { is_active: true, Stage: "New" };
+    var condition = { is_active: req.body.active, Stage: "New" };
 
     if (req.body.source) {
         condition.Source = req.body.source;
@@ -241,7 +241,7 @@ const getAllLead = asyncHandler(async (req, res) => {
 
 const getLeadById = asyncHandler(async (req, res) => {
     try {
-        let leadList = await Lead.find({ is_active: true, Stage: "New", _id: req.params.id }).populate("Source").populate("Product").populate("Executive").populate("Interaction").populate("NextTalk").populate("addedBy")
+        let leadList = await Lead.find({Stage: "New", _id: req.params.id }).populate("Source").populate("Product").populate("Executive").populate("Interaction").populate("NextTalk").populate("addedBy")
         return res.status(200).json({
             success: true,
             data: leadList
