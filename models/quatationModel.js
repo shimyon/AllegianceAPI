@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 
-const orderSchema = mongoose.Schema(
+const quatationSchema = mongoose.Schema(
     {
         Customer: {
             type: mongoose.Schema.Types.ObjectId,
@@ -8,7 +8,7 @@ const orderSchema = mongoose.Schema(
         },
         Products: [{
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'OrderProduct'
+            ref: 'QuatationProduct'
         }],
         ShippingAddress: {
             type: mongoose.Schema.Types.ObjectId,
@@ -18,8 +18,13 @@ const orderSchema = mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'BillingAddress'
         },
-        Status: {
-            type: String
+        SalesExecutive: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        },
+        addedBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
         },
         Amount: {
             type: Number
@@ -39,34 +44,25 @@ const orderSchema = mongoose.Schema(
         TotalPrice: {
             type: Number
         },
-        OrderDate: {
+        QuatationDate: {
             type: Date
         },
-        DeliveryDate: {
+        ValidDate: {
             type: Date
         },
-        Executive: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User'
-        },
-        addedBy: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User'
-        },
-        Note: {
+        Status: {
             type: String
         },
-        is_deleted: {
-            type: Boolean,
-            default: false
+        Note:
+        {
+            type:String
         }
-    },
-    {
-        timestamps: true,
+
     })
-const orderProductSchema = mongoose.Schema(
+
+const quatationProductSchema = mongoose.Schema(
     {
-        OrderId: {
+        QuatationId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Orders'
         },
@@ -97,20 +93,16 @@ const orderProductSchema = mongoose.Schema(
         },
         Note: {
             type: String
-        },
-        addedBy: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User'
-        },
+        }
     })
 
-const OrderModal = mongoose.model('Orders', orderSchema);
-const OrderProductModal = mongoose.model('OrderProduct', orderProductSchema);
+const QuatationModal = mongoose.model('Quatations', quatationSchema);
+const QuatationProductModal = mongoose.model('QuatationProduct', quatationProductSchema);
 
 const syncIndex = async () => {
-    await OrderModal.syncIndexes();
-    await OrderProductModal.syncIndexes();
+    await QuatationModal.syncIndexes();
+    await QuatationProductModal.syncIndexes();
 }
 syncIndex();
 
-module.exports = { OrderModal, OrderProductModal };
+module.exports = { QuatationModal, QuatationProductModal };

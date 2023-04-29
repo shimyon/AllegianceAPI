@@ -1,28 +1,28 @@
 const asyncHandler = require('express-async-handler')
-const OrderModal = require('../models/orderModel')
-const Order = OrderModal.OrderModal
-const OrderProduct = OrderModal.OrderProductModal
+const QuatationModal = require('../models/quatationModel')
+const Quatation = QuatationModal.QuatationModal
+const QuatationProduct = QuatationModal.QuatationProductModal
 
 
-const addOrder = asyncHandler(async (req, res) => {
+const addQuatation = asyncHandler(async (req, res) => {
     try {
 
-        const newOrder = await Order.create({
+        const newQuatation = await Quatation.create({
             Customer: req.body.customer,
             ShippingAddress: req.body.shippingAddress,
             BillingAddress: req.body.billingAddress,
             Status: "New",
+            SalesExecutive: req.body.executive,
+            addedBy: req.user._id,
             Amount: req.body.amount,
             CGST: req.body.CGST,
             SGST: req.body.SGST,
             Discount: req.body.discount,
             TotalTax: req.body.totalTax,
             TotalPrice: req.body.totalPrice,
-            OrderDate: new Date(),
-            DeliveryDate: req.body.deliveryDate,
-            Executive: req.body.executive,
+            QuatationDate: req.body.quatattionDate,
+            ValidDate: req.body.vaidDate,
             Note: req.body.note,
-            addedBy: req.user._id,
             is_deleted: false
         });
         var products = [];
@@ -30,77 +30,7 @@ const addOrder = asyncHandler(async (req, res) => {
         for (var i = 0; i < req.body.products.length; i++) {
             var pr = req.body.products[i];
             var newPr = {
-                OrderId: newOrder._id.toString(),
-                Product: (pr.product),
-                Quantity: pr.quantity,
-                Unit: pr.unit,
-                Price: pr.price,
-                CGST: pr.CGST,
-                SGST: pr.SGST,
-                TotalAmount: pr.totalAmount,
-                Note: pr.note
-            }
-            products.push(newPr);
-        }
-
-        const prOrder = await OrderProduct.create(products);
-        for(var i=0; i<prOrder.length; i++){
-            newOrder.Products.push(prOrder[i]);
-        }
-        newOrder.save((err) => {
-            if (err) throw err;
-        });
-
-        return res.status(200).json(newOrder).end();
-    } catch (err) {
-        return res.status(400).json({
-            success: false,
-            msg: "Error in creating Order. " + err.message,
-            data: null,
-        });
-    }
-
-});
-
-const editOrder = asyncHandler(async (req, res) => {
-    try {
-        const oldOrder = await Order.findById(req.body.id);
-        if (!oldOrder) {
-            return res.status(400).json({
-                success: false,
-                msg: "Order not found"
-            });
-        }
-
-        await Order.findByIdAndUpdate(req.body.id, {
-            Customer: req.body.customer,
-            ShippingAddress: req.body.shippingAddress,
-            BillingAddress: req.body.billingAddress,
-            Amount: req.body.amount,
-            CGST: req.body.CGST,
-            SGST: req.body.SGST,
-            Discount: req.body.discount,
-            TotalTax: req.body.totalTax,
-            TotalPrice: req.body.totalPrice,
-            DeliveryDate: req.body.deliveryDate,
-            Executive: req.body.executive,
-            Note: req.body.note
-        });
-
-        await OrderProduct.deleteMany({ OrderId: req.body.id }).lean().exec((err, doc) => {
-            if (err) {
-                return res.status(401).json({
-                    success: false,
-                    msg: err
-                }).end();
-            }
-        });
-        var products = [];
-
-        for (var i = 0; i < req.body.products.length; i++) {
-            var pr = req.body.products[i];
-            var newPr = {
-                OrderId: req.body.id,
+                QuatationId: newQuatation._id.toString(),
                 Product: pr.product,
                 Quantity: pr.quantity,
                 Unit: pr.unit,
@@ -113,58 +43,130 @@ const editOrder = asyncHandler(async (req, res) => {
             products.push(newPr);
         }
 
-        const prOrder = await OrderProduct.create(products);
-
-        for(var i=0; i<prOrder.length; i++){
-            oldOrder.Products.push(prOrder[i]);
+        const prQuatation = await QuatationProduct.create(products);
+        for(var i=0; i<prQuatation.length; i++){
+            newQuatation.Products.push(prQuatation[i]);
         }
-        oldOrder.save((err) => {
+        newQuatation.save((err) => {
             if (err) throw err;
         });
-        return res.status(200).json({
-            success: true,
-            msg: "Order Updated",
-        }).end();
+
+        return res.status(200).json(newQuatation).end();
     } catch (err) {
         return res.status(400).json({
             success: false,
-            msg: "Error in creating Order. " + err.message,
+            msg: "Error in creating Quatation. " + err.message,
             data: null,
         });
     }
 
 });
 
-const removeOrder = asyncHandler(async (req, res) => {
+const editQuatation = asyncHandler(async (req, res) => {
     try {
-        const existCustomer = await Order.findById(req.params.id);
-        if (!existCustomer) {
-            return res.status(200).json({
+        const oldQuatation = await Quatation.findById(req.body.id);
+        if (!oldQuatation) {
+            return res.status(400).json({
                 success: false,
-                msg: "Order not found."
+                msg: "Quatation not found"
             });
         }
 
-        const newOrder = await Order.findOneAndUpdate(req.params.id, {
-            is_deleted: true
+        await Quatation.findByIdAndUpdate(req.body.id, {
+            Customer: req.body.customer,
+            ShippingAddress: req.body.shippingAddress,
+            BillingAddress: req.body.billingAddress,
+            SalesExecutive: req.body.executive,
+            addedBy: req.user._id,
+            Amount: req.body.amount,
+            CGST: req.body.CGST,
+            SGST: req.body.SGST,
+            Discount: req.body.discount,
+            TotalTax: req.body.totalTax,
+            TotalPrice: req.body.totalPrice,
+            QuatationDate: req.body.quatattionDate,
+            ValidDate: req.body.vaidDate,
+            Note: req.body.note,
         });
+        
+        await QuatationProduct.deleteMany({ QuatationId: req.body.id }).lean().exec((err, doc) => {
+            if (err) {
+                return res.status(401).json({
+                    success: false,
+                    msg: err
+                }).end();
+            }
+        });
+        var products = [];
 
+        for (var i = 0; i < req.body.products.length; i++) {
+            var pr = req.body.products[i];
+            var newPr = {
+                QuatationId: req.body.id,
+                Product: pr.product,
+                Quantity: pr.quantity,
+                Unit: pr.unit,
+                Price: pr.price,
+                CGST: pr.CGST,
+                SGST: pr.SGST,
+                TotalAmount: pr.totalAmount,
+                Note: pr.note
+            }
+            products.push(newPr);
+        }
+
+        const prQuatation = await QuatationProduct.create(products);
+
+        for(var i=0; i<prQuatation.length; i++){
+            oldQuatation.Products.push(prQuatation[i]);
+        }
+        oldQuatation.save((err) => {
+            if (err) throw err;
+        });
         return res.status(200).json({
             success: true,
-            msg: "Order removed. "
+            msg: "Quatation Updated",
         }).end();
     } catch (err) {
         return res.status(400).json({
             success: false,
-            msg: "Error in removing Order. " + err.message
+            msg: "Error in creating Quatation. " + err.message,
+            data: null,
         });
     }
 
 });
 
-const getAllOrder = asyncHandler(async (req, res) => {
+const removeQuatation = asyncHandler(async (req, res) => {
     try {
-        let customerList = await Order.find({ is_deleted: false })
+        const existCustomer = await Quatation.findById(req.params.id);
+        if (!existCustomer) {
+            return res.status(200).json({
+                success: false,
+                msg: "Quatation not found."
+            });
+        }
+
+        const newQuatation = await Quatation.findOneAndUpdate(req.params.id, {
+            is_deleted: true
+        });
+
+        return res.status(200).json({
+            success: true,
+            msg: "Quatation removed. "
+        }).end();
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in removing Quatation. " + err.message
+        });
+    }
+
+});
+
+const getAllQuatation = asyncHandler(async (req, res) => {
+    try {
+        let customerList = await Quatation.find({ is_deleted: false })
             .populate("Customer")
             .populate({
                 path: 'Products',
@@ -174,7 +176,7 @@ const getAllOrder = asyncHandler(async (req, res) => {
             })
             .populate("ShippingAddress")
             .populate("BillingAddress")
-            .populate("Executive", 'name email')
+            .populate("SalesExecutive", 'name email')
             .populate("addedBy", 'name email')
 
         return res.status(200).json({
@@ -184,7 +186,7 @@ const getAllOrder = asyncHandler(async (req, res) => {
     } catch (err) {
         return res.status(400).json({
             success: false,
-            msg: "Error in getting Order. " + err.message,
+            msg: "Error in getting Quatation. " + err.message,
             data: null,
         });
     }
@@ -192,7 +194,7 @@ const getAllOrder = asyncHandler(async (req, res) => {
 
 const getCustomerById = asyncHandler(async (req, res) => {
     try {
-        let customerList = await Order.find({ is_deleted: false, _id: req.params.id })
+        let customerList = await Quatation.find({ is_deleted: false, _id: req.params.id })
             .populate("Customer")
             .populate({
                 path: 'Products',
@@ -202,7 +204,7 @@ const getCustomerById = asyncHandler(async (req, res) => {
             })
             .populate("ShippingAddress")
             .populate("BillingAddress")
-            .populate("Executive", 'name email')
+            .populate("SalesExecutive", 'name email')
             .populate("addedBy", 'name email')
 
         return res.status(200).json({
@@ -212,23 +214,23 @@ const getCustomerById = asyncHandler(async (req, res) => {
     } catch (err) {
         return res.status(400).json({
             success: false,
-            msg: "Error in getting Order. " + err.message,
+            msg: "Error in getting Quatation. " + err.message,
             data: null,
         });
     }
 })
 
-const changeOrderStatus= asyncHandler(async(req,res)=>{
+const changeQuatationStatus= asyncHandler(async(req,res)=>{
     try {
-        const existCustomer = await Order.findById(req.body.id);
+        const existCustomer = await Quatation.findById(req.body.id);
         if (!existCustomer) {
             return res.status(200).json({
                 success: false,
-                msg: "Order not found."
+                msg: "Quatation not found."
             });
         }
 
-        const newOrder = await Order.findByIdAndUpdate(req.body.id, {
+        const newQuatation = await Quatation.findByIdAndUpdate(req.body.id, {
             Status: req.body.status
         });
 
@@ -245,10 +247,10 @@ const changeOrderStatus= asyncHandler(async(req,res)=>{
 })
 
 module.exports = {
-    addOrder,
-    editOrder,
-    removeOrder,
-    getAllOrder,
+    addQuatation,
+    editQuatation,
+    removeQuatation,
+    getAllQuatation,
     getCustomerById,
-    changeOrderStatus
+    changeQuatationStatus
 }

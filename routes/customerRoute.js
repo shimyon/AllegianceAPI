@@ -19,7 +19,7 @@ const { protect } = require('../middleware/authMiddleware')
 router.post('/addCustomer', protect, addCustomer)
 router.post('/editCustomer', protect, editCustomer)
 router.post('/removeCustomer/:id', protect, removeCustomer)
-router.get('/getAllCustomer', protect, getAllCustomer)
+router.post('/getAllCustomer', protect, getAllCustomer)
 router.get('/getCustomerById/:id', protect, getCustomerById)
 
 router.post('/addBillingAddress', protect, addBillingAddress)

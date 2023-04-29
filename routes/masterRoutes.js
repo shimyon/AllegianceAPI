@@ -20,7 +20,7 @@ router.get('/getExecutive', protect, getExecutive)
 router.post('/addProduct', protect, addProduct)
 router.post('/editProduct', protect, editProduct)
 router.post('/changeProductStatus', protect, changeProductStatus)
-router.get('/getProduct', protect, getProduct)
+router.post('/getProduct', protect, getProduct)
 router.get('/product/:id', protect, getProductById)
 
 router.post('/addSource', protect, addSource)
