@@ -1,14 +1,21 @@
 const mongoose = require('mongoose')
 
-const orderSchema = mongoose.Schema(
+const invoiceSchema = mongoose.Schema(
     {
+        InvoiceNo:{
+            type:Number
+        },
         Customer: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Customers'
         },
+        Order: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Orders'
+        },
         Products: [{
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'OrderProduct'
+            ref: 'InvoiceProduct'
         }],
         ShippingAddress: {
             type: mongoose.Schema.Types.ObjectId,
@@ -17,9 +24,6 @@ const orderSchema = mongoose.Schema(
         BillingAddress: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'BillingAddress'
-        },
-        Status: {
-            type: String
         },
         Amount: {
             type: Number
@@ -39,10 +43,7 @@ const orderSchema = mongoose.Schema(
         TotalPrice: {
             type: Number
         },
-        OrderDate: {
-            type: Date
-        },
-        DeliveryDate: {
+        InvoiceDate: {
             type: Date
         },
         Executive: {
@@ -56,11 +57,10 @@ const orderSchema = mongoose.Schema(
         Note: {
             type: String
         },
-        is_deleted: {
-            type: Boolean,
-            default: false
+        TermsAndCondition: {
+            type: String
         },
-        Invoice_Created: {
+        is_deleted: {
             type: Boolean,
             default: false
         }
@@ -68,11 +68,11 @@ const orderSchema = mongoose.Schema(
     {
         timestamps: true,
     })
-const orderProductSchema = mongoose.Schema(
+const invoiceProductSchema = mongoose.Schema(
     {
-        OrderId: {
+        InvoiceId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'Orders'
+            ref: 'Invoices'
         },
         Product: {
             type: mongoose.Schema.Types.ObjectId,
@@ -106,19 +106,15 @@ const orderProductSchema = mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User'
         },
-        is_deleted: {
-            type: Boolean,
-            default: false
-        }
     })
 
-const OrderModal = mongoose.model('Orders', orderSchema);
-const OrderProductModal = mongoose.model('OrderProduct', orderProductSchema);
+const InvoiceModal = mongoose.model('Invoices', invoiceSchema);
+const InvoiceProductModal = mongoose.model('InvoiceProduct', invoiceProductSchema);
 
 const syncIndex = async () => {
-    await OrderModal.syncIndexes();
-    await OrderProductModal.syncIndexes();
+    await InvoiceModal.syncIndexes();
+    await InvoiceProductModal.syncIndexes();
 }
 syncIndex();
 
-module.exports = { OrderModal, OrderProductModal };
+module.exports = { InvoiceModal, InvoiceProductModal };

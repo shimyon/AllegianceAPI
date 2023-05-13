@@ -28,6 +28,7 @@ const addCustomer = asyncHandler(async (req, res) => {
             State: req.body.state,
             Country: req.body.country,
             addedBy: req.user._id,
+            Notes:req.body.notes,
             is_active: true
         });
 
@@ -53,7 +54,7 @@ const editCustomer = asyncHandler(async (req, res) => {
             });
         }
 
-        const newCustomer = await Customer.findOneAndUpdate(req.body.id, {
+        const newCustomer = await Customer.findByIdAndUpdate(req.body.id, {
             Company: req.body.company,
             Title: req.body.title,
             FirstName: req.body.firstname,
@@ -66,6 +67,7 @@ const editCustomer = asyncHandler(async (req, res) => {
             State: req.body.state,
             Country: req.body.country,
             addedBy: req.user._id,
+            Notes:req.body.notes,
             is_active: true
         });
 
@@ -116,7 +118,7 @@ const removeCustomer = asyncHandler(async (req, res) => {
 
 const getAllCustomer = asyncHandler(async (req, res) => {
     try {
-        let customerList = await Customer.find({ is_active: req.body.active }).populate("BillingAddress").populate("ShippingAddress").populate("addedBy",'name email')
+        let customerList = await Customer.find({ is_active: req.body.active }).populate("BillingAddress").populate("ShippingAddress").populate("addedBy", 'name email')
         return res.status(200).json({
             success: true,
             data: customerList
@@ -131,7 +133,7 @@ const getAllCustomer = asyncHandler(async (req, res) => {
 })
 const getCustomerById = asyncHandler(async (req, res) => {
     try {
-        let customerList = await Customer.find({ _id: req.params.id }).populate("BillingAddress").populate("ShippingAddress").populate("addedBy",'name email')
+        let customerList = await Customer.find({ _id: req.params.id }).populate("BillingAddress").populate("ShippingAddress").populate("addedBy", 'name email')
         return res.status(200).json({
             success: true,
             data: customerList
@@ -183,7 +185,7 @@ const editBillingAddress = asyncHandler(async (req, res) => {
             });
         }
 
-      var newBill =  await BillingAddress.findOneAndUpdate(req.body.id, {
+        var newBill = await BillingAddress.findByIdAndUpdate(req.body.id, {
             Address: req.body.address,
             City: req.body.city,
             State: req.body.state,
@@ -207,13 +209,13 @@ const editBillingAddress = asyncHandler(async (req, res) => {
 
 const removeBillingAddress = asyncHandler(async (req, res) => {
     try {
-        await BillingAddress.deleteOne({ _id: req.params.id }).lean().exec((err,doc)=>{
-            if(err) {
+        await BillingAddress.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {
+            if (err) {
                 return res.status(401).json({
                     success: false,
                     msg: err
                 }).end();
-            }else{
+            } else {
                 return res.status(200).json({
                     success: true,
                     msg: "Billing removed. ",
@@ -269,7 +271,7 @@ const editShippingAddress = asyncHandler(async (req, res) => {
             });
         }
 
-        await ShippingAddress.findOneAndUpdate(req.body.id, {
+        await ShippingAddress.findByIdAndUpdate(req.body.id, {
             Address: req.body.address,
             City: req.body.city,
             State: req.body.state,
@@ -294,18 +296,50 @@ const editShippingAddress = asyncHandler(async (req, res) => {
 
 const removeShippingAddress = asyncHandler(async (req, res) => {
     try {
-        await ShippingAddress.deleteOne({ _id: req.params.id }).lean().exec((err,doc)=>{
-            if(err) {
+        await ShippingAddress.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {
+            if (err) {
                 return res.status(401).json({
                     success: false,
                     msg: err
                 }).end();
-            }else{
+            } else {
                 return res.status(200).json({
                     success: true,
                     msg: "Shipping removed. ",
                 }).end();
             }
+        });
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in removing Shipping. " + err.message,
+            data: null,
+        });
+    }
+
+});
+
+const setDefaultAddress = asyncHandler(async (req, res) => {
+    try {
+        if (req.body.type == "shipping") {
+            await ShippingAddress.updateMany({"Customer":req.body.customerId}, {
+                is_default: false
+            });
+            await ShippingAddress.findByIdAndUpdate(req.body.addressId, {
+                is_default: req.body.default
+            });
+        } else {
+            await BillingAddress.updateMany({"Customer":req.body.customerId}, {
+                is_default: false
+            });
+            await BillingAddress.findByIdAndUpdate(req.body.addressId, {
+                is_default: req.body.default
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            msg: "Default address set"
         });
     } catch (err) {
         return res.status(400).json({
@@ -328,5 +362,6 @@ module.exports = {
     editShippingAddress,
     removeShippingAddress,
     getAllCustomer,
-    getCustomerById
+    getCustomerById,
+    setDefaultAddress
 }

@@ -26,6 +26,7 @@ app.use('/api/lead', require('./routes/leadRoute'));
 app.use('/api/customer', require('./routes/customerRoute'));
 app.use('/api/order', require('./routes/orderRoute'));
 app.use('/api/quatation', require('./routes/quatationRoute'));
+app.use('/api/invoice', require('./routes/invoiceRoute'));
 
 app.use(errorHandler)
 app.listen(port, () => console.log(`Listening at port ${port}`))

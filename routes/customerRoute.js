@@ -12,7 +12,8 @@ const {
     editShippingAddress,
     removeShippingAddress,
     getAllCustomer,
-    getCustomerById
+    getCustomerById,
+    setDefaultAddress
  } = require('../controllers/customerController')
 const { protect } = require('../middleware/authMiddleware')
 
@@ -29,5 +30,7 @@ router.post('/removeBillingAddress/:id', protect, removeBillingAddress)
 router.post('/addShippingAddress', protect, addShippingAddress)
 router.post('/editShippingAddress', protect, editShippingAddress)
 router.post('/removeShippingAddress/:id', protect, removeShippingAddress)
+
+router.post('/setDefaultAddress', protect, setDefaultAddress)
 
 module.exports = router

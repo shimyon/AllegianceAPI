@@ -38,6 +38,7 @@ const addLead = asyncHandler(async (req, res) => {
             InCharge: req.body.incharge,
             NextTalkon: req.body.nextTalkOn,
             NextTalkNotes: req.body.nextTalkNotes,
+            Executive:req.body.executive,
             addedBy: req.user._id,
             Stage: "New",
             LeadSince: new Date(),
@@ -67,7 +68,7 @@ const editLead = asyncHandler(async (req, res) => {
             });
         }
 
-        const newLead = await Lead.findOneAndUpdate(req.body.id, {
+        const newLead = await Lead.findByIdAndUpdate(req.body.id, {
             Company: req.body.company,
             Title: req.body.title,
             FirstName: req.body.firstname,
@@ -81,6 +82,7 @@ const editLead = asyncHandler(async (req, res) => {
             Source: req.body.source,
             Product: req.body.product,
             Requirements: req.body.requirements,
+            Executive:req.body.executive,
             Notes: req.body.notes,
             InCharge: req.body.incharge,
             is_active: true

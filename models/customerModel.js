@@ -86,6 +86,10 @@ const billingAddressSchema = mongoose.Schema(
         is_active: {
             type: Boolean,
             default: true
+        },
+        is_default: {
+            type: Boolean,
+            default: false
         }
     })
 const shippingAddressSchema = mongoose.Schema(
@@ -109,6 +113,10 @@ const shippingAddressSchema = mongoose.Schema(
         is_active: {
             type: Boolean,
             default: true
+        },
+        is_default: {
+            type: Boolean,
+            default: false
         }
     })
 

@@ -38,6 +38,7 @@ const addOrder = asyncHandler(async (req, res) => {
                 CGST: pr.CGST,
                 SGST: pr.SGST,
                 TotalAmount: pr.totalAmount,
+                Discount: pr.discount,
                 Note: pr.note
             }
             products.push(newPr);
@@ -107,6 +108,7 @@ const editOrder = asyncHandler(async (req, res) => {
                 Price: pr.price,
                 CGST: pr.CGST,
                 SGST: pr.SGST,
+                Discount: pr.discount,
                 TotalAmount: pr.totalAmount,
                 Note: pr.note
             }
@@ -190,7 +192,7 @@ const getAllOrder = asyncHandler(async (req, res) => {
     }
 })
 
-const getCustomerById = asyncHandler(async (req, res) => {
+const getOrderById = asyncHandler(async (req, res) => {
     try {
         let customerList = await Order.find({ is_deleted: false, _id: req.params.id })
             .populate("Customer")
@@ -208,7 +210,7 @@ const getCustomerById = asyncHandler(async (req, res) => {
         return res.status(200).json({
             success: true,
             data: customerList
-        }).end();
+        });
     } catch (err) {
         return res.status(400).json({
             success: false,
@@ -249,6 +251,6 @@ module.exports = {
     editOrder,
     removeOrder,
     getAllOrder,
-    getCustomerById,
+    getOrderById,
     changeOrderStatus
 }

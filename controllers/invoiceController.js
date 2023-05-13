@@ -1,0 +1,324 @@
+const asyncHandler = require('express-async-handler')
+const InvoiceModal = require('../models/invoiceModel')
+const Invoice = InvoiceModal.InvoiceModal
+const InvoiceProduct = InvoiceModal.InvoiceProductModal
+const OrderModal = require('../models/orderModel')
+const OrderObject = OrderModal.OrderModal
+
+const addInvoice = asyncHandler(async (req, res) => {
+    try {
+        let invoiceNo = await Invoice.find({}, { InvoiceNo: 1, _id: 0 }).sort({ InvoiceNo: -1 }).limit(1);
+        let maxInvoice = 1;
+        if (invoiceNo) {
+            maxInvoice = invoiceNo[0].InvoiceNo + 1;
+        }
+
+        const newInvoice = await Invoice.create({
+            InvoiceNo: maxInvoice,
+            Customer: req.body.customer,
+            ShippingAddress: req.body.shippingAddress,
+            BillingAddress: req.body.billingAddress,
+            Order: req.body.orderId,
+            Amount: req.body.amount,
+            CGST: req.body.CGST,
+            SGST: req.body.SGST,
+            Discount: req.body.discount,
+            TotalTax: req.body.totalTax,
+            TotalPrice: req.body.totalPrice,
+            InvoiceDate: new Date(),
+            DeliveryDate: req.body.deliveryDate,
+            Executive: req.body.executive,
+            Note: req.body.note,
+            addedBy: req.user._id,
+            TermsAndCondition: req.body.termsCondition,
+            is_deleted: false
+        });
+        var products = [];
+
+        for (var i = 0; i < req.body.products.length; i++) {
+            var pr = req.body.products[i];
+            var newPr = {
+                InvoiceId: newInvoice._id.toString(),
+                Product: (pr.product),
+                Quantity: pr.quantity,
+                Unit: pr.unit,
+                Price: pr.price,
+                CGST: pr.CGST,
+                SGST: pr.SGST,
+                TotalAmount: pr.totalAmount,
+                Note: pr.note
+            }
+            products.push(newPr);
+        }
+
+        const prInvoice = await InvoiceProduct.create(products);
+        for (var i = 0; i < prInvoice.length; i++) {
+            newInvoice.Products.push(prInvoice[i]);
+        }
+        newInvoice.save((err) => {
+            if (err) throw err;
+        });
+
+        return res.status(200).json(newInvoice).end();
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in creating Invoice. " + err.message,
+            data: null,
+        });
+    }
+
+});
+
+const createOrderInvoice = asyncHandler(async (req, res) => {
+    const orderDetail = await OrderObject.findOne({ is_deleted: false, _id: req.params.id })
+        .populate({
+            path: 'Products',
+            populate: {
+                path: 'Product',
+            }
+        });
+
+    if (orderDetail.Invoice_Created) {
+        return res.status(400).json({
+            success: false,
+            msg: "Invoice already created",
+        });
+    }
+
+    let invoiceNo = await Invoice.find({}, { InvoiceNo: 1, _id: 0 }).sort({ InvoiceNo: -1 }).limit(1);
+    let maxInvoice = 1;
+    if (invoiceNo) {
+        maxInvoice = invoiceNo[0].InvoiceNo + 1;
+    }
+
+    const orderProduct = orderDetail.Products;
+
+    try {
+
+        const newInvoice = await Invoice.create({
+            InvoiceNo: maxInvoice,
+            Customer: orderDetail.Customer,
+            ShippingAddress: orderDetail.ShippingAddress,
+            BillingAddress: orderDetail.BillingAddress,
+            Order: req.param.id,
+            Amount: orderDetail.Amount,
+            CGST: orderDetail.CGST,
+            SGST: orderDetail.SGST,
+            Discount: orderDetail.Discount,
+            TotalTax: orderDetail.TotalTax,
+            TotalPrice: orderDetail.TotalPrice,
+            InvoiceDate: new Date(),
+            Executive: orderDetail.Executive,
+            Note: orderDetail.Note,
+            addedBy: req.user._id,
+            is_deleted: false
+        });
+        var products = [];
+
+        for (var i = 0; i < orderProduct.length; i++) {
+            var pr = orderProduct[i];
+            var newPr = {
+                InvoiceId: newInvoice._id.toString(),
+                Product: (pr.Product),
+                Quantity: pr.Quantity,
+                Unit: pr.Unit,
+                Price: pr.Price,
+                CGST: pr.CGST,
+                SGST: pr.SGST,
+                Discount: pr.Discount,
+                TotalAmount: pr.TotalAmount,
+                Note: pr.Note
+            }
+            products.push(newPr);
+        }
+
+        const prInvoice = await InvoiceProduct.create(products);
+        for (var i = 0; i < prInvoice.length; i++) {
+            newInvoice.Products.push(prInvoice[i]);
+        }
+        newInvoice.save((err) => {
+            if (err) throw err;
+        });
+
+        const newOrder = await OrderObject.findByIdAndUpdate(req.params.id, {
+            Invoice_Created: true
+        });
+
+        return res.status(200).json(newInvoice).end();
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in creating Invoice. " + err.message,
+        });
+    }
+
+});
+
+const editInvoice = asyncHandler(async (req, res) => {
+    try {
+        const oldInvoice = await Invoice.findById(req.body.id);
+        if (!oldInvoice) {
+            return res.status(400).json({
+                success: false,
+                msg: "Invoice not found"
+            });
+        }
+
+        await Invoice.findByIdAndUpdate(req.body.id, {
+            Customer: req.body.customer,
+            ShippingAddress: req.body.shippingAddress,
+            BillingAddress: req.body.billingAddress,
+            Order: req.body.orderId,
+            Amount: req.body.amount,
+            CGST: req.body.CGST,
+            SGST: req.body.SGST,
+            Discount: req.body.discount,
+            TotalTax: req.body.totalTax,
+            TotalPrice: req.body.totalPrice,
+            DeliveryDate: req.body.deliveryDate,
+            Executive: req.body.executive,
+            TermsAndCondition: req.body.termsCondition,
+            Note: req.body.note
+        });
+
+        await InvoiceProduct.deleteMany({ InvoiceId: req.body.id }).lean().exec((err, doc) => {
+            if (err) {
+                return res.status(401).json({
+                    success: false,
+                    msg: err
+                }).end();
+            }
+        });
+        var products = [];
+
+        for (var i = 0; i < req.body.products.length; i++) {
+            var pr = req.body.products[i];
+            var newPr = {
+                InvoiceId: req.body.id,
+                Product: pr.product,
+                Quantity: pr.quantity,
+                Unit: pr.unit,
+                Price: pr.price,
+                CGST: pr.CGST,
+                SGST: pr.SGST,
+                TotalAmount: pr.totalAmount,
+                Note: pr.note
+            }
+            products.push(newPr);
+        }
+
+        const prInvoice = await InvoiceProduct.create(products);
+
+        for (var i = 0; i < prInvoice.length; i++) {
+            oldInvoice.Products.push(prInvoice[i]);
+        }
+        oldInvoice.save((err) => {
+            if (err) throw err;
+        });
+        return res.status(200).json({
+            success: true,
+            msg: "Invoice Updated",
+        }).end();
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in creating Invoice. " + err.message,
+            data: null,
+        });
+    }
+
+});
+
+const removeInvoice = asyncHandler(async (req, res) => {
+    try {
+        const existCustomer = await Invoice.findById(req.params.id);
+        if (!existCustomer) {
+            return res.status(200).json({
+                success: false,
+                msg: "Invoice not found."
+            });
+        }
+
+        const newInvoice = await Invoice.findOneAndUpdate(req.params.id, {
+            is_deleted: true
+        });
+
+        return res.status(200).json({
+            success: true,
+            msg: "Invoice removed. "
+        }).end();
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in removing Invoice. " + err.message
+        });
+    }
+
+});
+
+const getAllInvoice = asyncHandler(async (req, res) => {
+    try {
+        let invoiceList = await Invoice.find({ is_deleted: false })
+            .populate("Customer")
+            .populate({
+                path: 'Products',
+                populate: {
+                    path: 'Product',
+                }
+            })
+            .populate("ShippingAddress")
+            .populate("BillingAddress")
+            .populate("Executive", 'name email')
+            .populate("addedBy", 'name email')
+
+        return res.status(200).json({
+            success: true,
+            data: invoiceList
+        }).end();
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in getting Invoice. " + err.message,
+            data: null,
+        });
+    }
+})
+
+const getInvoiceById = asyncHandler(async (req, res) => {
+    try {
+        let invoiceList = await Invoice.find({ is_deleted: false, _id: req.params.id })
+            .populate("Customer")
+            .populate({
+                path: 'Products',
+                populate: {
+                    path: 'Product',
+                }
+            })
+            .populate("ShippingAddress")
+            .populate("BillingAddress")
+            .populate("Executive", 'name email')
+            .populate("addedBy", 'name email')
+
+        return res.status(200).json({
+            success: true,
+            data: invoiceList
+        }).end();
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in getting Invoice. " + err.message,
+            data: null,
+        });
+    }
+})
+
+
+module.exports = {
+    addInvoice,
+    editInvoice,
+    removeInvoice,
+    getAllInvoice,
+    getInvoiceById,
+    createOrderInvoice
+}
