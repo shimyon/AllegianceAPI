@@ -11,6 +11,11 @@ const {
     getProductById,
     getSources,
     getSourceById,
+    addUnit,
+    editUnit,
+    changeUnitStatus,
+    getUnits,
+    getUnitById,
     getExecutive,
     changeSourceStatus } = require('../controllers/masterController')
 const { protect } = require('../middleware/authMiddleware')
@@ -28,5 +33,12 @@ router.post('/editSource', protect, editSource)
 router.post('/changeSourceStatus', protect, changeSourceStatus)
 router.get('/getSource', protect, getSources)
 router.get('/source/:id', protect, getSourceById)
+
+
+router.post('/addUnit', protect, addUnit)
+router.post('/editUnit', protect, editUnit)
+router.post('/changeUnitStatus', protect, changeUnitStatus)
+router.get('/getUnit', protect, getUnits)
+router.get('/unit/:id', protect, getUnitById)
 
 module.exports = router

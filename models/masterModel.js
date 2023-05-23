@@ -54,13 +54,25 @@ const sourceSchema = mongoose.Schema(
         }
     });
 
+const unitSchema = mongoose.Schema(
+    {
+        Name: {
+            type: String
+        },
+        is_active: {
+            type: Boolean
+        }
+});
+
 const ProductModal = mongoose.model('Products', productSchema);
 const SourceModal = mongoose.model('Sources', sourceSchema);
+const UnitModal = mongoose.model('Units', unitSchema);
 
 const syncIndex = async () => {
     await ProductModal.syncIndexes();
     await SourceModal.syncIndexes();
+    await UnitModal.syncIndexes();
 }
 syncIndex();
 
-module.exports = { ProductModal, SourceModal };
+module.exports = { ProductModal, SourceModal, UnitModal };
