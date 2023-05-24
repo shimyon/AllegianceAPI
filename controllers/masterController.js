@@ -2,7 +2,7 @@ const asyncHandler = require('express-async-handler')
 const Master = require('../models/masterModel')
 const Product = Master.ProductModal;
 const Source = Master.SourceModal;
-const Unit = Master.SourceModal;
+const Unit = Master.UnitModal;
 const Response = require('../models/responseModel')
 const User = require('../models/userModel')
 
