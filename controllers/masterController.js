@@ -3,6 +3,8 @@ const Master = require('../models/masterModel')
 const Product = Master.ProductModal;
 const Source = Master.SourceModal;
 const Unit = Master.UnitModal;
+const Category = Master.CategoryModal;
+const SubCategory = Master.SubCategoryModal;
 const Response = require('../models/responseModel')
 const User = require('../models/userModel')
 
@@ -10,7 +12,7 @@ const addProduct = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let oldProduct = await Product.findOne({ Name: {$regex:req.body.name,$options:'i'} });
+        let oldProduct = await Product.findOne({ Name: { $regex: req.body.name, $options: 'i' } });
 
         if (oldProduct) {
             response.message = "Product with same name already exist.";
@@ -101,7 +103,7 @@ const getProduct = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let products = await Product.find({is_active:req.body.active});
+        let products = await Product.find({ is_active: req.body.active });
 
         response.success = true;
         response.data = products;
@@ -117,7 +119,7 @@ const getProductById = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let products = await Product.findOne({is_active:true,_id:req.params.id});
+        let products = await Product.findOne({ is_active: true, _id: req.params.id });
 
         response.success = true;
         response.data = products;
@@ -133,7 +135,7 @@ const addSource = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let oldSource = await Source.findOne({ Name: {$regex:req.body.name,$options:'i'} });
+        let oldSource = await Source.findOne({ Name: { $regex: req.body.name, $options: 'i' } });
 
         if (oldSource) {
             response.message = "Source with same name already exist.";
@@ -167,7 +169,7 @@ const editSource = asyncHandler(async (req, res) => {
             return res.status(400).json(response);
         }
 
-        let newSource = await Source.findByIdAndUpdate(req.body.id,{
+        let newSource = await Source.findByIdAndUpdate(req.body.id, {
             Name: req.body.name
         });
 
@@ -205,7 +207,7 @@ const getSources = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let sources = await Source.find({is_active:"true"});
+        let sources = await Source.find({ is_active: "true" });
 
         response.success = true;
         response.data = sources;
@@ -221,7 +223,7 @@ const getSourceById = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let sources = await Source.findOne({is_active:true,_id:req.params.id});
+        let sources = await Source.findOne({ is_active: true, _id: req.params.id });
 
         response.success = true;
         response.data = sources;
@@ -237,7 +239,7 @@ const getExecutive = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let sources = await User.find({is_active:true,role:"executive"});
+        let sources = await User.find({ is_active: true, role: "executive" });
 
         response.success = true;
         response.data = sources;
@@ -253,7 +255,7 @@ const addUnit = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let oldUnit = await Unit.findOne({ Name: {$regex:req.body.name,$options:'i'} });
+        let oldUnit = await Unit.findOne({ Name: { $regex: req.body.name, $options: 'i' } });
 
         if (oldUnit) {
             response.message = "Unit with same name already exist.";
@@ -287,7 +289,7 @@ const editUnit = asyncHandler(async (req, res) => {
             return res.status(400).json(response);
         }
 
-        let newUnit = await Unit.findByIdAndUpdate(req.body.id,{
+        let newUnit = await Unit.findByIdAndUpdate(req.body.id, {
             Name: req.body.name
         });
 
@@ -325,7 +327,7 @@ const getUnits = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let sources = await Unit.find({is_active:"true"});
+        let sources = await Unit.find({ is_active: "true" });
 
         response.success = true;
         response.data = sources;
@@ -341,7 +343,7 @@ const getUnitById = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let sources = await Unit.findOne({is_active:true,_id:req.params.id});
+        let sources = await Unit.findOne({ is_active: true, _id: req.params.id });
 
         response.success = true;
         response.data = sources;
@@ -353,6 +355,218 @@ const getUnitById = asyncHandler(async (req, res) => {
     }
 })
 
+const addCategory = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let oldCategory = await Category.findOne({ Name: { $regex: req.body.name, $options: 'i' } });
+
+        if (oldCategory) {
+            response.message = "Category with same name already exist.";
+            return res.status(400).json(response);
+        }
+
+        let newCategory = await Category.create({
+            Name: req.body.name,
+            is_active: true,
+        });
+
+        response.success = true;
+        response.message = "Category added successfully";
+        response.data = newCategory;
+        return res.status(200).json(response);
+    } catch (err) {
+        response.message = "Error in adding source. " + err.message;
+        return res.status(400).json(response);
+    }
+
+});
+
+const editCategory = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let oldCategory = Category.findById(req.body.id);
+
+        if (!oldCategory) {
+            response.message = "Category not found.";
+            return res.status(400).json(response);
+        }
+
+        let newCategory = await Category.findByIdAndUpdate(req.body.id, {
+            Name: req.body.name
+        });
+
+        response.success = true;
+        response.message = "Category added successfully";
+        response.data = newCategory;
+        return res.status(200).json(response);
+    } catch (err) {
+        response.message = "Error in updating source. " + err.message;
+        return res.status(400).json(response);
+    }
+
+});
+
+const changeCategoryStatus = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let newCategory = await Category.findByIdAndUpdate(req.body.id, {
+            is_active: req.body.active
+        });
+
+        response.success = true;
+        response.message = "Category status updated successfully";
+        return res.status(200).json(response);
+    }
+    catch (err) {
+        response.message = "Error in updating status. " + err.message;
+        return res.status(400).json(response);
+    }
+
+})
+
+const getCategorys = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let sources = await Category.find({ is_active: "true" }).populate("subCategory");
+
+        response.success = true;
+        response.data = sources;
+        return res.status(200).json(response);
+    }
+    catch (err) {
+        response.message = "Error in getting sources. " + err.message;
+        return res.status(400).json(response);
+    }
+})
+
+const getCategoryById = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let sources = await Category.findOne({ is_active: true, _id: req.params.id }).populate("subCategory");
+
+        response.success = true;
+        response.data = sources;
+        return res.status(200).json(response);
+    }
+    catch (err) {
+        response.message = "Error in getting source by id. " + err.message;
+        return res.status(400).json(response);
+    }
+})
+
+const addSubCategory = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let oldSubCategory = await SubCategory.findOne({ Name: { $regex: req.body.name, $options: 'i' }, Category: req.body.category });
+
+        if (oldSubCategory) {
+            response.message = "SubCategory with same name already exist.";
+            return res.status(400).json(response);
+        }
+
+        let newSubCategory = await SubCategory.create({
+            Name: req.body.name,
+            Category: req.body.category,
+            is_active: true,
+        });
+        let category= await Category.findById(req.body.category);
+        category.subCategory.push(newSubCategory);
+        category.save((err) => {
+            if (err) throw err;
+        });
+        response.success = true;
+        response.message = "SubCategory added successfully";
+        response.data = newSubCategory;
+        return res.status(200).json(response);
+    } catch (err) {
+        response.message = "Error in adding source. " + err.message;
+        return res.status(400).json(response);
+    }
+
+});
+
+const editSubCategory = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let oldSubCategory = SubCategory.findById(req.body.id);
+
+        if (!oldSubCategory) {
+            response.message = "SubCategory not found.";
+            return res.status(400).json(response);
+        }
+
+        let newSubCategory = await SubCategory.findByIdAndUpdate(req.body.id, {
+            Name: req.body.name
+        });
+
+        response.success = true;
+        response.message = "SubCategory added successfully";
+        response.data = newSubCategory;
+        return res.status(200).json(response);
+    } catch (err) {
+        response.message = "Error in updating source. " + err.message;
+        return res.status(400).json(response);
+    }
+
+});
+
+const changeSubCategoryStatus = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let newSubCategory = await SubCategory.findByIdAndUpdate(req.body.id, {
+            is_active: req.body.active
+        });
+
+        response.success = true;
+        response.message = "SubCategory status updated successfully";
+        return res.status(200).json(response);
+    }
+    catch (err) {
+        response.message = "Error in updating status. " + err.message;
+        return res.status(400).json(response);
+    }
+
+})
+
+const getSubCategorys = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let sources = await SubCategory.find({ is_active: "true" });
+
+        response.success = true;
+        response.data = sources;
+        return res.status(200).json(response);
+    }
+    catch (err) {
+        response.message = "Error in getting sources. " + err.message;
+        return res.status(400).json(response);
+    }
+})
+
+const getSubCategoryById = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let sources = await SubCategory.findOne({ is_active: true, _id: req.params.id });
+
+        response.success = true;
+        response.data = sources;
+        return res.status(200).json(response);
+    }
+    catch (err) {
+        response.message = "Error in getting source by id. " + err.message;
+        return res.status(400).json(response);
+    }
+})
 module.exports = {
     addProduct,
     editProduct,
@@ -369,5 +583,15 @@ module.exports = {
     changeUnitStatus,
     getUnits,
     getUnitById,
-    getExecutive
+    getExecutive,
+    addCategory,
+    editCategory,
+    changeCategoryStatus,
+    getCategorys,
+    getCategoryById,
+    addSubCategory,
+    editSubCategory,
+    changeSubCategoryStatus,
+    getSubCategorys,
+    getSubCategoryById
 }

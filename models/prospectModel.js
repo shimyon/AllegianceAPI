@@ -1,7 +1,6 @@
 const mongoose = require('mongoose')
-//mongoose.set('strictQuery', false)
 
-const leadSchema = mongoose.Schema(
+const prospectSchema = mongoose.Schema(
     {
         Company: {
             type: String,
@@ -18,7 +17,10 @@ const leadSchema = mongoose.Schema(
             type: String,
             required: [true, 'Please add Last Name']
         },
-        Designation: {
+        Industry: {
+            type: String
+        },
+        Segment: {
             type: String
         },
         Mobile: {
@@ -38,10 +40,6 @@ const leadSchema = mongoose.Schema(
         Country: {
             type: String
         },
-        Source: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Sources'
-        },
         Product: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Products'
@@ -50,29 +48,31 @@ const leadSchema = mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User'
         },
-        Requirements: {
+        ProspectAmount: {
+            type: Number
+        },
+        OrderTarget: {
             type: String
         },
         Notes: {
             type: String
         },
-        InCharge: {
-            type: String
-        },
-        LeadSince: {
-            //use for getting lead add date
-            type: Date
-        },
         Interaction: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'Interaction',
+            ref: 'ProInteraction',
             default: null
         },
         NextTalk: {
             //this will use for appointment
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'NextOn',
+            ref: 'ProNextOn',
             default: null
+        },
+        Requirements: {
+            type: String
+        },
+        Tags: {
+            type: String
         },
         Status: {
             type: String
@@ -105,10 +105,9 @@ const leadSchema = mongoose.Schema(
     },
     {
         timestamps: true,
-    }
-)
+    });
 
-const nextOnSchema = mongoose.Schema(
+const proNextOnSchema = mongoose.Schema(
     {
         proId: {
             type: mongoose.Schema.Types.ObjectId,
@@ -126,7 +125,7 @@ const nextOnSchema = mongoose.Schema(
         }
     });
 
-const interactionSchema = mongoose.Schema(
+const proInteractionSchema = mongoose.Schema(
     {
         proId: {
             type: mongoose.Schema.Types.ObjectId,
@@ -144,16 +143,15 @@ const interactionSchema = mongoose.Schema(
         }
     });
 
-const LeadsModal = mongoose.model('Leads', leadSchema);
-const InteractionModal = mongoose.model('Interaction', interactionSchema);
-const NextOnModal = mongoose.model('NextOn', nextOnSchema);
+const ProspectsModal = mongoose.model('Prospect', prospectSchema);
+const ProInteractionModal = mongoose.model('ProInteraction', proInteractionSchema);
+const ProNextOnModal = mongoose.model('ProNextOn', proNextOnSchema);
 
 const syncIndex = async () => {
-    await LeadsModal.syncIndexes();
-    await InteractionModal.syncIndexes();
-    await NextOnModal.syncIndexes();
-    
+    await ProspectsModal.syncIndexes();
+    await ProNextOnModal.syncIndexes();
+    await ProInteractionModal.syncIndexes();
 }
 syncIndex();
 
-module.exports = { LeadsModal, InteractionModal, NextOnModal};
+module.exports = { ProspectsModal, ProInteractionModal, ProNextOnModal };

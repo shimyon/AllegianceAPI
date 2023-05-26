@@ -62,17 +62,51 @@ const unitSchema = mongoose.Schema(
         is_active: {
             type: Boolean
         }
-});
+    });
+
+const categorySchema = mongoose.Schema(
+    {
+        Name: {
+            type: String
+        },
+        subCategory: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'SubCategory'
+        }],
+        is_active: {
+            type: Boolean
+        }
+    });
+
+const subCategorySchema = mongoose.Schema(
+    {
+        Name: {
+            type: String
+        },
+        Category:
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Category'
+        }
+        ,
+        is_active: {
+            type: Boolean
+        }
+    });
 
 const ProductModal = mongoose.model('Products', productSchema);
 const SourceModal = mongoose.model('Sources', sourceSchema);
 const UnitModal = mongoose.model('Units', unitSchema);
+const CategoryModal = mongoose.model('Category', categorySchema);
+const SubCategoryModal = mongoose.model('SubCategory', subCategorySchema);
 
 const syncIndex = async () => {
     await ProductModal.syncIndexes();
     await SourceModal.syncIndexes();
     await UnitModal.syncIndexes();
+    await CategoryModal.syncIndexes();
+    await SubCategoryModal.syncIndexes();
 }
 syncIndex();
 
-module.exports = { ProductModal, SourceModal, UnitModal };
+module.exports = { ProductModal, SourceModal, UnitModal, CategoryModal, SubCategoryModal };
