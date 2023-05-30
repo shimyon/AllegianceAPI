@@ -431,7 +431,7 @@ const getCategorys = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let sources = await Category.find({ is_active: "true" }).populate("subCategory");
+        let sources = await Category.find({ is_active: req.body.active }).populate("subCategory");
 
         response.success = true;
         response.data = sources;
@@ -540,7 +540,7 @@ const getSubCategorys = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let sources = await SubCategory.find({ is_active: "true" });
+        let sources = await SubCategory.find({ is_active: req.body.active });
 
         response.success = true;
         response.data = sources;

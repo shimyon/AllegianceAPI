@@ -80,6 +80,10 @@ const prospectSchema = mongoose.Schema(
         Stage: {
             type: String
         },
+        Source: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Sources'
+        },
         StageDate: {
             type: Date
         },

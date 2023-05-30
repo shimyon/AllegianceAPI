@@ -87,6 +87,7 @@ const editCustomer = asyncHandler(async (req, res) => {
 });
 
 const removeCustomer = asyncHandler(async (req, res) => {
+    let active= req.body.active== true?"enabled":"disabled";
     try {
         const existCustomer = await Customer.findById(req.params.id);
         if (!existCustomer) {
@@ -98,18 +99,18 @@ const removeCustomer = asyncHandler(async (req, res) => {
         }
 
         const newCustomer = await Customer.findOneAndUpdate(req.params.id, {
-            is_active: false
+            is_active: req.body.active
         });
-
+        
         return res.status(200).json({
             success: true,
-            msg: "Customer removed. ",
+            msg: "Customer "+active,
             data: null
         }).end();
     } catch (err) {
         return res.status(400).json({
             success: false,
-            msg: "Error in removing Customer. " + err.message,
+            msg: "Error in process. " + err.message,
             data: null,
         });
     }

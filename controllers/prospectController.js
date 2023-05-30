@@ -24,6 +24,8 @@ const addProspect = asyncHandler(async (req, res) => {
             Executive: req.body.executive,
             addedBy: req.user._id,
             Stage: req.body.stage,
+            Requirements:req.body.requirements,
+            Source:req.body.source,
             StageDate: new Date(),
             is_active: true
         });
@@ -70,6 +72,8 @@ const editProspect = asyncHandler(async (req, res) => {
             Executive: req.body.executive,
             addedBy: req.user._id,
             Stage: req.body.stage,
+            Source:req.body.source,
+            Requirements:req.body.requirements,
             StageDate: new Date(),
             is_active: true
         });
@@ -91,7 +95,7 @@ const editProspect = asyncHandler(async (req, res) => {
 
 const removeProspect = asyncHandler(async (req, res) => {
     try {
-        const exisProspect = await Prospect.findById(req.body.id);
+        const existProspect = await Prospect.findById(req.body.id);
         if (!existProspect) {
             return res.status(200).json({
                 success: false,
@@ -135,7 +139,7 @@ const getAllProspect = asyncHandler(async (req, res) => {
                     path:"user",
                     select: "_id name email role"
                 }
-            }).populate("Product").populate("Executive").populate("addedBy", "_id name email role")
+            }).populate("Product").populate("Executive").populate("Source").populate("addedBy", "_id name email role")
         return res.status(200).json({
             success: true,
             data: prospectList
@@ -165,7 +169,7 @@ const getProspectById = asyncHandler(async (req, res) => {
                     path:"user",
                     select: "_id name email role"
                 }
-            }).populate("Product").populate("Executive").populate("addedBy", "_id name email role")
+            }).populate("Product").populate("Executive").populate("Source").populate("addedBy", "_id name email role")
         return res.status(200).json({
             success: true,
             data: prospectList
@@ -188,12 +192,12 @@ const changeProspectStage = asyncHandler(async (req, res) => {
         });
         return res.status(200).json({
             success: true,
-            msg: "Moved to " + req.body.prospect + " successfully",
+            msg: "Stage Changed",
         }).end();
     } catch (err) {
         return res.status(400).json({
             success: false,
-            msg: "Error in moving. " + err.message,
+            msg: "Error in process"+ err.message,
             data: null,
         });
     }

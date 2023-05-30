@@ -147,7 +147,7 @@ const removeOrder = asyncHandler(async (req, res) => {
             });
         }
 
-        const newOrder = await Order.findOneAndUpdate(req.params.id, {
+        const newOrder = await Order.findByIdAndUpdate(req.params.id, {
             is_deleted: true
         });
 

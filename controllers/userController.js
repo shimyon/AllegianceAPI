@@ -51,7 +51,7 @@ const registerUser = asyncHandler(async (req, res) => {
 })
 
 const updateUser = asyncHandler(async (req, res) => {
-    const { name, id, role } = req.body
+    const { name, id, role, active } = req.body
 
     if (!name || !role) {
         res.status(400)
@@ -71,7 +71,8 @@ const updateUser = asyncHandler(async (req, res) => {
 
     let user = await User.findByIdAndUpdate(id, {
         name: name,
-        role: role
+        role: role,
+        is_active: active
     });
     user = await User.findOne({ _id: id });
     if (user) {
