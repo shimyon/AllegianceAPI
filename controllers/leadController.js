@@ -116,7 +116,7 @@ const removeLead = asyncHandler(async (req, res) => {
             });
         }
 
-        const newLead = await Lead.findOneAndUpdate(req.body.id, {
+        const newLead = await Lead.findByIdAndUpdate(req.body.id, {
             is_active: false,
             RemoveReason:req.body.reason
         });

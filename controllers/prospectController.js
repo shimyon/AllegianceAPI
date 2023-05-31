@@ -104,7 +104,7 @@ const removeProspect = asyncHandler(async (req, res) => {
             });
         }
 
-        const newProspect = await Prospect.findOneAndUpdate(req.body.id, {
+        const newProspect = await Prospect.findByIdAndUpdate(req.body.id, {
             is_active: false,
             RemoveReason:req.body.reason
         });

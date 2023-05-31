@@ -147,7 +147,7 @@ const removeQuatation = asyncHandler(async (req, res) => {
             });
         }
 
-        const newQuatation = await Quatation.findOneAndUpdate(req.params.id, {
+        const newQuatation = await Quatation.findByIdAndUpdate(req.params.id, {
             is_deleted: true
         });
 

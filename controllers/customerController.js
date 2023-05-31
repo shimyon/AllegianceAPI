@@ -98,7 +98,7 @@ const removeCustomer = asyncHandler(async (req, res) => {
             });
         }
 
-        const newCustomer = await Customer.findOneAndUpdate(req.params.id, {
+        const newCustomer = await Customer.findByIdAndUpdate(req.params.id, {
             is_active: req.body.active
         });
         

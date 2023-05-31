@@ -240,7 +240,7 @@ const removeInvoice = asyncHandler(async (req, res) => {
             });
         }
 
-        const newInvoice = await Invoice.findOneAndUpdate(req.params.id, {
+        const newInvoice = await Invoice.findByIdAndUpdate(req.params.id, {
             is_deleted: true
         });
 
