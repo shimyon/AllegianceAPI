@@ -3,6 +3,7 @@ const ProspectModal = require('../models/prospectModel')
 const Prospect = ProspectModal.ProspectsModal;
 const Interaction = ProspectModal.ProInteractionModal;
 const NextOn = ProspectModal.ProNextOnModal;
+const ProspectOtherContactModal = ProspectModal.ProspectOtherContactModal;
 
 const addProspect = asyncHandler(async (req, res) => {
     try {
@@ -24,8 +25,8 @@ const addProspect = asyncHandler(async (req, res) => {
             Executive: req.body.executive,
             addedBy: req.user._id,
             Stage: req.body.stage,
-            Requirements:req.body.requirements,
-            Source:req.body.source,
+            Requirements: req.body.requirements,
+            Source: req.body.source,
             StageDate: new Date(),
             is_active: true
         });
@@ -72,8 +73,8 @@ const editProspect = asyncHandler(async (req, res) => {
             Executive: req.body.executive,
             addedBy: req.user._id,
             Stage: req.body.stage,
-            Source:req.body.source,
-            Requirements:req.body.requirements,
+            Source: req.body.source,
+            Requirements: req.body.requirements,
             StageDate: new Date(),
             is_active: true
         });
@@ -106,7 +107,7 @@ const removeProspect = asyncHandler(async (req, res) => {
 
         const newProspect = await Prospect.findByIdAndUpdate(req.body.id, {
             is_active: false,
-            RemoveReason:req.body.reason
+            RemoveReason: req.body.reason
         });
 
         return res.status(200).json({
@@ -126,20 +127,20 @@ const removeProspect = asyncHandler(async (req, res) => {
 
 const getAllProspect = asyncHandler(async (req, res) => {
     try {
-        let prospectList = await Prospect.find({is_active:true }).populate({
-            path:"Interaction",
-            populate:{
-                path:"user",
+        let prospectList = await Prospect.find({ is_active: true }).populate({
+            path: "Interaction",
+            populate: {
+                path: "user",
                 select: "_id name email role"
             }
         }).populate(
             {
-                path:"NextTalk",
-                populate:{
-                    path:"user",
+                path: "NextTalk",
+                populate: {
+                    path: "user",
                     select: "_id name email role"
                 }
-            }).populate("Product").populate("Executive").populate("Source").populate("addedBy", "_id name email role")
+            }).populate("Product").populate("OtherContact").populate("Executive").populate("Source").populate("addedBy", "_id name email role")
         return res.status(200).json({
             success: true,
             data: prospectList
@@ -157,19 +158,19 @@ const getAllProspect = asyncHandler(async (req, res) => {
 const getProspectById = asyncHandler(async (req, res) => {
     try {
         let prospectList = await Prospect.find({ _id: req.params.id }).populate({
-            path:"Interaction",
-            populate:{
-                path:"user",
+            path: "Interaction",
+            populate: {
+                path: "user",
                 select: "_id name email role"
             }
         }).populate(
             {
-                path:"NextTalk",
-                populate:{
-                    path:"user",
+                path: "NextTalk",
+                populate: {
+                    path: "user",
                     select: "_id name email role"
                 }
-            }).populate("Product").populate("Executive").populate("Source").populate("addedBy", "_id name email role")
+            }).populate("Product").populate("OtherContact").populate("Executive").populate("Source").populate("addedBy", "_id name email role")
         return res.status(200).json({
             success: true,
             data: prospectList
@@ -197,7 +198,7 @@ const changeProspectStage = asyncHandler(async (req, res) => {
     } catch (err) {
         return res.status(400).json({
             success: false,
-            msg: "Error in process"+ err.message,
+            msg: "Error in process" + err.message,
             data: null,
         });
     }
@@ -256,6 +257,49 @@ const addInteraction = asyncHandler(async (req, res) => {
 
 });
 
+const addOtherContact = asyncHandler(async (req, res) => {
+    try {
+        let prospectExist = await Prospect.findById(req.body.id);
+        let nextOn = await ProspectOtherContactModal.create({
+            LeadId: req.body.id,
+            Name: req.body.name,
+            Mobile: req.body.mobile,
+            Email: req.user.email
+        });
+
+        prospectExist.OtherContact.push(nextOn);
+        prospectExist.save((err) => {
+            if (err) throw err;
+        });
+        return res.status(200).json({
+            success: true,
+            msg: "Contact added successfully",
+        }).end();
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in adding contact. " + err.message
+        });
+    }
+
+});
+
+const getOtherContact = asyncHandler(async (req, res) => {
+    try {
+        let otherContact = await ProspectOtherContactModal.find({ LeadId: req.params.id });
+        return res.status(200).json({
+            success: true,
+            msg: "Success",
+            data: otherContact
+        }).end();
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in getting data. " + err.message
+        });
+    }
+})
+
 module.exports = {
     addProspect,
     editProspect,
@@ -264,5 +308,7 @@ module.exports = {
     addNext,
     addInteraction,
     removeProspect,
-    changeProspectStage
+    changeProspectStage,
+    addOtherContact,
+    getOtherContact
 }

@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 
-const { 
+const {
     addProspect,
     editProspect,
     removeProspect,
@@ -10,7 +10,9 @@ const {
     getProspectById,
     addInteraction,
     addNext,
- } = require('../controllers/prospectController')
+    addOtherContact,
+    getOtherContact
+} = require('../controllers/prospectController')
 const { protect } = require('../middleware/authMiddleware')
 
 router.post('/add', protect, addProspect)
@@ -20,6 +22,8 @@ router.post('/changeProspectStage', protect, changeProspectStage)
 router.post('/remove', protect, removeProspect)
 router.get('/:id', protect, getProspectById)
 router.post('/addNext', protect, addNext)
+router.post('/addOtherContact', protect, addOtherContact)
+router.get('/otherContact/:id', protect, getOtherContact)
 router.post('/addInteraction', protect, addInteraction)
 
 module.exports = router

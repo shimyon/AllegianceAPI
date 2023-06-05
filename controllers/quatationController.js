@@ -2,7 +2,7 @@ const asyncHandler = require('express-async-handler')
 const QuatationModal = require('../models/quatationModel')
 const Quatation = QuatationModal.QuatationModal
 const QuatationProduct = QuatationModal.QuatationProductModal
-
+const QuatationTermsandCondition = QuatationModal.QuatationTermsandCondition
 
 const addQuatation = asyncHandler(async (req, res) => {
     try {
@@ -25,6 +25,8 @@ const addQuatation = asyncHandler(async (req, res) => {
             Note: req.body.note,
             is_deleted: false
         });
+
+        //adding product
         var products = [];
 
         for (var i = 0; i < req.body.products.length; i++) {
@@ -44,9 +46,26 @@ const addQuatation = asyncHandler(async (req, res) => {
         }
 
         const prQuatation = await QuatationProduct.create(products);
-        for(var i=0; i<prQuatation.length; i++){
+        for (var i = 0; i < prQuatation.length; i++) {
             newQuatation.Products.push(prQuatation[i]);
         }
+
+        //adding terms and condition
+        var condition = [];
+        for (var i = 0; i < req.body.TermsAndCondition.length; i++) {
+            var tr = req.body.TermsAndCondition[i];
+            var newTr = {
+                QuatationId: newQuatation._id.toString(),
+                condition: tr
+            }
+            condition.push(newTr);
+        }
+        const trQuatation = await QuatationTermsandCondition.create(condition);
+
+        for (var i = 0; i < trQuatation.length; i++) {
+            newQuatation.TermsAndCondition.push(trQuatation[i]);
+        }
+
         newQuatation.save((err) => {
             if (err) throw err;
         });
@@ -88,7 +107,7 @@ const editQuatation = asyncHandler(async (req, res) => {
             ValidDate: req.body.vaidDate,
             Note: req.body.note,
         });
-        
+
         await QuatationProduct.deleteMany({ QuatationId: req.body.id }).lean().exec((err, doc) => {
             if (err) {
                 return res.status(401).json({
@@ -97,6 +116,17 @@ const editQuatation = asyncHandler(async (req, res) => {
                 }).end();
             }
         });
+
+        await QuatationTermsandCondition.deleteMany({ QuatationId: req.body.id }).lean().exec((err, doc) => {
+            if (err) {
+                return res.status(401).json({
+                    success: false,
+                    msg: err
+                }).end();
+            }
+        });
+
+        // adding product
         var products = [];
 
         for (var i = 0; i < req.body.products.length; i++) {
@@ -117,8 +147,24 @@ const editQuatation = asyncHandler(async (req, res) => {
 
         const prQuatation = await QuatationProduct.create(products);
 
-        for(var i=0; i<prQuatation.length; i++){
+        for (var i = 0; i < prQuatation.length; i++) {
             oldQuatation.Products.push(prQuatation[i]);
+        }
+
+        //adding terms and condition
+        var condition = [];
+        for (var i = 0; i < req.body.TermsAndCondition.length; i++) {
+            var tr = req.body.TermsAndCondition[i];
+            var newTr = {
+                QuatationId: newQuatation._id.toString(),
+                condition: tr
+            }
+            condition.push(newTr);
+        }
+        const trQuatation = await QuatationTermsandCondition.create(condition);
+
+        for (var i = 0; i < trQuatation.length; i++) {
+            oldQuatation.TermsAndCondition.push(trQuatation[i]);
         }
         oldQuatation.save((err) => {
             if (err) throw err;
@@ -175,6 +221,7 @@ const getAllQuatation = asyncHandler(async (req, res) => {
                 }
             })
             .populate("ShippingAddress")
+            .populate("TermsAndCondition")
             .populate("BillingAddress")
             .populate("SalesExecutive", 'name email')
             .populate("addedBy", 'name email')
@@ -204,6 +251,7 @@ const getCustomerById = asyncHandler(async (req, res) => {
             })
             .populate("ShippingAddress")
             .populate("BillingAddress")
+            .populate("TermsAndCondition")
             .populate("SalesExecutive", 'name email')
             .populate("addedBy", 'name email')
 
@@ -220,7 +268,7 @@ const getCustomerById = asyncHandler(async (req, res) => {
     }
 })
 
-const changeQuatationStatus= asyncHandler(async(req,res)=>{
+const changeQuatationStatus = asyncHandler(async (req, res) => {
     try {
         const existCustomer = await Quatation.findById(req.body.id);
         if (!existCustomer) {

@@ -2,8 +2,8 @@ const mongoose = require('mongoose')
 
 const invoiceSchema = mongoose.Schema(
     {
-        InvoiceNo:{
-            type:Number
+        InvoiceNo: {
+            type: Number
         },
         Customer: {
             type: mongoose.Schema.Types.ObjectId,
@@ -57,9 +57,10 @@ const invoiceSchema = mongoose.Schema(
         Note: {
             type: String
         },
-        TermsAndCondition: {
-            type: String
-        },
+        TermsAndCondition: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'InvoiceTermsandCondition'
+        }],
         is_deleted: {
             type: Boolean,
             default: false
@@ -105,16 +106,36 @@ const invoiceProductSchema = mongoose.Schema(
         addedBy: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User'
-        },
+        }
+    },
+    {
+        timestamps: true,
     })
+
+const invoiceTermsandCondition = mongoose.Schema(
+    {
+        InvoiceId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Invoices'
+        },
+        condition: {
+            type: String
+        }
+    },
+    {
+        timestamps: true,
+    }
+)
 
 const InvoiceModal = mongoose.model('Invoices', invoiceSchema);
 const InvoiceProductModal = mongoose.model('InvoiceProduct', invoiceProductSchema);
+const InvoiceTermsandCondition = mongoose.model('InvoiceTermsandCondition', invoiceTermsandCondition);
 
 const syncIndex = async () => {
     await InvoiceModal.syncIndexes();
     await InvoiceProductModal.syncIndexes();
+    await InvoiceTermsandCondition.syncIndexes();
 }
 syncIndex();
 
-module.exports = { InvoiceModal, InvoiceProductModal };
+module.exports = { InvoiceModal, InvoiceProductModal, InvoiceTermsandCondition };

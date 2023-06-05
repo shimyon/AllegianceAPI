@@ -3,6 +3,7 @@ const LeadModal = require('../models/leadModel')
 const Lead = LeadModal.LeadsModal;
 const Interaction = LeadModal.InteractionModal;
 const NextOn = LeadModal.NextOnModal;
+const LeadOtherContact = LeadModal.LeadOtherContact;
 const Master = require('../models/masterModel')
 const Product = Master.ProductModal;
 const Source = Master.SourceModal;
@@ -117,7 +118,7 @@ const removeLead = asyncHandler(async (req, res) => {
         }
 
         const newLead = await Lead.findByIdAndUpdate(req.body.id, {
-            is_active: false,
+            is_active: req.body.active,
             RemoveReason:req.body.reason
         });
 
@@ -138,6 +139,10 @@ const removeLead = asyncHandler(async (req, res) => {
 
 const getAllLead = asyncHandler(async (req, res) => {
     var condition = { is_active: req.body.active, Stage: "New" };
+    if(req.body.favorite)
+    {
+        condition.is_favorite=true;
+    }
 
     if (req.body.source) {
         condition.Source = req.body.source;
@@ -153,6 +158,9 @@ const getAllLead = asyncHandler(async (req, res) => {
 
     if (req.body.appointment == "notset") {
         condition.NextTalk = null;
+    }
+    else if (req.body.appointment != "all"){
+        condition.NextTalk = {$ne:null};
     }
 
     if (req.body.month) {
@@ -191,13 +199,13 @@ const getAllLead = asyncHandler(async (req, res) => {
     }
 
     try {
-        let leadList = await Lead.find(condition).populate("Source").populate("Product").populate("Executive").populate("Interaction").populate("NextTalk").populate("addedBy")
+        let leadList = await Lead.find(condition).populate("Source").populate("OtherContact").populate("Product").populate("Executive").populate("Interaction").populate("NextTalk").populate("addedBy")
             .exec((err, result) => {
                 var newResult = [];
                 result.forEach((val, idx) => {
                     var addData = true;
-                    if (req.body.appointment) {
-                        if (val.NextTalk.date) {
+                    if (req.body.appointment !="notset" && req.body.appointment !="all") {
+                        if (val.NextTalk) {
                             let dt = new Date();
                             let nDate = new Date();
                             nDate.setDate(nDate.getDate() + 1);
@@ -246,7 +254,7 @@ const getAllLead = asyncHandler(async (req, res) => {
 
 const getLeadById = asyncHandler(async (req, res) => {
     try {
-        let leadList = await Lead.find({ Stage: "New", _id: req.params.id }).populate("Source").populate("Product").populate("Executive").populate("Interaction").populate("NextTalk").populate("addedBy")
+        let leadList = await Lead.find({ Stage: "New", _id: req.params.id }).populate("Source").populate("OtherContact").populate("Product").populate("Executive").populate("Interaction").populate("NextTalk").populate("addedBy")
         return res.status(200).json({
             success: true,
             data: leadList
@@ -287,6 +295,49 @@ const addNext = asyncHandler(async (req, res) => {
     }
 
 });
+
+const addOtherContact = asyncHandler(async (req, res) => {
+    try {
+        let leadExist= await Lead.findById(req.body.id);
+        let nextOn = await LeadOtherContact.create({
+            LeadId: req.body.id,
+            Name: req.body.name,
+            Mobile: req.body.mobile,
+            Email: req.user.email
+        });
+
+        leadExist.OtherContact.push(nextOn);
+        leadExist.save((err) => {
+            if (err) throw err;
+        });
+        return res.status(200).json({
+            success: true,
+            msg: "Contact added successfully",
+        }).end();
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in adding contact. " + err.message
+        });
+    }
+
+});
+
+const getOtherContact= asyncHandler(async(req,res)=>{
+    try {
+        let otherContact= await LeadOtherContact.find({LeadId: req.params.id});
+        return res.status(200).json({
+            success: true,
+            msg: "Success",
+            data: otherContact
+        }).end();
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in getting data. " + err.message
+        });
+    }
+})
 
 const addInteraction = asyncHandler(async (req, res) => {
     try {
@@ -475,6 +526,25 @@ const importFiletoDB = asyncHandler(async (req, res, fileName) => {
 
     }
 })
+
+const setAsFavorite = asyncHandler(async (req, res) => {
+    try {
+        let leadExisting = await Lead.findByIdAndUpdate(req.body.id, {
+            is_favorite: req.body.favorite
+        });
+        return res.status(200).json({
+            success: true,
+            msg: "Process Complete",
+        }).end();
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in process. " + err.message,
+            data: null,
+        });
+    }
+
+});
 module.exports = {
     addLead,
     editLead,
@@ -485,5 +555,8 @@ module.exports = {
     addInteraction,
     assignExecutive,
     moveToProspect,
-    importExcel
+    importExcel,
+    setAsFavorite,
+    addOtherContact,
+    getOtherContact
 }

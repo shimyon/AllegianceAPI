@@ -94,6 +94,10 @@ const leadSchema = mongoose.Schema(
         RemoveReason: {
             type: String
         },
+        OtherContact: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'LeadOtherContact'
+        }],
         is_favorite: {
             type: Boolean,
             default: false
@@ -144,16 +148,35 @@ const interactionSchema = mongoose.Schema(
         }
     });
 
+
+const leadOtherContact = mongoose.Schema(
+    {
+        LeadId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Leads'
+        },
+        Name: {
+            type: String
+        },
+        Mobile: {
+            type: Number
+        },
+        Email: {
+            type: String
+        }
+    });
+
 const LeadsModal = mongoose.model('Leads', leadSchema);
 const InteractionModal = mongoose.model('Interaction', interactionSchema);
 const NextOnModal = mongoose.model('NextOn', nextOnSchema);
+const LeadOtherContact = mongoose.model('LeadOtherContact', leadOtherContact);
 
 const syncIndex = async () => {
     await LeadsModal.syncIndexes();
     await InteractionModal.syncIndexes();
     await NextOnModal.syncIndexes();
-    
+    await LeadOtherContact.syncIndexes();
 }
 syncIndex();
 
-module.exports = { LeadsModal, InteractionModal, NextOnModal};
+module.exports = { LeadsModal, InteractionModal, NextOnModal, LeadOtherContact };

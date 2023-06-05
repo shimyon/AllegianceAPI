@@ -91,6 +91,10 @@ const prospectSchema = mongoose.Schema(
             //this will use for prospect stages
             type: String
         },
+        OtherContact: [{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'ProspectOtherContact'
+        }],
         is_active: {
             type: Boolean,
             default: true
@@ -147,15 +151,34 @@ const proInteractionSchema = mongoose.Schema(
         }
     });
 
+const prospectOtherContact = mongoose.Schema(
+    {
+        ProspectId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Prospect'
+        },
+        Name: {
+            type: String
+        },
+        Mobile: {
+            type: Number
+        },
+        Email: {
+            type: String
+        }
+    });
+
 const ProspectsModal = mongoose.model('Prospect', prospectSchema);
 const ProInteractionModal = mongoose.model('ProInteraction', proInteractionSchema);
 const ProNextOnModal = mongoose.model('ProNextOn', proNextOnSchema);
+const ProspectOtherContactModal = mongoose.model('ProspectOtherContact', prospectOtherContact);
 
 const syncIndex = async () => {
     await ProspectsModal.syncIndexes();
     await ProNextOnModal.syncIndexes();
     await ProInteractionModal.syncIndexes();
+    await ProspectOtherContactModal.syncIndexes();
 }
 syncIndex();
 
-module.exports = { ProspectsModal, ProInteractionModal, ProNextOnModal };
+module.exports = { ProspectsModal, ProInteractionModal, ProNextOnModal, ProspectOtherContactModal };
