@@ -261,10 +261,10 @@ const addOtherContact = asyncHandler(async (req, res) => {
     try {
         let prospectExist = await Prospect.findById(req.body.id);
         let nextOn = await ProspectOtherContactModal.create({
-            LeadId: req.body.id,
+            ProspectId: req.body.id,
             Name: req.body.name,
             Mobile: req.body.mobile,
-            Email: req.user.email
+            Email: req.body.email
         });
 
         prospectExist.OtherContact.push(nextOn);

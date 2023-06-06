@@ -303,7 +303,7 @@ const addOtherContact = asyncHandler(async (req, res) => {
             LeadId: req.body.id,
             Name: req.body.name,
             Mobile: req.body.mobile,
-            Email: req.user.email
+            Email: req.body.email
         });
 
         leadExist.OtherContact.push(nextOn);
