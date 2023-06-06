@@ -286,7 +286,7 @@ const addOtherContact = asyncHandler(async (req, res) => {
 
 const getOtherContact = asyncHandler(async (req, res) => {
     try {
-        let otherContact = await ProspectOtherContactModal.find({ LeadId: req.params.id });
+        let otherContact = await ProspectOtherContactModal.find({ ProspectId: req.params.id });
         return res.status(200).json({
             success: true,
             msg: "Success",
