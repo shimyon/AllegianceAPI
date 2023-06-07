@@ -127,7 +127,35 @@ const removeProspect = asyncHandler(async (req, res) => {
 
 const getAllProspect = asyncHandler(async (req, res) => {
     try {
-        let prospectList = await Prospect.find({ is_active: true }).populate({
+        var condition = { is_active: req.body.active };
+        var cDate = new Date();
+        if (req.body.executive) {
+            condition.Executive = req.body.executive;
+        }
+        if (req.body.source) {
+            condition.Source = req.body.source;
+        }
+        //unread prospect
+        if (req.body.unread== true) {
+            condition.is_readed = false;
+        }
+        //followup condition
+        if (req.body.followup) {
+            var fDate = new Date(followup);
+            condition.Interaction.date = fDate;
+        }
+        if (req.body.leadSince) {
+            cDate.setDate(cDate.getDate() - req.body.leadSince);
+            condition.createdAt = { $gte: cDate };
+        }
+        if (req.body.appointment == "notset") {
+            condition.NextTalk = null;
+        }
+        else if (req.body.appointment != "all") {
+            condition.NextTalk = { $ne: null };
+        }
+
+        let prospectList = await Prospect.find(condition).populate({
             path: "Interaction",
             populate: {
                 path: "user",
@@ -141,10 +169,48 @@ const getAllProspect = asyncHandler(async (req, res) => {
                     select: "_id name email role"
                 }
             }).populate("Product").populate("OtherContact").populate("Executive").populate("Source").populate("addedBy", "_id name email role")
-        return res.status(200).json({
-            success: true,
-            data: prospectList
-        }).end();
+            .exec((err, result) => {
+                var newResult = [];
+                result.forEach((val, idx) => {
+                    var addData = true;
+                    if (req.body.appointment != "notset" && req.body.appointment != "all") {
+                        if (val.NextTalk) {
+                            let dt = new Date();
+                            let nDate = new Date();
+                            nDate.setDate(nDate.getDate() + 1);
+                            let apptDate = new Date(val.NextTalk.date);
+                            let cDt = new Date(dt.toDateString());
+                            let aDate = new Date(apptDate.toDateString());
+                            let nDt = new Date(nDate.toDateString());
+                            addData = false;
+                            if (req.body.appointment == "overdue" && cDt > aDate) {
+                                addData = true;
+                            }
+
+                            if (req.body.appointment == "today" && dt.toDateString() == apptDate.toDateString()) {
+                                addData = true;
+                            }
+
+                            if (req.body.appointment == "tomorrow" && nDate.toDateString() == apptDate.toDateString()) {
+                                addData = true;
+                            }
+
+                            if (req.body.appointment == "future" && aDate > nDate) {
+                                addData = true;
+                            }
+                        }
+                    }
+                    if (addData) {
+                        newResult.push(val);
+
+                    }
+                })
+                return res.status(200).json({
+                    success: true,
+                    data: newResult
+                }).end();
+
+            })
     } catch (err) {
         return res.status(400).json({
             success: false,

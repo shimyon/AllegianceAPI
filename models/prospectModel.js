@@ -99,6 +99,10 @@ const prospectSchema = mongoose.Schema(
             type: Boolean,
             default: true
         },
+        is_readed: {
+            type: Boolean,
+            default: false
+        },
         RemoveReason: {
             type: String
         },
