@@ -6,6 +6,9 @@ const prospectSchema = mongoose.Schema(
             type: String,
             required: [true, 'Please add a company']
         },
+        CompanyCode: {
+            type: String,
+        },
         Title: {
             type: String,
         },
@@ -30,6 +33,9 @@ const prospectSchema = mongoose.Schema(
         Email: {
             type: String,
             required: [true, 'Please add email'],
+        },
+        Website: {
+            type: String,
         },
         City: {
             type: String

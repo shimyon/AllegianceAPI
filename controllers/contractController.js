@@ -17,12 +17,13 @@ const addContract = asyncHandler(async (req, res) => {
     } catch (err) {
         return res.status(400).json({
             success: false,
-            msg: "Error in importing data. " + err.message,
+            msg: "Error in adding data. " + err.message,
             data: null,
         });
 
     }
 })
+
 
 const insertContract = asyncHandler(async (req, res, fileName) => {
     try {
@@ -56,6 +57,71 @@ const insertContract = asyncHandler(async (req, res, fileName) => {
         return res.status(400).json({
             success: false,
             msg: "Error in adding contract. " + err.message
+        });
+    }
+})
+
+const editContract = asyncHandler(async (req, res) => {
+    try {
+        process.env.UPLOADFILE = "";
+        await uploadFile(req, res, function (err) {
+            if (err) {
+                return ("Error uploading file.");
+            } else {
+                insertEditContract(req, res, process.env.UPLOADFILE)
+            }
+        })
+
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in adding data. " + err.message,
+        });
+
+    }
+})
+
+const insertEditContract = asyncHandler(async (req, res, fileName) => {
+    try {
+        var existing= await Contract.findById(req.body.id);
+        if(!existing)
+        {
+            return res.status(400).json({
+                success: false,
+                msg: "Contract not found. " + err.message,
+            });
+    
+        }
+
+        var fileList = existing.Files;
+        var files = fileName.split(",");
+        for (var i = 0; i < files.length; i++) {
+            if (files[i] != "") {
+                fileList.push(files[i]);
+            }
+        }
+        await Contract.create({
+            Customer: req.body.customer,
+            ContractNo: req.body.contracNo,
+            StartDate: req.body.startDate,
+            ExpiryDate: req.body.expiryDate,
+            Type: req.body.type,
+            Item: req.body.item,
+            Description: req.body.description,
+            ContractCharges: req.body.contractCharges,
+            RenewalCharges: req.body.renewalCharges,
+            Files: fileList,
+            addedBy: req.user._id,
+
+        });
+        return res.status(200).json({
+            success: true,
+            msg: "Contract updated successfully"
+        });
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in updating contract. " + err.message
         });
     }
 })
@@ -127,5 +193,6 @@ module.exports = {
     addContract,
     getAllContract,
     getContractById,
-    removeContract
+    removeContract,
+    editContract
 }

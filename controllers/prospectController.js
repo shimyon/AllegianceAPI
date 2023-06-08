@@ -4,6 +4,14 @@ const Prospect = ProspectModal.ProspectsModal;
 const Interaction = ProspectModal.ProInteractionModal;
 const NextOn = ProspectModal.ProNextOnModal;
 const ProspectOtherContactModal = ProspectModal.ProspectOtherContactModal;
+const uploadFile = require("../middleware/uploadFileMiddleware");
+const path = require("path");
+const readXlsxFile = require('read-excel-file/node')
+const Master = require('../models/masterModel')
+const Product = Master.ProductModal;
+const Source = Master.SourceModal;
+const CustomerModal = require('../models/customerModel')
+const Customer = CustomerModal.CustomerModal
 
 const addProspect = asyncHandler(async (req, res) => {
     try {
@@ -15,6 +23,7 @@ const addProspect = asyncHandler(async (req, res) => {
             LastName: req.body.lastname,
             Mobile: req.body.mobile,
             Email: req.body.email,
+            Website: req.body.website,
             City: req.body.city,
             State: req.body.state,
             Country: req.body.country,
@@ -63,6 +72,7 @@ const editProspect = asyncHandler(async (req, res) => {
             LastName: req.body.lastname,
             Mobile: req.body.mobile,
             Email: req.body.email,
+            Website: req.body.website,
             City: req.body.city,
             State: req.body.state,
             Country: req.body.country,
@@ -136,7 +146,7 @@ const getAllProspect = asyncHandler(async (req, res) => {
             condition.Source = req.body.source;
         }
         //unread prospect
-        if (req.body.unread== true) {
+        if (req.body.unread == true) {
             condition.is_readed = false;
         }
         //followup condition
@@ -366,6 +376,149 @@ const getOtherContact = asyncHandler(async (req, res) => {
     }
 })
 
+const importExcel = asyncHandler(async (req, res) => {
+    try {
+        process.env.UPLOADFILE = "";
+        await uploadFile(req, res, function (err) {
+            if (err) {
+                return ("Error uploading file.");
+            } else {
+                importFiletoDB(req, res, process.env.UPLOADFILE)
+            }
+        })
+
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in importing data. " + err.message,
+            data: null,
+        });
+
+    }
+})
+
+const importFiletoDB = asyncHandler(async (req, res, fileName) => {
+    try {
+        var exFile = path.join(process.env.UPLOAD_FOLDER, "uploads", fileName.replace(",", ""));
+        var importData = [];
+
+        await readXlsxFile(exFile).then(async (rows) => {
+            var msg = "";
+            for (var idx = 0; idx < rows.length; idx++) {
+                var val = rows[idx];
+                var sourceId = {};
+                var productId = {};
+                sourceId._id = null;
+                productId._id = null;
+                if (idx != 0) {
+                    if (val[18] != "" && val[18] != null) {
+                        sourceId = await Source.findOne({ Name: { $regex: val[18], $options: 'i' } }, { _id: 1 });
+                        if (!sourceId) {
+                            return res.status(400).json({
+                                success: true,
+                                msg: val[10] + " source not found. ",
+                                data: null,
+                            });
+                        }
+                    }
+
+                    if (val[15] != "" && val[15] != null) {
+                        productId = await Product.findOne({ Name: { $regex: val[15], $options: 'i' } }, { _id: 1 });
+                        if (!productId) {
+                            return res.status(400).json({
+                                success: true,
+                                msg: val[11] + " product not found. ",
+                                data: null,
+                            });
+
+
+                        }
+                    }
+                    importData.push({
+                        Company: val[0],
+                        CompanyCode: val[1],
+                        Title: val[2],
+                        FirstName: val[3],
+                        LastName: val[4],
+                        Mobile: val[5],
+                        Email: val[6],
+                        Stage: "New",
+                        Website: val[9],
+                        Industry: val[10],
+                        Segment: val[11],
+                        Country: val[12],
+                        State: val[13],
+                        City: val[14],
+                        Source: sourceId._id,
+                        Product: productId._id,
+                        ProspectAmount: val[16],
+                        Notes: val[17],
+                        addedBy: req.user._id,
+                        LeadSince: new Date(),
+                        StageDate: new Date(),
+                        is_active: true
+                    });
+                }
+            }
+
+            const newLead = await Prospect.create(importData);
+            return res.status(200).json({
+                success: true,
+                msg: "Data imported successfully. ",
+                data: null,
+            });
+
+        });
+
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in importing data. " + err.message,
+            data: null,
+        });
+
+
+    }
+})
+
+const convertToCustomer = asyncHandler(async (req, res) => {
+    try {
+        var pros= await Prospect.findById(req.params.id);
+
+        const existCustomer = await Customer.findOne({ $or: [{ Mobile: pros.Mobile, Email: pros.Email }] });
+        if (existCustomer) {
+            return res.status(200).json({
+                success: false,
+                msg: "Customer already exist with same mobile or email.",
+                data: null,
+            });
+        }
+
+        const newCustomer = await Customer.create({
+            Company: pros.Company,
+            Title: pros.Title,
+            FirstName: pros.FirstName,
+            LastName: pros.LastName,
+            Mobile: pros.Mobile,
+            Email: pros.Email,
+            City: pros.City,
+            State: pros.State,
+            Country: pros.Country,
+            addedBy: req.user._id,
+            Notes:pros.Notes,
+            is_active: true
+        });
+
+        return res.status(200).json(newCustomer).end();
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in creating Customer. " + err.message,
+            data: null,
+        });
+    }
+
+});
 module.exports = {
     addProspect,
     editProspect,
@@ -376,5 +529,7 @@ module.exports = {
     removeProspect,
     changeProspectStage,
     addOtherContact,
-    getOtherContact
+    getOtherContact,
+    importExcel,
+    convertToCustomer
 }

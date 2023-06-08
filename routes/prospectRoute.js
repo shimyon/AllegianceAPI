@@ -11,7 +11,9 @@ const {
     addInteraction,
     addNext,
     addOtherContact,
-    getOtherContact
+    getOtherContact,
+    importExcel,
+    convertToCustomer
 } = require('../controllers/prospectController')
 const { protect } = require('../middleware/authMiddleware')
 
@@ -21,9 +23,11 @@ router.post('/getAll', protect, getAllProspect)
 router.post('/changeProspectStage', protect, changeProspectStage)
 router.post('/remove', protect, removeProspect)
 router.get('/:id', protect, getProspectById)
+router.get('/convertToCustomer/:id', protect, convertToCustomer)
 router.post('/addNext', protect, addNext)
 router.post('/addOtherContact', protect, addOtherContact)
 router.get('/otherContact/:id', protect, getOtherContact)
 router.post('/addInteraction', protect, addInteraction)
+router.post('/importExcel', protect, importExcel)
 
 module.exports = router

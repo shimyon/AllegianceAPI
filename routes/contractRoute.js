@@ -5,11 +5,13 @@ const {
     addContract,
     getAllContract,
     getContractById,
-    removeContract
+    removeContract,
+    editContract
  } = require('../controllers/contractController')
 const { protect } = require('../middleware/authMiddleware')
 
 router.post('/addContract', protect, addContract)
+router.post('/editContract', protect, editContract)
 router.post('/getAllContract', protect, getAllContract)
 router.get('/getContractById/:id', protect, getContractById)
 router.post('/removeContract', protect, removeContract)
