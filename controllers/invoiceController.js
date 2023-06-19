@@ -10,7 +10,7 @@ const addInvoice = asyncHandler(async (req, res) => {
     try {
         let invoiceNo = await Invoice.find({}, { InvoiceNo: 1, _id: 0 }).sort({ InvoiceNo: -1 }).limit(1);
         let maxInvoice = 1;
-        if (invoiceNo) {
+        if (invoiceNo.length >0) {
             maxInvoice = invoiceNo[0].InvoiceNo + 1;
         }
 
@@ -239,7 +239,7 @@ const editInvoice = asyncHandler(async (req, res) => {
 
         const prInvoice = await InvoiceProduct.create(products);
 
-        for (var i = 0; i < prInvoice.length; i++) {
+        for (var i = 0; i < oldInvoice.length; i++) {
             oldInvoice.Products.push(prInvoice[i]);
         }
 
@@ -248,7 +248,7 @@ const editInvoice = asyncHandler(async (req, res) => {
         for (var i = 0; i < req.body.TermsAndCondition.length; i++) {
             var tr = req.body.TermsAndCondition[i];
             var newTr = {
-                InvoiceId: newInvoice._id.toString(),
+                InvoiceId: oldInvoice._id.toString(),
                 condition: tr
             }
             condition.push(newTr);

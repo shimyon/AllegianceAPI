@@ -12,7 +12,7 @@ const addProduct = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let oldProduct = await Product.findOne({ Name: { $regex: req.body.name, $options: 'i' } });
+        let oldProduct = await Product.findOne({ Name: req.body.name });
 
         if (oldProduct) {
             response.message = "Product with same name already exist.";
@@ -135,7 +135,7 @@ const addSource = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let oldSource = await Source.findOne({ Name: { $regex: req.body.name, $options: 'i' } });
+        let oldSource = await Source.findOne({ Name: req.body.name });
 
         if (oldSource) {
             response.message = "Source with same name already exist.";
@@ -255,7 +255,7 @@ const addUnit = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let oldUnit = await Unit.findOne({ Name: { $regex: req.body.name, $options: 'i' } });
+        let oldUnit = await Unit.findOne({ Name:body.name });
 
         if (oldUnit) {
             response.message = "Unit with same name already exist.";
@@ -359,7 +359,7 @@ const addCategory = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let oldCategory = await Category.findOne({ Name: { $regex: req.body.name, $options: 'i' } });
+        let oldCategory = await Category.findOne({ Name: req.body.name });
 
         if (oldCategory) {
             response.message = "Category with same name already exist.";
@@ -463,7 +463,7 @@ const addSubCategory = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let oldSubCategory = await SubCategory.findOne({ Name: { $regex: req.body.name, $options: 'i' }, Category: req.body.category });
+        let oldSubCategory = await SubCategory.findOne({ Name:  req.body.name , Category: req.body.category });
 
         if (oldSubCategory) {
             response.message = "SubCategory with same name already exist.";

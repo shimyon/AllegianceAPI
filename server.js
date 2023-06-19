@@ -29,6 +29,8 @@ app.use('/api/order', require('./routes/orderRoute'));
 app.use('/api/quatation', require('./routes/quatationRoute'));
 app.use('/api/invoice', require('./routes/invoiceRoute'));
 app.use('/api/contract', require('./routes/contractRoute'));
+app.use('/api/recovery', require('./routes/recoveryRoute'));
+app.use('/api/support', require('./routes/supportRoute'));
 
 app.use(errorHandler)
 app.listen(port, () => console.log(`Listening at port ${port}`))

@@ -1,6 +1,8 @@
 const asyncHandler = require('express-async-handler')
 const ContractModel = require('../models/contractModel')
 const Contract = ContractModel.ContractModal;
+const Process = ContractModel.ContractProcess;
+
 const uploadFile = require("../middleware/uploadFileMiddleware");
 
 const addContract = asyncHandler(async (req, res) => {
@@ -83,14 +85,13 @@ const editContract = asyncHandler(async (req, res) => {
 
 const insertEditContract = asyncHandler(async (req, res, fileName) => {
     try {
-        var existing= await Contract.findById(req.body.id);
-        if(!existing)
-        {
+        var existing = await Contract.findById(req.body.id);
+        if (!existing) {
             return res.status(400).json({
                 success: false,
-                msg: "Contract not found. " + err.message,
+                msg: "Contract not found. ",
             });
-    
+
         }
 
         var fileList = existing.Files;
@@ -100,7 +101,7 @@ const insertEditContract = asyncHandler(async (req, res, fileName) => {
                 fileList.push(files[i]);
             }
         }
-        await Contract.create({
+        await Contract.findByIdAndUpdate(req.body.id, {
             Customer: req.body.customer,
             ContractNo: req.body.contracNo,
             StartDate: req.body.startDate,
@@ -128,7 +129,7 @@ const insertEditContract = asyncHandler(async (req, res, fileName) => {
 
 const getAllContract = asyncHandler(async (req, res) => {
     try {
-        let ContractList = await Contract.find({ is_active: req.body.active }).populate("Customer").populate("addedBy", "_id name email role")
+        let ContractList = await Contract.find({ is_active: req.body.active }).populate("Process").populate("Customer").populate("addedBy", "_id name email role")
         return res.status(200).json({
             success: true,
             data: ContractList
@@ -145,7 +146,7 @@ const getAllContract = asyncHandler(async (req, res) => {
 
 const getContractById = asyncHandler(async (req, res) => {
     try {
-        let ContractList = await Contract.find({_id:req.params.id }).populate("Customer").populate("addedBy", "_id name email role");
+        let ContractList = await Contract.find({ _id: req.params.id }).populate("Process").populate("Customer").populate("addedBy", "_id name email role");
         return res.status(200).json({
             success: true,
             data: ContractList
@@ -160,6 +161,129 @@ const getContractById = asyncHandler(async (req, res) => {
 
 });
 
+const addProcess = asyncHandler(async (req, res) => {
+    try {
+
+        await Process.create({
+            contractId: req.body.contractId,
+            executive: req.body.executive,
+            status: req.body.status,
+            note: req.body.note,
+            startDate: req.body.startDate,
+            dueDate: req.body.dueDate,
+            addedBy: req.user._id,
+
+        });
+        return res.status(200).json({
+            success: true,
+            msg: "Process added successfully"
+        });
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in adding Process. " + err.message
+        });
+    }
+})
+
+const editProcess = asyncHandler(async (req, res) => {
+    try {
+        var oldProcess = Process.findById(req.body.id);
+        if (!oldProcess) {
+            return res.status(400).json({
+                success: false,
+                msg: "Process not exist"
+            });
+        }
+        await Process.findByIdAndUpdate(req.body.id, {
+            executive: req.body.executive,
+            status: req.body.status,
+            note: req.body.note,
+            startDate: req.body.startDate,
+            dueDate: req.body.dueDate,
+
+        });
+        return res.status(200).json({
+            success: true,
+            msg: "Process updated successfully"
+        });
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in updating Process. " + err.message
+        });
+    }
+})
+
+const getAllProcess = asyncHandler(async (req, res) => {
+    try {
+        let ProcessList = await Process.find({ contractId: req.body.contractId }).populate("executive").populate("addedBy", "_id name email role")
+        return res.status(200).json({
+            success: true,
+            data: ProcessList
+        }).end();
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in getting Process. " + err.message,
+            data: null,
+        });
+    }
+
+});
+
+const getProcessById = asyncHandler(async (req, res) => {
+    try {
+        let ProcessList = await Process.find({ _id: req.body.processId }).populate("executive").populate("addedBy", "_id name email role");
+        return res.status(200).json({
+            success: true,
+            data: ProcessList
+        }).end();
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in getting Process. " + err.message,
+            data: null,
+        });
+    }
+
+});
+
+const removeProcess = asyncHandler(async (req, res) => {
+    try {
+        const existProcess = await Process.findById(req.params.id);
+        if (!existProcess) {
+            return res.status(200).json({
+                success: false,
+                msg: "Process not found.",
+                data: null,
+            });
+        }
+
+         await Process.remove({ _id: req.params.id }, function (err) {
+            if (!err) {
+
+                return res.status(200).json({
+                    success: true,
+                    msg: "Process removed. ",
+                }).end();
+            }
+            else {
+                return res.status(400).json({
+                    success: false,
+                    msg: "Error in removing Process. " + err,
+                }).end();
+            }
+        });
+
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in removing Process. " + err.message,
+        });
+    }
+
+});
 const removeContract = asyncHandler(async (req, res) => {
     try {
         const existContract = await Contract.findById(req.body.id);
@@ -194,5 +318,10 @@ module.exports = {
     getAllContract,
     getContractById,
     removeContract,
-    editContract
+    editContract,
+    addProcess,
+    editProcess,
+    getAllProcess,
+    getProcessById,
+    removeProcess
 }

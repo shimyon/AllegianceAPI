@@ -156,7 +156,7 @@ const editQuatation = asyncHandler(async (req, res) => {
         for (var i = 0; i < req.body.TermsAndCondition.length; i++) {
             var tr = req.body.TermsAndCondition[i];
             var newTr = {
-                QuatationId: newQuatation._id.toString(),
+                QuatationId: oldQuatation._id.toString(),
                 condition: tr
             }
             condition.push(newTr);

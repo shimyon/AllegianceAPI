@@ -149,11 +149,6 @@ const getAllProspect = asyncHandler(async (req, res) => {
         if (req.body.unread == true) {
             condition.is_readed = false;
         }
-        //followup condition
-        if (req.body.followup) {
-            var fDate = new Date(followup);
-            condition.Interaction.date = fDate;
-        }
         if (req.body.leadSince) {
             cDate.setDate(cDate.getDate() - req.body.leadSince);
             condition.createdAt = { $gte: cDate };
@@ -180,6 +175,12 @@ const getAllProspect = asyncHandler(async (req, res) => {
                 }
             }).populate("Product").populate("OtherContact").populate("Executive").populate("Source").populate("addedBy", "_id name email role")
             .exec((err, result) => {
+                if (err) {
+                    return res.status(400).json({
+                        success: false,
+                        msg: "Error in getting prospect. " + err,
+                    });
+                }
                 var newResult = [];
                 result.forEach((val, idx) => {
                     var addData = true;
@@ -210,9 +211,20 @@ const getAllProspect = asyncHandler(async (req, res) => {
                             }
                         }
                     }
+                    //followup condition
+                    if (req.body.followup) {
+                        var fDate = new Date(req.body.followup);
+                        if (val.Interaction == null) {
+                            addData = false;
+                        } else {
+                            if (val.Interaction.date != fDate) {
+                                addData = false;
+                            }
+                        }
+                    }
+
                     if (addData) {
                         newResult.push(val);
-
                     }
                 })
                 return res.status(200).json({
@@ -225,7 +237,6 @@ const getAllProspect = asyncHandler(async (req, res) => {
         return res.status(400).json({
             success: false,
             msg: "Error in getting prospect. " + err.message,
-            data: null,
         });
     }
 
@@ -483,7 +494,7 @@ const importFiletoDB = asyncHandler(async (req, res, fileName) => {
 
 const convertToCustomer = asyncHandler(async (req, res) => {
     try {
-        var pros= await Prospect.findById(req.params.id);
+        var pros = await Prospect.findById(req.params.id);
 
         const existCustomer = await Customer.findOne({ $or: [{ Mobile: pros.Mobile, Email: pros.Email }] });
         if (existCustomer) {
@@ -505,7 +516,7 @@ const convertToCustomer = asyncHandler(async (req, res) => {
             State: pros.State,
             Country: pros.Country,
             addedBy: req.user._id,
-            Notes:pros.Notes,
+            Notes: pros.Notes,
             is_active: true
         });
 
