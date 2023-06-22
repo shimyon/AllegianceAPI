@@ -412,6 +412,7 @@ const moveToProspect = asyncHandler(async (req, res) => {
             Product: leadExisting.Product,
             Notes: leadExisting.Notes,
             Executive: leadExisting.Executive,
+            Source:leadExisting.Source,
             addedBy: req.user._id,
             Stage: "New",
             StageDate: new Date(),

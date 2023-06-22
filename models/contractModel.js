@@ -6,6 +6,9 @@ const contractSchema = mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Customers'
         },
+        Name:{
+            type: String
+        },
         Process:[{
             type: mongoose.Schema.Types.ObjectId,
             ref: 'ContractProcess'
@@ -34,9 +37,9 @@ const contractSchema = mongoose.Schema(
         RenewalCharges: {
             type: Number
         },
-        Files: [{
+        Files: {
             type: String
-        }],
+        },
         is_active: {
             type: Boolean,
             default: true
@@ -56,12 +59,22 @@ const contractProcessSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Contracts'
     },
+    Name:{
+        type: String
+    },
     executive: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     },
+    dailyStatus: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'ProcessDailyStatus'
+    }],
     status:{
         type:String
+    },
+    progress:{
+        type:Number
     },
     note:{
         type:String
@@ -79,12 +92,38 @@ const contractProcessSchema = mongoose.Schema({
 },{
     timestamps: true,
 })
+
+const processDailyStatusSchema = mongoose.Schema({
+    processId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'ContractProcess'
+    },
+    status:{
+        type:String
+    },
+    note:{
+        type:String
+    },
+    progress:{
+        type:Number
+    },
+    addedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }
+},{
+    timestamps: true,
+})
+
 const ContractModal = mongoose.model('Contracts', contractSchema);
 const ContractProcess = mongoose.model('ContractProcess', contractProcessSchema);
+const ProcessDailyStatus = mongoose.model('ProcessDailyStatus', processDailyStatusSchema);
+
 const syncIndex = async () => {
     await ContractModal.syncIndexes();
     await ContractProcess.syncIndexes();
+    await ProcessDailyStatus.syncIndexes();
 }
 syncIndex();
 
-module.exports = { ContractModal, ContractProcess };
+module.exports = { ContractModal, ContractProcess, ProcessDailyStatus };

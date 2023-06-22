@@ -241,7 +241,7 @@ const getAllQuatation = asyncHandler(async (req, res) => {
 
 const getCustomerById = asyncHandler(async (req, res) => {
     try {
-        let customerList = await Quatation.find({ is_deleted: false, _id: req.params.id })
+        let customerList = await Quatation.find({ _id: req.params.id })
             .populate("Customer")
             .populate({
                 path: 'Products',

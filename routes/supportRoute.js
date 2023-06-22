@@ -6,7 +6,8 @@ const {
     getAllSupport,
     getSupportById,
     updateSupport,
-    editSupport
+    editSupport,
+    updateStatus
  } = require('../controllers/supportController')
 const { protect } = require('../middleware/authMiddleware')
 
@@ -14,6 +15,6 @@ router.post('/addSupport', protect, addSupport)
 router.post('/editSupport', protect, editSupport)
 router.post('/getAllSupport', protect, getAllSupport)
 router.get('/getSupportById/:id', protect, getSupportById)
-router.post('/updateSupport', protect, updateSupport)
+router.post('/updateStatus', protect, updateStatus)
 
 module.exports = router

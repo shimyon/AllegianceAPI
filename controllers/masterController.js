@@ -255,7 +255,7 @@ const addUnit = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let oldUnit = await Unit.findOne({ Name:body.name });
+        let oldUnit = await Unit.findOne({ Name:req.body.name });
 
         if (oldUnit) {
             response.message = "Unit with same name already exist.";

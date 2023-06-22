@@ -197,6 +197,7 @@ const editInvoice = asyncHandler(async (req, res) => {
             DeliveryDate: req.body.deliveryDate,
             Executive: req.body.executive,
             TermsAndCondition: req.body.termsCondition,
+            InvoiceDate: req.body.invoiceDate,
             Note: req.body.note
         });
 
@@ -239,7 +240,7 @@ const editInvoice = asyncHandler(async (req, res) => {
 
         const prInvoice = await InvoiceProduct.create(products);
 
-        for (var i = 0; i < oldInvoice.length; i++) {
+        for (var i = 0; i < prInvoice.length; i++) {
             oldInvoice.Products.push(prInvoice[i]);
         }
 

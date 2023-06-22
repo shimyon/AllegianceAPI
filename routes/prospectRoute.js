@@ -13,7 +13,8 @@ const {
     addOtherContact,
     getOtherContact,
     importExcel,
-    convertToCustomer
+    convertToCustomer,
+    markAsRead
 } = require('../controllers/prospectController')
 const { protect } = require('../middleware/authMiddleware')
 
@@ -29,5 +30,6 @@ router.post('/addOtherContact', protect, addOtherContact)
 router.get('/otherContact/:id', protect, getOtherContact)
 router.post('/addInteraction', protect, addInteraction)
 router.post('/importExcel', protect, importExcel)
+router.get('/markAsRead/:id', protect, markAsRead)
 
 module.exports = router

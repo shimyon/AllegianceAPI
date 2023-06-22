@@ -53,6 +53,10 @@ const quatationSchema = mongoose.Schema(
         Status: {
             type: String
         },
+        is_deleted:{
+            type:Boolean,
+            default:false
+        },
         TermsAndCondition: [{
             type: mongoose.Schema.Types.ObjectId,
             ref: 'QuatationTermsandCondition'

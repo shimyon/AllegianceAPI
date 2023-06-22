@@ -135,10 +135,31 @@ const updateSupport = asyncHandler(async (req, res) => {
     }
 
 });
+
+const updateStatus = asyncHandler(async (req, res) => {
+    try {
+        await Support.findByIdAndUpdate(req.body.id,{
+            Status:req.body.status
+        })
+        return res.status(200).json({
+            success: true,
+            msg: "Status updated",
+        }).end();
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in updating status. " + err.message
+        });
+    }
+
+});
+
+
 module.exports = {
     addSupport,
     getAllSupport,
     getSupportById,
     updateSupport,
-    editSupport
+    editSupport,
+    updateStatus
 }

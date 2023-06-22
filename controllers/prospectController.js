@@ -530,6 +530,25 @@ const convertToCustomer = asyncHandler(async (req, res) => {
     }
 
 });
+
+const markAsRead = asyncHandler(async (req, res) => {
+    try {
+        await Prospect.findByIdAndUpdate(req.params.id,{
+            is_readed:true
+        })
+        return res.status(200).json({
+            success: true,
+            msg: "Marked as read",
+        }).end();
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in process. " + err.message
+        });
+    }
+
+});
+
 module.exports = {
     addProspect,
     editProspect,
@@ -542,5 +561,6 @@ module.exports = {
     addOtherContact,
     getOtherContact,
     importExcel,
-    convertToCustomer
+    convertToCustomer,
+    markAsRead
 }
