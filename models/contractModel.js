@@ -110,6 +110,9 @@ const processDailyStatusSchema = mongoose.Schema({
     addedBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
+    },
+    statusDate:{
+        type: Date
     }
 },{
     timestamps: true,
