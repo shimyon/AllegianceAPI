@@ -14,7 +14,12 @@ const {
     removeProcess,
     updateProcess,
     addDailyStatus,
-    getAllDailyStatus
+    getAllDailyStatus,
+    addSubProcess,
+    editSubProcess,
+    getSubAllProcess,
+    getSubProcessById,
+    removeSubProcess
  } = require('../controllers/contractController')
 const { protect } = require('../middleware/authMiddleware')
 
@@ -31,4 +36,10 @@ router.get('/removeProcess/:id', protect, removeProcess)
 router.post('/updateProcess', protect, updateProcess)
 router.post('/addDailyStatus', protect, addDailyStatus)
 router.get('/getAllDailyStatus/:id', protect, getAllDailyStatus)
+router.post('/addSubProcess', protect, addSubProcess)
+router.post('/editSubProcess', protect, editSubProcess)
+router.post('/getSubAllProcess', protect, getSubAllProcess)
+router.post('/getSubProcessById', protect, getSubProcessById)
+router.get('/removeSubProcess/:id', protect, removeSubProcess)
+
 module.exports = router

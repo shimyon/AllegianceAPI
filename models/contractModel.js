@@ -66,6 +66,45 @@ const contractProcessSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     },
+    subProcess: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'ContractSubProcess'
+    }],
+    status:{
+        type:String
+    },
+    progress:{
+        type:Number
+    },
+    note:{
+        type:String
+    },
+    startDate:{
+        type: Date
+    },
+    dueDate:{
+        type: Date
+    },
+    addedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }
+},{
+    timestamps: true,
+})
+
+const contractSubProcessSchema = mongoose.Schema({
+    processId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'ContractProcess'
+    },
+    Name:{
+        type: String
+    },
+    executive: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    },
     dailyStatus: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'ProcessDailyStatus'
@@ -94,9 +133,9 @@ const contractProcessSchema = mongoose.Schema({
 })
 
 const processDailyStatusSchema = mongoose.Schema({
-    processId: {
+    subProcessId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'ContractProcess'
+        ref: 'ContractSubProcess'
     },
     status:{
         type:String
@@ -120,13 +159,15 @@ const processDailyStatusSchema = mongoose.Schema({
 
 const ContractModal = mongoose.model('Contracts', contractSchema);
 const ContractProcess = mongoose.model('ContractProcess', contractProcessSchema);
+const ContractSubProcess = mongoose.model('ContractSubProcess', contractSubProcessSchema);
 const ProcessDailyStatus = mongoose.model('ProcessDailyStatus', processDailyStatusSchema);
 
 const syncIndex = async () => {
     await ContractModal.syncIndexes();
     await ContractProcess.syncIndexes();
     await ProcessDailyStatus.syncIndexes();
+    await ContractSubProcess.syncIndexes();
 }
 syncIndex();
 
-module.exports = { ContractModal, ContractProcess, ProcessDailyStatus };
+module.exports = { ContractModal, ContractProcess, ProcessDailyStatus ,ContractSubProcess};
