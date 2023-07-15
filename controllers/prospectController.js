@@ -217,7 +217,8 @@ const getAllProspect = asyncHandler(async (req, res) => {
                         if (val.Interaction == null) {
                             addData = false;
                         } else {
-                            if (val.Interaction.date != fDate) {
+                            console.log(val.Interaction.date+" "+fDate);
+                            if (val.Interaction.date.toDateString() !== fDate.toDateString()) {
                                 addData = false;
                             }
                         }

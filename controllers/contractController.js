@@ -365,9 +365,26 @@ const addDailyStatus = asyncHandler(async (req, res) => {
         });
         oldSubProcess.dailyStatus.push(newStatus);
         oldSubProcess.progress = req.body.progress;
-        oldSubProcess.save((err) => {
+        await oldSubProcess.save((err) => {
             if (err) throw err;
         });
+
+        let exProcess= await SubProcess.find({processId:oldSubProcess.processId});
+        let tProgress=0;
+        let totalProgress= 100*exProcess.length; 
+        for(var i=0; i<exProcess.length; i++)
+        {
+            var pro= exProcess[i]._id==req.body.subProcessId? parseInt( req.body.progress):exProcess[i].progress;
+            tProgress+= pro;
+        }
+        if(tProgress >0)
+        {
+            let percent= (tProgress*100)/totalProgress;
+            await Process.findByIdAndUpdate(oldSubProcess.processId,{
+                progress:percent
+            })
+        }
+
         return res.status(200).json({
             success: true,
             msg: "Daily status added",
@@ -522,7 +539,7 @@ const removeSubProcess = asyncHandler(async (req, res) => {
 
 const getAllDailyStatus = asyncHandler(async (req, res) => {
     try {
-        let StatusList = await DailyStatus.find({ processId: req.params.id }).populate("addedBy", "_id name email role")
+        let StatusList = await DailyStatus.find({ subProcessId: req.params.id }).populate("addedBy", "_id name email role")
         return res.status(200).json({
             success: true,
             data: StatusList
