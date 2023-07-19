@@ -214,11 +214,11 @@ const getAllProspect = asyncHandler(async (req, res) => {
                     //followup condition
                     if (req.body.followup) {
                         var fDate = new Date(req.body.followup);
-                        if (val.Interaction == null) {
+                        if (val.NextTalk == null) {
                             addData = false;
                         } else {
-                            console.log(val.Interaction.date+" "+fDate);
-                            if (val.Interaction.date.toDateString() !== fDate.toDateString()) {
+                            console.log(val.NextTalk.date+" "+fDate);
+                            if (val.NextTalk.date.toDateString() !== fDate.toDateString()) {
                                 addData = false;
                             }
                         }
