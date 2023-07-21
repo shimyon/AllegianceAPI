@@ -32,6 +32,7 @@ app.use('/api/contract', require('./routes/contractRoute'));
 app.use('/api/recovery', require('./routes/recoveryRoute'));
 app.use('/api/support', require('./routes/supportRoute'));
 app.use('/api/dashboard', require('./routes/dashboardRoute'));
+app.use('/api/template', require('./routes/templateRoutes'));
 
 app.use(errorHandler)
 app.listen(port, () => console.log(`Listening at port ${port}`))
