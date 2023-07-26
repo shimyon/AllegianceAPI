@@ -7,7 +7,8 @@ const {
     removeOrder,
     getAllOrder,
     getOrderById,
-    changeOrderStatus
+    changeOrderStatus,
+    pdfcreate
  } = require('../controllers/orderController')
 const { protect } = require('../middleware/authMiddleware')
 
@@ -17,5 +18,6 @@ router.post('/remove/:id', protect, removeOrder)
 router.post('/changeOrderStatus', protect, changeOrderStatus)
 router.get('/getAll', protect, getAllOrder)
 router.get('/getById/:id', protect, getOrderById)
+router.post('/pdfcreate/:id', pdfcreate)
 
 module.exports = router

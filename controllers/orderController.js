@@ -2,7 +2,11 @@ const asyncHandler = require('express-async-handler')
 const OrderModal = require('../models/orderModel')
 const Order = OrderModal.OrderModal
 const OrderProduct = OrderModal.OrderProductModal
-
+var pdf = require('html-pdf')
+var fs = require('fs')
+var test = require('tape')
+var path = require('path')
+const Template = require('../models/templateModel')
 
 const addOrder = asyncHandler(async (req, res) => {
     try {
@@ -45,7 +49,7 @@ const addOrder = asyncHandler(async (req, res) => {
         }
 
         const prOrder = await OrderProduct.create(products);
-        for(var i=0; i<prOrder.length; i++){
+        for (var i = 0; i < prOrder.length; i++) {
             newOrder.Products.push(prOrder[i]);
         }
         newOrder.save((err) => {
@@ -117,7 +121,7 @@ const editOrder = asyncHandler(async (req, res) => {
 
         const prOrder = await OrderProduct.create(products);
 
-        for(var i=0; i<prOrder.length; i++){
+        for (var i = 0; i < prOrder.length; i++) {
             oldOrder.Products.push(prOrder[i]);
         }
         oldOrder.save((err) => {
@@ -192,6 +196,51 @@ const getAllOrder = asyncHandler(async (req, res) => {
     }
 })
 
+const pdfcreate = asyncHandler(async (req, res) => {
+    const data = await Template.findById(req.params.id)
+    try {
+        let customerList = await Order.find({ is_deleted: false, _id: req.body.id })
+            .populate("Customer")
+            .populate({
+                path: 'Products',
+                populate: {
+                    path: 'Product',
+                }
+            })
+            .populate("ShippingAddress")
+            .populate("BillingAddress")
+            .populate("Executive", 'name email')
+            .populate("addedBy", 'name email')
+
+        var template = path.join(__dirname, 'card.html')
+        var filename = template.replace('.html', '.pdf')
+        var templateHtml = fs.readFileSync(template, 'utf8')
+        templateHtml = templateHtml.replace('{{image}}', data.Detail)
+        templateHtml = templateHtml.replace('{{order.company}}', customerList[0].Customer?.Company)
+        templateHtml = templateHtml.replace('{{order.firstname}}', customerList[0].Customer?.FirstName)
+        templateHtml = templateHtml.replace('{{order.lastname}}', customerList[0].Customer?.LastName)
+        templateHtml = templateHtml.replace('{{order.email}}', customerList[0].Customer?.Email)
+        templateHtml = templateHtml.replace('{{order.mobile}}', customerList[0].Customer?.Mobile)
+        templateHtml = templateHtml.replace('{{order.orderdate}}', customerList[0].OrderDate)
+
+        pdf
+            .create(templateHtml)
+            .toFile(filename, function (err, pdf) {
+                return res.status(400).json({
+                    error: err,
+                    data: pdf.filename,
+                });
+            })
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in getting Order. " + err.message,
+            data: null,
+        });
+    }
+
+})
+
 const getOrderById = asyncHandler(async (req, res) => {
     try {
         let customerList = await Order.find({ is_deleted: false, _id: req.params.id })
@@ -220,7 +269,7 @@ const getOrderById = asyncHandler(async (req, res) => {
     }
 })
 
-const changeOrderStatus= asyncHandler(async(req,res)=>{
+const changeOrderStatus = asyncHandler(async (req, res) => {
     try {
         const existCustomer = await Order.findById(req.body.id);
         if (!existCustomer) {
@@ -251,6 +300,6 @@ module.exports = {
     editOrder,
     removeOrder,
     getAllOrder,
-    getOrderById,
+    getOrderById, pdfcreate,
     changeOrderStatus
 }
