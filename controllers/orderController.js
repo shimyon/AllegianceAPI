@@ -213,7 +213,7 @@ const pdfcreate = asyncHandler(async (req, res) => {
         var templateHtml = fs.readFileSync(template, 'utf8')
         templateHtml = templateHtml.replace('{{Data}}', data.Detail)
         if (data.TemplateFor == 'Order') {
-        var filename = template.replace('template.html', 'Order.pdf')
+        var filename = template.replace('template.html', `Order_${req.body.id}.pdf`)
             let customerList = await Order.find({ is_deleted: false, _id: req.body.id })
                 .populate("Customer")
                 .populate({
@@ -265,7 +265,7 @@ const pdfcreate = asyncHandler(async (req, res) => {
             </table>`)
         }
         else if (data.TemplateFor == 'Invoice') {
-        var filename = template.replace('template.html', 'Invoice.pdf')
+        var filename = template.replace('template.html', `Invoice_${req.body.id}.pdf`)
             let customerList = await Invoice.find({ is_deleted: false, _id: req.body.id })
                 .populate("Customer")
                 .populate({
@@ -326,7 +326,7 @@ const pdfcreate = asyncHandler(async (req, res) => {
             </table>`)
         }
         else {
-            var filename = template.replace('template.html', 'Quatation.pdf')
+            var filename = template.replace('template.html', `Quatation_${req.body.id}.pdf`)
             let customerList = await Quatation.find({ is_deleted: false, _id: req.body.id })
                 .populate("Customer")
                 .populate({
