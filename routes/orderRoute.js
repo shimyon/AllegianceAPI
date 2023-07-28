@@ -18,6 +18,6 @@ router.post('/remove/:id', protect, removeOrder)
 router.post('/changeOrderStatus', protect, changeOrderStatus)
 router.get('/getAll', protect, getAllOrder)
 router.get('/getById/:id', protect, getOrderById)
-router.post('/pdfcreate/:id', pdfcreate)
+router.post('/pdfcreate', pdfcreate)
 
 module.exports = router

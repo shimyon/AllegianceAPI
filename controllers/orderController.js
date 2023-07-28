@@ -207,13 +207,13 @@ const getAllOrder = asyncHandler(async (req, res) => {
 })
 
 const pdfcreate = asyncHandler(async (req, res) => {
-    const data = await Template.findById(req.params.id)
+    const data = await Template.findById(req.body.template_id)
     try {
-        var template = path.join(__dirname, 'card.html')
-        var filename = template.replace('.html', '.pdf')
+        var template = path.join(__dirname, 'template.html')
         var templateHtml = fs.readFileSync(template, 'utf8')
         templateHtml = templateHtml.replace('{{Data}}', data.Detail)
         if (data.TemplateFor == 'Order') {
+        var filename = template.replace('template.html', 'Order.pdf')
             let customerList = await Order.find({ is_deleted: false, _id: req.body.id })
                 .populate("Customer")
                 .populate({
@@ -240,20 +240,32 @@ const pdfcreate = asyncHandler(async (req, res) => {
             templateHtml = templateHtml.replace('{{token.finalamount}}', customerList[0].TotalPrice)
             templateHtml = templateHtml.replace('{{token.finalamountword}}', converter.toWords(customerList[0].TotalPrice))
             templateHtml = templateHtml.replace('{{token.table}}', `<table border="1" style="width:100%">
-                <tbody>
-                    <tr>
-                        <<th>Item</th>
-                        <th>Qty</th>
-                        <th>Unit</th>
-                        <th>Rate (₹)</th>
-                        <th>CGST (%)</th>
-                        <th>SGST (%)</th>
-                        <th>Total (₹)</th>
-                    </tr>
-                </tbody>
+            <tbody>
+                <tr>
+                <th>Item</th>
+                <th>Qty</th>
+                <th>Unit</th>
+                <th>Rate (₹)</th>
+                <th>CGST</th>
+                <th>SGST</th>
+                <th>Total (₹)</th>
+                </tr>
+                ${customerList[0].Products.map((x, i) => (
+                `<tr>
+                <td>${x.Product?.Name}</td>
+                <td>${x.Quantity}</td>
+                <td>${x.Unit}</td>
+                <td>${x.Price}</td>
+                <td>${(x.Price*x.Quantity*x.CGST)/100} (${x.CGST}%)</td>
+                <td>${(x.Price*x.Quantity*x.SGST)/100} (${x.SGST}%)</td>
+                <td>${x.TotalAmount}</td>
+                </tr>`
+                ))}
+            </tbody>
             </table>`)
         }
         else if (data.TemplateFor == 'Invoice') {
+        var filename = template.replace('template.html', 'Invoice.pdf')
             let customerList = await Invoice.find({ is_deleted: false, _id: req.body.id })
                 .populate("Customer")
                 .populate({
@@ -291,18 +303,30 @@ const pdfcreate = asyncHandler(async (req, res) => {
             templateHtml = templateHtml.replace('{{token.table}}', `<table border="1" style="width:100%">
             <tbody>
                 <tr>
-                    <th>Item</th>
-                    <th>Qty</th>
-                    <th>Unit</th>
-                    <th>Rate (₹)</th>
-                    <th>CGST (%)</th>
-                    <th>SGST (%)</th>
-                    <th>Total (₹)</th>
+                <th>Item</th>
+                <th>Qty</th>
+                <th>Unit</th>
+                <th>Rate (₹)</th>
+                <th>CGST</th>
+                <th>SGST</th>
+                <th>Total (₹)</th>
                 </tr>
+                ${customerList[0].Products.map((x, i) => (
+                `<tr>
+                <td>${x.Product?.Name}</td>
+                <td>${x.Quantity}</td>
+                <td>${x.Unit}</td>
+                <td>${x.Price}</td>
+                <td>${(x.Price*x.Quantity*x.CGST)/100} (${x.CGST}%)</td>
+                <td>${(x.Price*x.Quantity*x.SGST)/100} (${x.SGST}%)</td>
+                <td>${x.TotalAmount}</td>
+                </tr>`
+                ))}
             </tbody>
-        </table>`)
+            </table>`)
         }
         else {
+            var filename = template.replace('template.html', 'Quatation.pdf')
             let customerList = await Quatation.find({ is_deleted: false, _id: req.body.id })
                 .populate("Customer")
                 .populate({
@@ -346,12 +370,23 @@ const pdfcreate = asyncHandler(async (req, res) => {
                 <th>Qty</th>
                 <th>Unit</th>
                 <th>Rate (₹)</th>
-                <th>CGST (%)</th>
-                <th>SGST (%)</th>
+                <th>CGST</th>
+                <th>SGST</th>
                 <th>Total (₹)</th>
                 </tr>
+                ${customerList[0].Products.map((x, i) => (
+                `<tr>
+                <td>${x.Product?.Name}</td>
+                <td>${x.Quantity}</td>
+                <td>${x.Unit}</td>
+                <td>${x.Price}</td>
+                <td>${(x.Price*x.Quantity*x.CGST)/100} (${x.CGST}%)</td>
+                <td>${(x.Price*x.Quantity*x.SGST)/100} (${x.SGST}%)</td>
+                <td>${x.TotalAmount}</td>
+                </tr>`
+                ))}
             </tbody>
-        </table>`)
+            </table>`)
         }
         pdf
             .create(templateHtml)
