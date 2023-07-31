@@ -209,12 +209,12 @@ const getAllOrder = asyncHandler(async (req, res) => {
 const pdfcreate = asyncHandler(async (req, res) => {
     const data = await Template.findById(req.body.template_id)
     try {
-        var template = path.join(__dirname, 'template.html')
+        var template = path.join(__dirname, '..', 'public', 'template.html')
         var templateHtml = fs.readFileSync(template, 'utf8')
         templateHtml = templateHtml.replace('{{Data}}', data.Detail)
+        var filename = template.replace('template.html', `Print.pdf`)
         if (data.TemplateFor == 'Order') {
-        var filename = template.replace('template.html', `Order_${req.body.id}.pdf`)
-            let customerList = await Order.find({ is_deleted: false, _id: req.body.id })
+           let customerList = await Order.find({ is_deleted: false, _id: req.body.id })
                 .populate("Customer")
                 .populate({
                     path: 'Products',
@@ -256,16 +256,15 @@ const pdfcreate = asyncHandler(async (req, res) => {
                 <td>${x.Quantity}</td>
                 <td>${x.Unit}</td>
                 <td>${x.Price}</td>
-                <td>${(x.Price*x.Quantity*x.CGST)/100} (${x.CGST}%)</td>
-                <td>${(x.Price*x.Quantity*x.SGST)/100} (${x.SGST}%)</td>
+                <td>${(x.Price * x.Quantity * x.CGST) / 100} (${x.CGST}%)</td>
+                <td>${(x.Price * x.Quantity * x.SGST) / 100} (${x.SGST}%)</td>
                 <td>${x.TotalAmount}</td>
                 </tr>`
-                ))}
+            ))}
             </tbody>
             </table>`)
         }
         else if (data.TemplateFor == 'Invoice') {
-        var filename = template.replace('template.html', `Invoice_${req.body.id}.pdf`)
             let customerList = await Invoice.find({ is_deleted: false, _id: req.body.id })
                 .populate("Customer")
                 .populate({
@@ -317,16 +316,15 @@ const pdfcreate = asyncHandler(async (req, res) => {
                 <td>${x.Quantity}</td>
                 <td>${x.Unit}</td>
                 <td>${x.Price}</td>
-                <td>${(x.Price*x.Quantity*x.CGST)/100} (${x.CGST}%)</td>
-                <td>${(x.Price*x.Quantity*x.SGST)/100} (${x.SGST}%)</td>
+                <td>${(x.Price * x.Quantity * x.CGST) / 100} (${x.CGST}%)</td>
+                <td>${(x.Price * x.Quantity * x.SGST) / 100} (${x.SGST}%)</td>
                 <td>${x.TotalAmount}</td>
                 </tr>`
-                ))}
+            ))}
             </tbody>
             </table>`)
         }
         else {
-            var filename = template.replace('template.html', `Quatation_${req.body.id}.pdf`)
             let customerList = await Quatation.find({ is_deleted: false, _id: req.body.id })
                 .populate("Customer")
                 .populate({
@@ -380,22 +378,24 @@ const pdfcreate = asyncHandler(async (req, res) => {
                 <td>${x.Quantity}</td>
                 <td>${x.Unit}</td>
                 <td>${x.Price}</td>
-                <td>${(x.Price*x.Quantity*x.CGST)/100} (${x.CGST}%)</td>
-                <td>${(x.Price*x.Quantity*x.SGST)/100} (${x.SGST}%)</td>
+                <td>${(x.Price * x.Quantity * x.CGST) / 100} (${x.CGST}%)</td>
+                <td>${(x.Price * x.Quantity * x.SGST) / 100} (${x.SGST}%)</td>
                 <td>${x.TotalAmount}</td>
                 </tr>`
-                ))}
+            ))}
             </tbody>
             </table>`)
         }
-        pdf
-            .create(templateHtml)
-            .toFile(filename, function (err, pdf) {
-                return res.status(400).json({
-                    error: err,
-                    data: pdf.filename,
-                });
-            })
+
+        pdf.create(templateHtml).toFile(filename, (err,resf) => {
+            const base64data = Buffer.from(templateHtml, 'binary')
+        });
+        var file = fs.createReadStream(filename);
+        var stat = fs.statSync(filename);
+        res.setHeader('Content-Length', stat.size);
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', 'attachment; filename=Print.pdf');
+        file.pipe(res);
     } catch (err) {
         return res.status(400).json({
             success: false,
