@@ -17,6 +17,8 @@ const {
     getUnits,
     getUnitById,
     getExecutive,
+    getWorker,
+    getProjectManager,
     changeSourceStatus,
     addCategory,
     editCategory,
@@ -32,6 +34,8 @@ const {
 const { protect } = require('../middleware/authMiddleware')
 
 router.get('/getExecutive', protect, getExecutive)
+router.get('/getWorker', protect, getWorker)
+router.get('/getProjectManager', protect, getProjectManager)
 
 router.post('/addProduct', protect, addProduct)
 router.post('/editProduct', protect, editProduct)

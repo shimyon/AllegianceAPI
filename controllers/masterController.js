@@ -250,7 +250,36 @@ const getExecutive = asyncHandler(async (req, res) => {
         return res.status(400).json(response);
     }
 })
+const getProjectManager = asyncHandler(async (req, res) => {
+    let response = new Response();
 
+    try {
+        let sources = await User.find({ is_active: true, role: "projectmanager" });
+
+        response.success = true;
+        response.data = sources;
+        return res.status(200).json(response);
+    }
+    catch (err) {
+        response.message = "Error in getting project manager. " + err.message;
+        return res.status(400).json(response);
+    }
+})
+const getWorker = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let sources = await User.find({ is_active: true, role: "worker" });
+
+        response.success = true;
+        response.data = sources;
+        return res.status(200).json(response);
+    }
+    catch (err) {
+        response.message = "Error in getting worker. " + err.message;
+        return res.status(400).json(response);
+    }
+})
 const addUnit = asyncHandler(async (req, res) => {
     let response = new Response();
 
@@ -584,6 +613,8 @@ module.exports = {
     getUnits,
     getUnitById,
     getExecutive,
+    getWorker,
+    getProjectManager,
     addCategory,
     editCategory,
     changeCategoryStatus,
