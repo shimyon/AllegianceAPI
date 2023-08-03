@@ -35,6 +35,7 @@ const insertContract = asyncHandler(async (req, res, fileName) => {
             Customer: req.body.customer,
             Name: req.body.name,
             ContractNo: req.body.contracNo,
+            executive: req.body.executive,
             StartDate: req.body.startDate,
             ExpiryDate: req.body.expiryDate,
             Type: req.body.type,
@@ -95,6 +96,7 @@ const insertEditContract = asyncHandler(async (req, res, fileName) => {
             Name: req.body.name,
             ContractNo: req.body.contracNo,
             StartDate: req.body.startDate,
+            executive: req.body.executive,
             ExpiryDate: req.body.expiryDate,
             Type: req.body.type,
             Item: req.body.item,
@@ -122,7 +124,7 @@ const insertEditContract = asyncHandler(async (req, res, fileName) => {
 
 const getAllContract = asyncHandler(async (req, res) => {
     try {
-        let ContractList = await Contract.find({ is_active: req.body.active }).populate("Process").populate("Customer").populate("addedBy", "_id name email role")
+        let ContractList = await Contract.find({ is_active: req.body.active }).populate("Process").populate("executive").populate("Customer").populate("addedBy", "_id name email role")
         return res.status(200).json({
             success: true,
             data: ContractList
@@ -139,7 +141,7 @@ const getAllContract = asyncHandler(async (req, res) => {
 
 const getContractById = asyncHandler(async (req, res) => {
     try {
-        let ContractList = await Contract.find({ _id: req.params.id }).populate("Process").populate("Customer").populate("addedBy", "_id name email role");
+        let ContractList = await Contract.find({ _id: req.params.id }).populate("Process").populate("executive").populate("Customer").populate("addedBy", "_id name email role");
         return res.status(200).json({
             success: true,
             data: ContractList
@@ -348,6 +350,7 @@ const updateProcess = asyncHandler(async (req, res) => {
 const addDailyStatus = asyncHandler(async (req, res) => {
     try {
         let oldSubProcess= await SubProcess.findById(req.body.subProcessId);
+        let oldProcess= await Process.findById(oldSubProcess.processId);
 
         if(!oldSubProcess){
             return res.status(400).json({
@@ -370,17 +373,32 @@ const addDailyStatus = asyncHandler(async (req, res) => {
         });
 
         let exProcess= await SubProcess.find({processId:oldSubProcess.processId});
+        let contract= await Process.find({contractId:oldProcess.contractId});
         let tProgress=0;
+        let cProgress=0;
         let totalProgress= 100*exProcess.length; 
+        let totalcontract= 100*contract.length; 
         for(var i=0; i<exProcess.length; i++)
         {
             var pro= exProcess[i]._id==req.body.subProcessId? parseInt( req.body.progress):exProcess[i].progress;
             tProgress+= pro;
         }
+        for(var i=0; i<contract.length; i++)
+        {
+            var cpro= contract[i]._id==oldProcess.contractId? parseInt( req.body.progress):contract[i].progress;
+            cProgress+= cpro;
+        }
         if(tProgress >0)
         {
             let percent= (tProgress*100)/totalProgress;
             await Process.findByIdAndUpdate(oldSubProcess.processId,{
+                progress:percent
+            })
+        }
+        if(cProgress >0)
+        {
+            let percent= (cProgress*100)/totalcontract;
+            await Contract.findByIdAndUpdate(oldProcess.contractId,{
                 progress:percent
             })
         }

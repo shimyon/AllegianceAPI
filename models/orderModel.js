@@ -45,7 +45,7 @@ const orderSchema = mongoose.Schema(
         DeliveryDate: {
             type: Date
         },
-        Executive: {
+        Sales: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User'
         },

@@ -28,7 +28,7 @@ const addInvoice = asyncHandler(async (req, res) => {
             TotalPrice: req.body.totalPrice,
             InvoiceDate: new Date(),
             DeliveryDate: req.body.deliveryDate,
-            Executive: req.body.executive,
+            Sales: req.body.sales,
             Note: req.body.note,
             addedBy: req.user._id,
             is_deleted: false
@@ -127,7 +127,7 @@ const createOrderInvoice = asyncHandler(async (req, res) => {
             TotalTax: orderDetail.TotalTax,
             TotalPrice: orderDetail.TotalPrice,
             InvoiceDate: new Date(),
-            Executive: orderDetail.Executive,
+            Sales: orderDetail.Sales,
             Note: orderDetail.Note,
             addedBy: req.user._id,
             is_deleted: false
@@ -195,7 +195,7 @@ const editInvoice = asyncHandler(async (req, res) => {
             TotalTax: req.body.totalTax,
             TotalPrice: req.body.totalPrice,
             DeliveryDate: req.body.deliveryDate,
-            Executive: req.body.executive,
+            Sales: req.body.sales,
             TermsAndCondition: req.body.termsCondition,
             InvoiceDate: req.body.invoiceDate,
             Note: req.body.note
@@ -317,7 +317,7 @@ const getAllInvoice = asyncHandler(async (req, res) => {
             .populate("ShippingAddress")
             .populate("BillingAddress")
             .populate("TermsAndCondition")
-            .populate("Executive", 'name email')
+            .populate("Sales", 'name email')
             .populate("addedBy", 'name email')
 
         return res.status(200).json({
@@ -346,7 +346,7 @@ const getInvoiceById = asyncHandler(async (req, res) => {
             .populate("ShippingAddress")
             .populate("BillingAddress")
             .populate("TermsAndCondition")
-            .populate("Executive", 'name email')
+            .populate("Sales", 'name email')
             .populate("addedBy", 'name email')
 
         return res.status(200).json({

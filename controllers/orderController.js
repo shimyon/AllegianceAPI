@@ -34,7 +34,7 @@ const addOrder = asyncHandler(async (req, res) => {
             TotalPrice: req.body.totalPrice,
             OrderDate: new Date(),
             DeliveryDate: req.body.deliveryDate,
-            Executive: req.body.executive,
+            Sales: req.body.sales,
             Note: req.body.note,
             addedBy: req.user._id,
             is_deleted: false
@@ -98,7 +98,7 @@ const editOrder = asyncHandler(async (req, res) => {
             TotalTax: req.body.totalTax,
             TotalPrice: req.body.totalPrice,
             DeliveryDate: req.body.deliveryDate,
-            Executive: req.body.executive,
+            Sales: req.body.sales,
             Note: req.body.note
         });
 
@@ -190,7 +190,7 @@ const getAllOrder = asyncHandler(async (req, res) => {
             })
             .populate("ShippingAddress")
             .populate("BillingAddress")
-            .populate("Executive", 'name email')
+            .populate("Sales", 'name email')
             .populate("addedBy", 'name email')
 
         return res.status(200).json({
@@ -224,7 +224,7 @@ const pdfcreate = asyncHandler(async (req, res) => {
                 })
                 .populate("ShippingAddress")
                 .populate("BillingAddress")
-                .populate("Executive", 'name email')
+                .populate("Sales", 'name email')
                 .populate("addedBy", 'name email')
             templateHtml = templateHtml.replace('{{Data}}', data.Detail)
             templateHtml = templateHtml.replace('{{token.company}}', customerList[0].Customer?.Company)
@@ -418,7 +418,7 @@ const getOrderById = asyncHandler(async (req, res) => {
             })
             .populate("ShippingAddress")
             .populate("BillingAddress")
-            .populate("Executive", 'name email')
+            .populate("Sales", 'name email')
             .populate("addedBy", 'name email')
 
         return res.status(200).json({

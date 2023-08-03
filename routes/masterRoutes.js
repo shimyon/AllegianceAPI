@@ -16,9 +16,8 @@ const {
     changeUnitStatus,
     getUnits,
     getUnitById,
-    getExecutive,
-    getWorker,
-    getProjectManager,
+    getSales,
+    getProjectrole,
     changeSourceStatus,
     addCategory,
     editCategory,
@@ -33,9 +32,8 @@ const {
  } = require('../controllers/masterController')
 const { protect } = require('../middleware/authMiddleware')
 
-router.get('/getExecutive', protect, getExecutive)
-router.get('/getWorker', protect, getWorker)
-router.get('/getProjectManager', protect, getProjectManager)
+router.get('/getSales', protect, getSales)
+router.get('/getProjectrole', protect, getProjectrole)
 
 router.post('/addProduct', protect, addProduct)
 router.post('/editProduct', protect, editProduct)

@@ -50,7 +50,7 @@ const supportSchema = mongoose.Schema(
         {
             type:String
         },
-        Executive: {
+        Sales: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User'
         },

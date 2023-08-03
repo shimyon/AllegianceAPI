@@ -18,7 +18,7 @@ const quatationSchema = mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'BillingAddress'
         },
-        SalesExecutive: {
+        Sales: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User'
         },

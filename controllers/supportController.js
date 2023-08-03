@@ -14,7 +14,7 @@ const addSupport = asyncHandler(async (req, res) => {
             DueDate: req.body.dueDate,
             Note: req.body.note,
             Status: "Pending",
-            Executive: req.body.executive,
+            Sales: req.body.sales,
             Products: req.body.product,
             addedBy: req.user._id
         });
@@ -50,7 +50,7 @@ const editSupport = asyncHandler(async (req, res) => {
             TicketDate: req.body.ticketDate,
             DueDate: req.body.dueDate,
             Note: req.body.note,
-            Executive: req.body.executive,
+            Sales: req.body.sales,
             Products: req.body.product,
         });
         return res.status(200).json({
@@ -66,8 +66,13 @@ const editSupport = asyncHandler(async (req, res) => {
 })
 
 const getAllSupport = asyncHandler(async (req, res) => {
+    var condition = { is_active: req.body.active };
+    if(req.body.sales)
+    {
+        condition.Sales=req.body.sales;
+    }
     try {
-        let SupportList = await Support.find({ is_active: req.body.active }).populate("Customer").populate("Executive").populate("Products").populate("addedBy", "_id name email role")
+        let SupportList = await Support.find(condition).populate("Customer").populate("Sales").populate("Products").populate("addedBy", "_id name email role")
         return res.status(200).json({
             success: true,
             data: SupportList
@@ -84,7 +89,7 @@ const getAllSupport = asyncHandler(async (req, res) => {
 
 const getSupportById = asyncHandler(async (req, res) => {
     try {
-        let SupportList = await Support.find({ _id: req.params.id }).populate("Customer").populate("Executive").populate("Products").populate("addedBy", "_id name email role");
+        let SupportList = await Support.find({ _id: req.params.id }).populate("Customer").populate("Sales").populate("Products").populate("addedBy", "_id name email role");
         return res.status(200).json({
             success: true,
             data: SupportList

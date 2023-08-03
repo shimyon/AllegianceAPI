@@ -31,7 +31,7 @@ const addProspect = asyncHandler(async (req, res) => {
             Notes: req.body.notes,
             ProspectAmount: req.body.prospectAmount,
             OrderTarget: req.body.orderTarget,
-            Executive: req.body.executive,
+            Sales: req.body.sales,
             addedBy: req.user._id,
             Stage: req.body.stage,
             Requirements: req.body.requirements,
@@ -80,7 +80,7 @@ const editProspect = asyncHandler(async (req, res) => {
             Notes: req.body.notes,
             ProspectAmount: req.body.prospectAmount,
             OrderTarget: req.body.orderTarget,
-            Executive: req.body.executive,
+            Sales: req.body.sales,
             addedBy: req.user._id,
             Stage: req.body.stage,
             Source: req.body.source,
@@ -139,8 +139,8 @@ const getAllProspect = asyncHandler(async (req, res) => {
     try {
         var condition = { is_active: req.body.active };
         var cDate = new Date();
-        if (req.body.executive) {
-            condition.Executive = req.body.executive;
+        if (req.body.sales) {
+            condition.Sales = req.body.sales;
         }
         if (req.body.source) {
             condition.Source = req.body.source;
@@ -173,7 +173,7 @@ const getAllProspect = asyncHandler(async (req, res) => {
                     path: "user",
                     select: "_id name email role"
                 }
-            }).populate("Product").populate("OtherContact").populate("Executive").populate("Source").populate("addedBy", "_id name email role")
+            }).populate("Product").populate("OtherContact").populate("Sales").populate("Source").populate("addedBy", "_id name email role")
             .exec((err, result) => {
                 if (err) {
                     return res.status(400).json({
@@ -258,7 +258,7 @@ const getProspectById = asyncHandler(async (req, res) => {
                     path: "user",
                     select: "_id name email role"
                 }
-            }).populate("Product").populate("OtherContact").populate("Executive").populate("Source").populate("addedBy", "_id name email role")
+            }).populate("Product").populate("OtherContact").populate("Sales").populate("Source").populate("addedBy", "_id name email role")
         return res.status(200).json({
             success: true,
             data: prospectList

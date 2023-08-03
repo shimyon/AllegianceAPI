@@ -46,7 +46,7 @@ const invoiceSchema = mongoose.Schema(
         InvoiceDate: {
             type: Date
         },
-        Executive: {
+        Sales: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User'
         },

@@ -41,7 +41,7 @@ const addLead = asyncHandler(async (req, res) => {
             InCharge: req.body.incharge,
             NextTalkon: req.body.nextTalkOn,
             NextTalkNotes: req.body.nextTalkNotes,
-            Executive: req.body.executive,
+            Sales: req.body.sales,
             addedBy: req.user._id,
             Stage: "New",
             LeadSince: new Date(),
@@ -85,7 +85,7 @@ const editLead = asyncHandler(async (req, res) => {
             Source: req.body.source,
             Product: req.body.product,
             Requirements: req.body.requirements,
-            Executive: req.body.executive,
+            Sales: req.body.sales,
             Notes: req.body.notes,
             InCharge: req.body.incharge,
             is_active: true
@@ -148,8 +148,8 @@ const getAllLead = asyncHandler(async (req, res) => {
         condition.Source = req.body.source;
     }
 
-    if (req.body.executive) {
-        condition.Executive = req.body.executive;
+    if (req.body.sales) {
+        condition.Sales = req.body.sales;
     }
 
     if (req.body.product) {
@@ -199,7 +199,7 @@ const getAllLead = asyncHandler(async (req, res) => {
     }
 
     try {
-        let leadList = await Lead.find(condition).populate("Source").populate("OtherContact").populate("Product").populate("Executive").populate("Interaction").populate("NextTalk").populate("addedBy")
+        let leadList = await Lead.find(condition).populate("Source").populate("OtherContact").populate("Product").populate("Sales").populate("Interaction").populate("NextTalk").populate("addedBy")
             .exec((err, result) => {
                 var newResult = [];
                 result.forEach((val, idx) => {
@@ -254,7 +254,7 @@ const getAllLead = asyncHandler(async (req, res) => {
 
 const getLeadById = asyncHandler(async (req, res) => {
     try {
-        let leadList = await Lead.find({ Stage: "New", _id: req.params.id }).populate("Source").populate("OtherContact").populate("Product").populate("Executive").populate("Interaction").populate("NextTalk").populate("addedBy")
+        let leadList = await Lead.find({ Stage: "New", _id: req.params.id }).populate("Source").populate("OtherContact").populate("Product").populate("Sales").populate("Interaction").populate("NextTalk").populate("addedBy")
         return res.status(200).json({
             success: true,
             data: leadList
@@ -365,25 +365,6 @@ const addInteraction = asyncHandler(async (req, res) => {
 
 });
 
-const assignExecutive = asyncHandler(async (req, res) => {
-    try {
-        let leadExisting = await Lead.findByIdAndUpdate(req.body.id, {
-            Executive: req.body.executive
-        });
-        return res.status(200).json({
-            success: true,
-            msg: "Executive assigned successfully",
-        }).end();
-    } catch (err) {
-        return res.status(400).json({
-            success: false,
-            msg: "Error in adding data. " + err.message,
-            data: null,
-        });
-    }
-
-});
-
 const moveToProspect = asyncHandler(async (req, res) => {
     try {
         let leadExisting = await Lead.findById(req.params.id);
@@ -411,7 +392,7 @@ const moveToProspect = asyncHandler(async (req, res) => {
             Country: leadExisting.Country,
             Product: leadExisting.Product,
             Notes: leadExisting.Notes,
-            Executive: leadExisting.Executive,
+            Sales: leadExisting.Sales,
             Source:leadExisting.Source,
             Requirements: leadExisting.Requirements,
             addedBy: req.user._id,
@@ -555,7 +536,6 @@ module.exports = {
     getLeadById,
     addNext,
     addInteraction,
-    assignExecutive,
     moveToProspect,
     importExcel,
     setAsFavorite,

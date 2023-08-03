@@ -231,8 +231,8 @@ const getDashboardCount = asyncHandler(async (req, res) => {
         else {
             dashboardCount.leadCount = await Lead.find({is_active:true,addedBy:req.user._id,Stage: "New"}).count({});
             dashboardCount.prospectCount = await Prospect.find({is_active:true,addedBy:req.user._id}).count({});
-            dashboardCount.processCount = await Contract.find({is_active:true,"Process.executive":req.user._id}).count({});
-            dashboardCount.supportCount = await Support.find({is_active:true,$or:[{addedBy:req.user._id},{Executive:req.user._id}]}).count({});
+            dashboardCount.processCount = await Contract.find({is_active:true,"Process.sales":req.user._id}).count({});
+            dashboardCount.supportCount = await Support.find({is_active:true,$or:[{addedBy:req.user._id},{Sales:req.user._id}]}).count({});
         }
 
         return res.status(200).json({

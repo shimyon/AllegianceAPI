@@ -12,7 +12,7 @@ const addQuatation = asyncHandler(async (req, res) => {
             ShippingAddress: req.body.shippingAddress,
             BillingAddress: req.body.billingAddress,
             Status: "New",
-            SalesExecutive: req.body.executive,
+            Sales: req.body.sales,
             addedBy: req.user._id,
             Amount: req.body.amount,
             CGST: req.body.CGST,
@@ -95,7 +95,7 @@ const editQuatation = asyncHandler(async (req, res) => {
             Customer: req.body.customer,
             ShippingAddress: req.body.shippingAddress,
             BillingAddress: req.body.billingAddress,
-            SalesExecutive: req.body.executive,
+            Sales: req.body.sales,
             addedBy: req.user._id,
             Amount: req.body.amount,
             CGST: req.body.CGST,
@@ -223,7 +223,7 @@ const getAllQuatation = asyncHandler(async (req, res) => {
             .populate("ShippingAddress")
             .populate("TermsAndCondition")
             .populate("BillingAddress")
-            .populate("SalesExecutive", 'name email')
+            .populate("Sales", 'name email')
             .populate("addedBy", 'name email')
 
         return res.status(200).json({
@@ -252,7 +252,7 @@ const getCustomerById = asyncHandler(async (req, res) => {
             .populate("ShippingAddress")
             .populate("BillingAddress")
             .populate("TermsAndCondition")
-            .populate("SalesExecutive", 'name email')
+            .populate("Sales", 'name email')
             .populate("addedBy", 'name email')
 
         return res.status(200).json({

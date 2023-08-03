@@ -6,18 +6,25 @@ const contractSchema = mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Customers'
         },
-        Name:{
+        Name: {
             type: String
         },
-        Process:[{
+        Process: [{
             type: mongoose.Schema.Types.ObjectId,
             ref: 'ContractProcess'
         }],
+        executive: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        },
         ContractNo: {
             type: String
         },
         StartDate: {
             type: Date
+        },
+        progress: {
+            type: Number
         },
         ExpiryDate: {
             type: Date
@@ -59,7 +66,7 @@ const contractProcessSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Contracts'
     },
-    Name:{
+    Name: {
         type: String
     },
     executive: {
@@ -70,26 +77,26 @@ const contractProcessSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'ContractSubProcess'
     }],
-    status:{
-        type:String
+    status: {
+        type: String
     },
-    progress:{
-        type:Number
+    progress: {
+        type: Number
     },
-    note:{
-        type:String
+    note: {
+        type: String
     },
-    startDate:{
+    startDate: {
         type: Date
     },
-    dueDate:{
+    dueDate: {
         type: Date
     },
     addedBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     }
-},{
+}, {
     timestamps: true,
 })
 
@@ -98,7 +105,7 @@ const contractSubProcessSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'ContractProcess'
     },
-    Name:{
+    Name: {
         type: String
     },
     executive: {
@@ -109,26 +116,26 @@ const contractSubProcessSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'ProcessDailyStatus'
     }],
-    status:{
-        type:String
+    status: {
+        type: String
     },
-    progress:{
-        type:Number
+    progress: {
+        type: Number
     },
-    note:{
-        type:String
+    note: {
+        type: String
     },
-    startDate:{
+    startDate: {
         type: Date
     },
-    dueDate:{
+    dueDate: {
         type: Date
     },
     addedBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     }
-},{
+}, {
     timestamps: true,
 })
 
@@ -137,23 +144,23 @@ const processDailyStatusSchema = mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'ContractSubProcess'
     },
-    status:{
-        type:String
+    status: {
+        type: String
     },
-    note:{
-        type:String
+    note: {
+        type: String
     },
-    progress:{
-        type:Number
+    progress: {
+        type: Number
     },
     addedBy: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     },
-    statusDate:{
+    statusDate: {
         type: Date
     }
-},{
+}, {
     timestamps: true,
 })
 
@@ -170,4 +177,4 @@ const syncIndex = async () => {
 }
 syncIndex();
 
-module.exports = { ContractModal, ContractProcess, ProcessDailyStatus ,ContractSubProcess};
+module.exports = { ContractModal, ContractProcess, ProcessDailyStatus, ContractSubProcess };

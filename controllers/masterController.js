@@ -235,26 +235,26 @@ const getSourceById = asyncHandler(async (req, res) => {
     }
 })
 
-const getExecutive = asyncHandler(async (req, res) => {
+const getSales = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let sources = await User.find({ is_active: true, role: "executive" });
+        let sources = await User.find({ is_active: true, role: "Sales" });
 
         response.success = true;
         response.data = sources;
         return res.status(200).json(response);
     }
     catch (err) {
-        response.message = "Error in getting executive. " + err.message;
+        response.message = "Error in getting Sales. " + err.message;
         return res.status(400).json(response);
     }
 })
-const getProjectManager = asyncHandler(async (req, res) => {
+const getProjectrole = asyncHandler(async (req, res) => {
     let response = new Response();
-
+    var condition = ["Project Manager","Worker","Sales"]
     try {
-        let sources = await User.find({ is_active: true, role: "projectmanager" });
+        let sources = await User.find({is_active: true,role:condition});
 
         response.success = true;
         response.data = sources;
@@ -262,21 +262,6 @@ const getProjectManager = asyncHandler(async (req, res) => {
     }
     catch (err) {
         response.message = "Error in getting project manager. " + err.message;
-        return res.status(400).json(response);
-    }
-})
-const getWorker = asyncHandler(async (req, res) => {
-    let response = new Response();
-
-    try {
-        let sources = await User.find({ is_active: true, role: "worker" });
-
-        response.success = true;
-        response.data = sources;
-        return res.status(200).json(response);
-    }
-    catch (err) {
-        response.message = "Error in getting worker. " + err.message;
         return res.status(400).json(response);
     }
 })
@@ -612,9 +597,8 @@ module.exports = {
     changeUnitStatus,
     getUnits,
     getUnitById,
-    getExecutive,
-    getWorker,
-    getProjectManager,
+    getSales,
+    getProjectrole,
     addCategory,
     editCategory,
     changeCategoryStatus,

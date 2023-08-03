@@ -46,7 +46,7 @@ const leadSchema = mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Products'
         },
-        Executive: {
+        Sales: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User'
         },
