@@ -8,6 +8,7 @@ const addRecovery = asyncHandler(async (req, res) => {
             Amount: req.body.amount,
             Reminder: req.body.reminder,
             Note: req.body.note,
+            Status: "In Complete",
             is_active: true,
             addedBy: req.user._id,
 
@@ -54,9 +55,39 @@ const editRecovery = asyncHandler(async (req, res) => {
     }
 })
 
-const getAllRecovery = asyncHandler(async (req, res) => {
+const complateRecovery = asyncHandler(async (req, res) => {
     try {
-        let RecoveryList = await Recovery.find({ is_active: req.body.active }).populate("Customer").populate("addedBy", "_id name email role")
+        var existing = await Recovery.findById(req.params.id);
+        if (!existing) {
+            return res.status(400).json({
+                success: false,
+                msg: "Recovery not found. " + err.message,
+            });
+
+        }
+        await Recovery.findByIdAndUpdate(req.params.id, {
+            Status: "Completed",
+        });
+        return res.status(200).json({
+            success: true,
+            msg: "Recovery updated successfully"
+        });
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in updating Recovery. " + err.message
+        });
+    }
+})
+
+const getAllRecovery = asyncHandler(async (req, res) => {
+    var condition = { is_active: req.body.active };
+    if(req.body.status)
+    {
+        condition.Status=req.body.status;
+    }
+    try {
+        let RecoveryList = await Recovery.find(condition).populate("Customer").populate("addedBy", "_id name email role")
         return res.status(200).json({
             success: true,
             data: RecoveryList
@@ -122,5 +153,6 @@ module.exports = {
     getAllRecovery,
     getRecoveryById,
     removeRecovery,
-    editRecovery
+    editRecovery,
+    complateRecovery
 }
