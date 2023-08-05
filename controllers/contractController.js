@@ -349,10 +349,10 @@ const updateProcess = asyncHandler(async (req, res) => {
 
 const addDailyStatus = asyncHandler(async (req, res) => {
     try {
-        let oldSubProcess= await SubProcess.findById(req.body.subProcessId);
-        let oldProcess= await Process.findById(oldSubProcess.processId);
+        let oldSubProcess = await SubProcess.findById(req.body.subProcessId);
+        let oldProcess = await Process.findById(oldSubProcess.processId);
 
-        if(!oldSubProcess){
+        if (!oldSubProcess) {
             return res.status(400).json({
                 success: false,
                 msg: "Sub process not found"
@@ -372,34 +372,30 @@ const addDailyStatus = asyncHandler(async (req, res) => {
             if (err) throw err;
         });
 
-        let exProcess= await SubProcess.find({processId:oldSubProcess.processId});
-        let contract= await Process.find({contractId:oldProcess.contractId});
-        let tProgress=0;
-        let cProgress=0;
-        let totalProgress= 100*exProcess.length; 
-        let totalcontract= 100*contract.length; 
-        for(var i=0; i<exProcess.length; i++)
-        {
-            var pro= exProcess[i]._id==req.body.subProcessId? parseInt( req.body.progress):exProcess[i].progress;
-            tProgress+= pro;
+        let exProcess = await SubProcess.find({ processId: oldSubProcess.processId });
+        let contract = await Process.find({ contractId: oldProcess.contractId });
+        let tProgress = 0;
+        let cProgress = 0;
+        let totalProgress = 100 * exProcess.length;
+        let totalcontract = 100 * contract.length;
+        for (var i = 0; i < exProcess.length; i++) {
+            var pro = exProcess[i]._id == req.body.subProcessId ? parseInt(req.body.progress) : exProcess[i].progress;
+            tProgress += pro;
         }
-        for(var i=0; i<contract.length; i++)
-        {
-            var cpro= contract[i]._id==oldProcess.contractId? parseInt( req.body.progress):contract[i].progress;
-            cProgress+= cpro;
+        for (var i = 0; i < contract.length; i++) {
+            var cro = contract[i]._id == oldProcess.id ? parseInt(req.body.progress) : contract[i].progress;
+            cProgress += cpro;
         }
-        if(tProgress >0)
-        {
-            let percent= (tProgress*100)/totalProgress;
-            await Process.findByIdAndUpdate(oldSubProcess.processId,{
-                progress:percent
+        if (tProgress > 0) {
+            let percent = (tProgress * 100) / totalProgress;
+            await Process.findByIdAndUpdate(oldSubProcess.processId, {
+                progress: percent
             })
         }
-        if(cProgress >0)
-        {
-            let percent= (cProgress*100)/totalcontract;
-            await Contract.findByIdAndUpdate(oldProcess.contractId,{
-                progress:percent
+        if (cProgress > 0) {
+            let percent = (cProgress * 100) / totalcontract;
+            await Contract.findByIdAndUpdate(oldProcess.contractId, {
+                progress: percent
             })
         }
 
@@ -421,8 +417,7 @@ const addDailyStatus = asyncHandler(async (req, res) => {
 const addSubProcess = asyncHandler(async (req, res) => {
     try {
         var oldProcess = await Process.findById(req.body.processId);
-        if(!oldProcess._id)
-        {
+        if (!oldProcess._id) {
             return res.status(400).json({
                 success: false,
                 msg: "Process not found. "
@@ -487,7 +482,7 @@ const editSubProcess = asyncHandler(async (req, res) => {
 
 const getSubAllProcess = asyncHandler(async (req, res) => {
     try {
-        let ProcessList = await SubProcess.find({ processId: req.body.processId }).populate( "dailyStatus").populate("executive").populate("addedBy", "_id name email role")
+        let ProcessList = await SubProcess.find({ processId: req.body.processId }).populate("dailyStatus").populate("executive").populate("addedBy", "_id name email role")
         return res.status(200).json({
             success: true,
             data: ProcessList

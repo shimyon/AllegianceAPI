@@ -3,6 +3,9 @@ const QuatationModal = require('../models/quatationModel')
 const Quatation = QuatationModal.QuatationModal
 const QuatationProduct = QuatationModal.QuatationProductModal
 const QuatationTermsandCondition = QuatationModal.QuatationTermsandCondition
+const OrderModal = require('../models/orderModel')
+const Order = OrderModal.OrderModal
+const OrderProduct = OrderModal.OrderProductModal
 
 const addQuatation = asyncHandler(async (req, res) => {
     try {
@@ -12,6 +15,7 @@ const addQuatation = asyncHandler(async (req, res) => {
             ShippingAddress: req.body.shippingAddress,
             BillingAddress: req.body.billingAddress,
             Status: "New",
+            Stage: "New",
             Sales: req.body.sales,
             addedBy: req.user._id,
             Amount: req.body.amount,
@@ -293,12 +297,94 @@ const changeQuatationStatus = asyncHandler(async (req, res) => {
         });
     }
 })
+const moveToOrder = asyncHandler(async (req, res) => {
+    try {
+        let quatationExisting = await Quatation.findById(req.params.id).populate("Customer")
+            .populate({
+                path: 'Products',
+                populate: {
+                    path: 'Product',
+                }
+            })
+            .populate("ShippingAddress")
+            .populate("TermsAndCondition")
+            .populate("BillingAddress")
+            .populate("Sales", 'name email')
+            .populate("addedBy", 'name email')
 
+        if (quatationExisting.Stage == "Order") {
+            return res.status(400).json({
+                success: false,
+                msg: "Quatation already moved to Order. "
+            });
+        }
+
+        await Quatation.findByIdAndUpdate(req.params.id, {
+            Stage: "Order",
+        });
+        const newOrder = await Order.create({
+            Customer: quatationExisting.Customer,
+            ShippingAddress: quatationExisting.ShippingAddress,
+            BillingAddress: quatationExisting.BillingAddress,
+            Status: "New",
+            Stage: "New",
+            Amount: quatationExisting.Amount,
+            CGST: quatationExisting.CGST,
+            SGST: quatationExisting.SGST,
+            Discount: quatationExisting.Discount,
+            TotalTax: quatationExisting.TotalTax,
+            TotalPrice: quatationExisting.TotalPrice,
+            OrderDate: new Date(),
+            // DeliveryDate: quatationExisting.DeliveryDate,
+            Sales: quatationExisting.Sales,
+            Note: quatationExisting.Note,
+            addedBy: req.user._id,
+            is_deleted: false
+        });
+        var products = [];
+        for (var i = 0; i < quatationExisting.Products.length; i++) {
+            var pr = quatationExisting.Products[i];
+            var newPr = {
+                OrderId: newOrder._id.toString(),
+                Product: pr.Product._id,
+                Quantity: pr.Quantity,
+                Unit: pr.Unit,
+                Price: pr.Price,
+                CGST: pr.CGST,
+                SGST: pr.SGST,
+                TotalAmount: pr.TotalAmount,
+                Note: pr.Note
+            }
+            products.push(newPr);
+        }
+
+        const prOrder = await OrderProduct.create(products);
+        for (var i = 0; i < prOrder.length; i++) {
+            newOrder.Products.push(prOrder[i]);
+        }
+        newOrder.save((err) => {
+            if (err) throw err;
+        });
+
+        return res.status(200).json({
+            success: true,
+            msg: "Moved to Order successfully",
+        }).end();
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in moving. " + err.message,
+            data: null,
+        });
+    }
+
+});
 module.exports = {
     addQuatation,
     editQuatation,
     removeQuatation,
     getAllQuatation,
     getCustomerById,
-    changeQuatationStatus
+    changeQuatationStatus,
+    moveToOrder
 }

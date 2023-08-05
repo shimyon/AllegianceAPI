@@ -26,6 +26,7 @@ const addOrder = asyncHandler(async (req, res) => {
             ShippingAddress: req.body.shippingAddress,
             BillingAddress: req.body.billingAddress,
             Status: "New",
+            Stage: "New",
             Amount: req.body.amount,
             CGST: req.body.CGST,
             SGST: req.body.SGST,
@@ -214,7 +215,7 @@ const pdfcreate = asyncHandler(async (req, res) => {
         templateHtml = templateHtml.replace('{{Data}}', data.Detail)
         var filename = template.replace('template.html', `Print.pdf`)
         if (data.TemplateFor == 'Order') {
-           let customerList = await Order.find({ is_deleted: false, _id: req.body.id })
+            let customerList = await Order.find({ is_deleted: false, _id: req.body.id })
                 .populate("Customer")
                 .populate({
                     path: 'Products',
@@ -387,7 +388,7 @@ const pdfcreate = asyncHandler(async (req, res) => {
             </table>`)
         }
 
-        pdf.create(templateHtml).toFile(filename, (err,resf) => {
+        pdf.create(templateHtml).toFile(filename, (err, resf) => {
             const base64data = Buffer.from(templateHtml, 'binary')
         });
         var file = fs.createReadStream(filename);
@@ -460,11 +461,99 @@ const changeOrderStatus = asyncHandler(async (req, res) => {
     }
 })
 
+const moveToInvoice = asyncHandler(async (req, res) => {
+    try {
+        let invoiceExisting = await Order.findById(req.params.id)
+            .populate("Customer")
+            .populate({
+                path: 'Products',
+                populate: {
+                    path: 'Product',
+                }
+            })
+            .populate("ShippingAddress")
+            .populate("BillingAddress")
+            .populate("Sales", 'name email')
+            .populate("addedBy", 'name email')
+
+        if (invoiceExisting.Stage == "Invoice") {
+            return res.status(400).json({
+                success: false,
+                msg: "Order already moved to Invoice. "
+            });
+        }
+
+        await Order.findByIdAndUpdate(req.params.id, {
+            Stage: "Invoice",
+        });
+        let invoiceNo = await Invoice.find({}, { InvoiceNo: 1, _id: 0 }).sort({ InvoiceNo: -1 }).limit(1);
+        let maxInvoice = 1;
+        if (invoiceNo.length > 0) {
+            maxInvoice = invoiceNo[0].InvoiceNo + 1;
+        }
+        const newInvoice = await Invoice.create({
+            InvoiceNo: maxInvoice,
+            Customer: invoiceExisting.Customer,
+            ShippingAddress: invoiceExisting.ShippingAddress,
+            BillingAddress: invoiceExisting.BillingAddress,
+            Stage: "New",
+            Amount: invoiceExisting.Amount,
+            CGST: invoiceExisting.CGST,
+            SGST: invoiceExisting.SGST,
+            Discount: invoiceExisting.Discount,
+            TotalTax: invoiceExisting.TotalTax,
+            TotalPrice: invoiceExisting.TotalPrice,
+            DeliveryDate: invoiceExisting.DeliveryDate,
+            InvoiceDate: new Date(),
+            Sales: invoiceExisting.Sales,
+            Note: invoiceExisting.Note,
+            addedBy: req.user._id,
+            is_deleted: false
+        });
+        var products = [];
+        for (var i = 0; i < invoiceExisting.Products.length; i++) {
+            var pr = invoiceExisting.Products[i];
+            var newPr = {
+                OrderId: newInvoice._id.toString(),
+                Product: pr.Product._id,
+                Quantity: pr.Quantity,
+                Unit: pr.Unit,
+                Price: pr.Price,
+                CGST: pr.CGST,
+                SGST: pr.SGST,
+                TotalAmount: pr.TotalAmount,
+                Note: pr.Note
+            }
+            products.push(newPr);
+        }
+
+        const prInvoice = await InvoiceProduct.create(products);
+        for (var i = 0; i < prInvoice.length; i++) {
+            newInvoice.Products.push(prInvoice[i]);
+        }
+        newInvoice.save((err) => {
+            if (err) throw err;
+        });
+
+        return res.status(200).json({
+            success: true,
+            msg: "Moved to Invoice successfully",
+        }).end();
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in moving. " + err.message,
+            data: null,
+        });
+    }
+
+});
 module.exports = {
     addOrder,
     editOrder,
     removeOrder,
     getAllOrder,
     getOrderById, pdfcreate,
-    changeOrderStatus
+    changeOrderStatus,
+    moveToInvoice
 }
