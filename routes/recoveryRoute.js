@@ -6,12 +6,14 @@ const {
     getAllRecovery,
     getRecoveryById,
     removeRecovery,
-    editRecovery
+    editRecovery,
+    complateRecovery
  } = require('../controllers/recoveryController')
 const { protect } = require('../middleware/authMiddleware')
 
 router.post('/addRecovery', protect, addRecovery)
 router.post('/editRecovery', protect, editRecovery)
+router.post('/complateRecovery/:id', protect, complateRecovery)
 router.post('/getAllRecovery', protect, getAllRecovery)
 router.get('/getRecoveryById/:id', protect, getRecoveryById)
 router.post('/removeRecovery', protect, removeRecovery)

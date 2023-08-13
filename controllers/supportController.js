@@ -71,6 +71,10 @@ const getAllSupport = asyncHandler(async (req, res) => {
     {
         condition.Sales=req.body.sales;
     }
+    if(req.body.status)
+    {
+        condition.Status=req.body.status;
+    }
     try {
         let SupportList = await Support.find(condition).populate("Customer").populate("Sales").populate("Products").populate("addedBy", "_id name email role")
         return res.status(200).json({

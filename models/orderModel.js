@@ -49,6 +49,9 @@ const orderSchema = mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User'
         },
+        Stage: {
+            type: String
+        },
         addedBy: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User'

@@ -107,7 +107,7 @@ const editSave = asyncHandler(async (req, res, fileName) => {
 })
 const getAllNews = asyncHandler(async (req, res) => {
     try {
-        let newsList = await NewsFeed.find({ is_active: req.body.active }).populate(
+        let newsList = await NewsFeed.find({ is_active: req.body.active }).sort({ createdAt: -1 }).populate(
             {
                 path:"replay",
                 populate:{

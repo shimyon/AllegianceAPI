@@ -50,12 +50,15 @@ const quatationSchema = mongoose.Schema(
         ValidDate: {
             type: Date
         },
+        Stage: {
+            type: String
+        },
         Status: {
             type: String
         },
-        is_deleted:{
-            type:Boolean,
-            default:false
+        is_deleted: {
+            type: Boolean,
+            default: false
         },
         TermsAndCondition: [{
             type: mongoose.Schema.Types.ObjectId,
@@ -63,7 +66,7 @@ const quatationSchema = mongoose.Schema(
         }],
         Note:
         {
-            type:String
+            type: String
         }
 
     })
@@ -104,20 +107,20 @@ const quatationProductSchema = mongoose.Schema(
         }
     })
 
-    const quatationTermsandCondition = mongoose.Schema(
-        {
-            QuatationId: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: 'Quatations'
-            },
-            condition: {
-                type: String
-            }
+const quatationTermsandCondition = mongoose.Schema(
+    {
+        QuatationId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Quatations'
         },
-        {
-            timestamps: true,
+        condition: {
+            type: String
         }
-    )
+    },
+    {
+        timestamps: true,
+    }
+)
 const QuatationModal = mongoose.model('Quatations', quatationSchema);
 const QuatationProductModal = mongoose.model('QuatationProduct', quatationProductSchema);
 const QuatationTermsandCondition = mongoose.model('QuatationTermsandCondition', quatationTermsandCondition);

@@ -18,6 +18,10 @@ const recoverySchema = mongoose.Schema(
         {
             type:String
         },
+        Status:
+        {
+            type:String
+        },
         is_active:
         {
             type:Boolean,
