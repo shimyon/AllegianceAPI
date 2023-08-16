@@ -9,8 +9,13 @@ const OrderProduct = OrderModal.OrderProductModal
 
 const addQuatation = asyncHandler(async (req, res) => {
     try {
-
+        let quatationNo = await Quatation.find({}, { QuatationNo: 1, _id: 0 }).sort({ QuatationNo: -1 }).limit(1);
+        let maxQuatation = 1;
+        if (quatationNo.length > 0) {
+            maxQuatation = quatationNo[0].QuatationNo + 1;
+        }
         const newQuatation = await Quatation.create({
+            QuatationNo: maxQuatation,
             Customer: req.body.customer,
             ShippingAddress: req.body.shippingAddress,
             BillingAddress: req.body.billingAddress,
