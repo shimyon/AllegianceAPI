@@ -284,14 +284,36 @@ const getProspectById = asyncHandler(async (req, res) => {
 
 const changeProspectStage = asyncHandler(async (req, res) => {
     try {
-        await Prospect.findByIdAndUpdate(req.body.id, {
+        let prospect = await Prospect.findByIdAndUpdate(req.body.id, {
             Stage: req.body.stage,
             StageDate: new Date()
         });
-        return res.status(200).json({
-            success: true,
-            msg: "Stage Changed",
-        }).end();
+        
+        if (prospect) {
+            let resuser = await User.find({ is_active: true, role: 'Admin' });
+            let date = new Date();
+            // const savedNotification = await notificationModel.create({
+            //     description: `Prospect(${prospect.Stage}) entry has been created`,
+            //     date: date,
+            //     userId: prospect.Sales,
+            //     Isread: false
+            // });
+            let insertdata = resuser.map(f => ({
+                description: `Prospect(${req.body.id}) move to ${req.body.stage} stage.`,
+                date: date,
+                userId: f._id,
+                Isread: false
+            }));
+            if (insertdata.length > 0) {
+                const savedNotification = await notificationModel.insertMany(insertdata);
+            }
+
+            return res.status(200).json(prospect).end();
+        }
+        else {
+            res.status(400)
+            throw new Error("Invalid Prospect data!")
+        }
     } catch (err) {
         return res.status(400).json({
             success: false,
