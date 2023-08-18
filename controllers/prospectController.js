@@ -1,5 +1,7 @@
 const asyncHandler = require('express-async-handler')
 const ProspectModal = require('../models/prospectModel')
+const User = require('../models/userModel')
+const notificationModel = require('../models/notificationModel')
 const Prospect = ProspectModal.ProspectsModal;
 const NextOn = ProspectModal.ProNextOnModal;
 const ProspectOtherContactModal = ProspectModal.ProspectOtherContactModal;
@@ -38,11 +40,31 @@ const addProspect = asyncHandler(async (req, res) => {
             StageDate: new Date(),
             is_active: true
         });
+        if (prospect) {
+            let resuser = await User.find({ is_active: true, role: 'Admin' });
+            let date = new Date();
+            const savedNotification = await notificationModel.create({
+                description: `Prospect(${req.body.company}) entry has been created`,
+                date: date,
+                userId: prospect.Sales,
+                Isread: false
+            });
+            let insertdata = resuser.map(f => ({
+                description: `Prospect(${req.body.company}) entry has been created`,
+                date: date,
+                userId: f._id,
+                Isread: false
+            }));
+            if (insertdata.length > 0) {
+                const savedNotification = await notificationModel.insertMany(insertdata);
+            }
 
-        return res.status(200).json({
-            success: true,
-            msg: "Prospect added successfully",
-        }).end();
+            return res.status(200).json(prospect).end();
+        }
+        else {
+            res.status(400)
+            throw new Error("Invalid Prospect data!")
+        }
     } catch (err) {
         return res.status(400).json({
             success: false,

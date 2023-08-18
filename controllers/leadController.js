@@ -52,6 +52,12 @@ const addLead = asyncHandler(async (req, res) => {
         if (newLead) {
             let resuser = await User.find({ is_active: true, role: 'Admin' });
             let date = new Date();
+            const savedNotification = await notificationModel.create({
+                description: `lead(${req.body.company}) entry has been created`,
+                date: date,
+                userId: newLead.Sales,
+                Isread: false
+            });
             let insertdata = resuser.map(f => ({
                 description: `lead(${req.body.company}) entry has been created`,
                 date: date,
@@ -66,7 +72,7 @@ const addLead = asyncHandler(async (req, res) => {
         }
         else {
             res.status(400)
-            throw new Error("Invalid student data!")
+            throw new Error("Invalid Lead data!")
         }
     } catch (err) {
         return res.status(400).json({
