@@ -208,8 +208,8 @@ const getAllOrder = asyncHandler(async (req, res) => {
 })
 
 const pdfcreate = asyncHandler(async (req, res) => {
-    const data = await Template.findById(req.body.template_id)
     try {
+        const data = await Template.findById(req.body.template_id)
         var template = path.join(__dirname, '..', 'public', 'template.html')
         var templateHtml = fs.readFileSync(template, 'utf8')
         templateHtml = templateHtml.replace('{{Data}}', data.Detail)
@@ -396,6 +396,7 @@ const pdfcreate = asyncHandler(async (req, res) => {
         res.setHeader('Content-Length', stat.size);
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', 'attachment; filename=Print.pdf');
+        
         file.pipe(res);
     } catch (err) {
         return res.status(400).json({
@@ -553,7 +554,8 @@ module.exports = {
     editOrder,
     removeOrder,
     getAllOrder,
-    getOrderById, pdfcreate,
+    getOrderById,
+    pdfcreate,
     changeOrderStatus,
     moveToInvoice
 }
