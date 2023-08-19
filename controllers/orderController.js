@@ -388,16 +388,16 @@ const pdfcreate = asyncHandler(async (req, res) => {
             </table>`)
         }
 
-        pdf.create(templateHtml).toFile(filename, (err, resf) => {
-            const base64data = Buffer.from(templateHtml, 'binary')
+        pdf.create(templateHtml).toStream(function(err, stream) {
+            if (err) {
+                res.end();
+            } else {
+                res.set('Content-type', 'application/pdf');
+                res.setHeader('Content-Disposition', `attachment; filename=Print_${Math.random() * 1000000}.pdf`);
+                stream.pipe(res)
+            }
         });
-        var file = fs.createReadStream(filename);
-        var stat = fs.statSync(filename);
-        res.setHeader('Content-Length', stat.size);
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', 'attachment; filename=Print.pdf');
         
-        file.pipe(res);
     } catch (err) {
         return res.status(400).json({
             success: false,
