@@ -240,7 +240,7 @@ const pdfcreate = asyncHandler(async (req, res) => {
             templateHtml = templateHtml.replace('{{token.discount}}', (customerList[0].Amount * customerList[0].Discount) / 100)
             templateHtml = templateHtml.replace('{{token.finalamount}}', customerList[0].TotalPrice)
             templateHtml = templateHtml.replace('{{token.finalamountword}}', converter.toWords(customerList[0].TotalPrice))
-            templateHtml = templateHtml.replace('{{token.table}}', `<table border="1" style="width:100%">
+            templateHtml = templateHtml.replace('{{token.table}}', `<table border="1" cellpadding="0" cellspacing="0" style="width:100%">
             <tbody>
                 <tr>
                 <th>Item</th>
@@ -300,7 +300,7 @@ const pdfcreate = asyncHandler(async (req, res) => {
             templateHtml = templateHtml.replace('{{token.discount}}', (customerList[0].Amount * customerList[0].Discount) / 100)
             templateHtml = templateHtml.replace('{{token.finalamount}}', customerList[0].TotalPrice)
             templateHtml = templateHtml.replace('{{token.finalamountword}}', converter.toWords(customerList[0].TotalPrice))
-            templateHtml = templateHtml.replace('{{token.table}}', `<table border="1" style="width:100%">
+            templateHtml = templateHtml.replace('{{token.table}}', `<table border="1" cellpadding="0" cellspacing="0" style="width:100%">
             <tbody>
                 <tr>
                 <th>Item</th>
@@ -362,7 +362,7 @@ const pdfcreate = asyncHandler(async (req, res) => {
             templateHtml = templateHtml.replace('{{token.discount}}', (customerList[0].Amount * customerList[0].Discount) / 100)
             templateHtml = templateHtml.replace('{{token.finalamount}}', customerList[0].TotalPrice)
             templateHtml = templateHtml.replace('{{token.finalamountword}}', converter.toWords(customerList[0].TotalPrice))
-            templateHtml = templateHtml.replace('{{token.table}}', `<table border="1" style="width:100%">
+            templateHtml = templateHtml.replace('{{token.table}}', `<table border="1" cellpadding="0" cellspacing="0" style="width:100%">
             <tbody>
                 <tr>
                 <th>Item</th>
