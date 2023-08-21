@@ -3,13 +3,17 @@ const colors = require('colors')
 const dotenv = require('dotenv').config()
 const bodyParser = require('body-parser')
 const { errorHandler } = require('./middleware/errorMiddleware')
-const connectDB = require('./config/db')
+// const connectDB = require ('./config/db')
 const port = process.env.port || 5000
+const mongoose = require('mongoose');
 var cors = require('cors');
 var cron = require('node-cron');
 var cookieParser = require('cookie-parser');
 const path = require('path')
-connectDB()
+
+let databasestatus = "In-Progress";
+
+// connectDB()
 
 const app = express()
 
@@ -17,8 +21,29 @@ app.use(cors({ origin: '*' }));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(cookieParser());
-
 app.options("*", cors());
+
+const connectDB = async() => {
+    try {
+        await mongoose.connect(process.env.MONGO_URI).then(() => {
+            databasestatus = "DB connected";
+        })
+        .catch((err) => {
+            databasestatus = err;
+        });
+    } catch (error) {
+        databasestatus = error;
+    }
+}
+connectDB();
+
+app.get("/api", (req, res) => {
+    res.json({
+        version: "v1.4-7.13.23.",
+        dbstatus: databasestatus,
+        rand:  new Date()
+    });
+});
 
 app.use('/static', express.static("public/uploads"));
 app.use('/api/users', require('./routes/userRoutes'));

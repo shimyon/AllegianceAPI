@@ -237,8 +237,8 @@ const getAllOrder = asyncHandler(async (req, res) => {
 })
 
 const pdfcreate = asyncHandler(async (req, res) => {
-    const data = await Template.findById(req.body.template_id)
     try {
+        const data = await Template.findById(req.body.template_id)
         var template = path.join(__dirname, '..', 'public', 'template.html')
         var templateHtml = fs.readFileSync(template, 'utf8')
         templateHtml = templateHtml.replace('{{Data}}', data.Detail)
@@ -269,7 +269,7 @@ const pdfcreate = asyncHandler(async (req, res) => {
             templateHtml = templateHtml.replace('{{token.discount}}', (customerList[0].Amount * customerList[0].Discount) / 100)
             templateHtml = templateHtml.replace('{{token.finalamount}}', customerList[0].TotalPrice)
             templateHtml = templateHtml.replace('{{token.finalamountword}}', converter.toWords(customerList[0].TotalPrice))
-            templateHtml = templateHtml.replace('{{token.table}}', `<table border="1" style="width:100%">
+            templateHtml = templateHtml.replace('{{token.table}}', `<table border="1" cellpadding="0" cellspacing="0" style="width:100%">
             <tbody>
                 <tr>
                 <th>Item</th>
@@ -329,7 +329,7 @@ const pdfcreate = asyncHandler(async (req, res) => {
             templateHtml = templateHtml.replace('{{token.discount}}', (customerList[0].Amount * customerList[0].Discount) / 100)
             templateHtml = templateHtml.replace('{{token.finalamount}}', customerList[0].TotalPrice)
             templateHtml = templateHtml.replace('{{token.finalamountword}}', converter.toWords(customerList[0].TotalPrice))
-            templateHtml = templateHtml.replace('{{token.table}}', `<table border="1" style="width:100%">
+            templateHtml = templateHtml.replace('{{token.table}}', `<table border="1" cellpadding="0" cellspacing="0" style="width:100%">
             <tbody>
                 <tr>
                 <th>Item</th>
@@ -391,7 +391,7 @@ const pdfcreate = asyncHandler(async (req, res) => {
             templateHtml = templateHtml.replace('{{token.discount}}', (customerList[0].Amount * customerList[0].Discount) / 100)
             templateHtml = templateHtml.replace('{{token.finalamount}}', customerList[0].TotalPrice)
             templateHtml = templateHtml.replace('{{token.finalamountword}}', converter.toWords(customerList[0].TotalPrice))
-            templateHtml = templateHtml.replace('{{token.table}}', `<table border="1" style="width:100%">
+            templateHtml = templateHtml.replace('{{token.table}}', `<table border="1" cellpadding="0" cellspacing="0" style="width:100%">
             <tbody>
                 <tr>
                 <th>Item</th>
@@ -417,15 +417,16 @@ const pdfcreate = asyncHandler(async (req, res) => {
             </table>`)
         }
 
-        pdf.create(templateHtml).toFile(filename, (err, resf) => {
-            const base64data = Buffer.from(templateHtml, 'binary')
+        pdf.create(templateHtml).toStream(function(err, stream) {
+            if (err) {
+                res.end();
+            } else {
+                res.set('Content-type', 'application/pdf');
+                res.setHeader('Content-Disposition', `attachment; filename=Print_${Math.random() * 1000000}.pdf`);
+                stream.pipe(res)
+            }
         });
-        var file = fs.createReadStream(filename);
-        var stat = fs.statSync(filename);
-        res.setHeader('Content-Length', stat.size);
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', 'attachment; filename=Print.pdf');
-        file.pipe(res);
+        
     } catch (err) {
         return res.status(400).json({
             success: false,
@@ -582,7 +583,8 @@ module.exports = {
     editOrder,
     removeOrder,
     getAllOrder,
-    getOrderById, pdfcreate,
+    getOrderById,
+    pdfcreate,
     changeOrderStatus,
     moveToInvoice
 }
