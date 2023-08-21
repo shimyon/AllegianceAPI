@@ -1,9 +1,11 @@
 const asyncHandler = require('express-async-handler')
 const RecoveryModel = require('../models/recoveryModel')
 const Recovery = RecoveryModel.RecoveryModal;
+const User = require('../models/userModel')
+const notificationModel = require('../models/notificationModel')
 const addRecovery = asyncHandler(async (req, res) => {
     try {
-        await Recovery.create({
+        const newRecovery = await Recovery.create({
             Customer: req.body.customer,
             Amount: req.body.amount,
             Reminder: req.body.reminder,
@@ -13,10 +15,25 @@ const addRecovery = asyncHandler(async (req, res) => {
             addedBy: req.user._id,
 
         });
-        return res.status(200).json({
-            success: true,
-            msg: "Recovery added successfully"
-        });
+        if (newRecovery) {
+            let resuser = await User.find({ is_active: true, role: 'Admin' });
+            let date = new Date();
+            let insertdata = resuser.map(f => ({
+                description: `Recovery() entry has been created`,
+                date: date,
+                userId: f._id,
+                Isread: false
+            }));
+            if (insertdata.length > 0) {
+                const savedNotification = await notificationModel.insertMany(insertdata);
+            }
+
+            return res.status(200).json(newRecovery).end();
+        }
+        else {
+            res.status(400)
+            throw new Error("Invalid Recovery data!")
+        }
     } catch (err) {
         return res.status(400).json({
             success: false,

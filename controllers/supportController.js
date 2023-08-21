@@ -1,11 +1,13 @@
 const asyncHandler = require('express-async-handler')
 const SupportModel = require('../models/supportModel')
+const User = require('../models/userModel')
+const notificationModel = require('../models/notificationModel')
 const Support = SupportModel.SupportModal;
 const { sendMail } = require('../middleware/sendMail')
 
 const addSupport = asyncHandler(async (req, res) => {
     try {
-        await Support.create({
+        const newSupport =  await Support.create({
             Customer: req.body.customer,
             TicketNo: req.body.ticketNo,
             Qty: req.body.qty,
@@ -18,10 +20,31 @@ const addSupport = asyncHandler(async (req, res) => {
             Products: req.body.product,
             addedBy: req.user._id
         });
-        return res.status(200).json({
-            success: true,
-            msg: "Support added successfully"
-        });
+        if (newSupport) {
+            let resuser = await User.find({ is_active: true, role: 'Admin' });
+            let date = new Date();
+            const savedNotification = await notificationModel.create({
+                description: `Support(${newSupport.TicketNo}) entry has been created`,
+                date: date,
+                userId: newSupport.Sales,
+                Isread: false
+            });
+            let insertdata = resuser.map(f => ({
+                description: `Support(${newSupport.TicketNo}) entry has been created`,
+                date: date,
+                userId: f._id,
+                Isread: false
+            }));
+            if (insertdata.length > 0) {
+                const savedNotification = await notificationModel.insertMany(insertdata);
+            }
+
+            return res.status(200).json(newSupport).end();
+        }
+        else {
+            res.status(400)
+            throw new Error("Invalid Support data!")
+        }
     } catch (err) {
         return res.status(400).json({
             success: false,

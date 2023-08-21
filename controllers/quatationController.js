@@ -1,5 +1,7 @@
 const asyncHandler = require('express-async-handler')
 const QuatationModal = require('../models/quatationModel')
+const User = require('../models/userModel')
+const notificationModel = require('../models/notificationModel')
 const Quatation = QuatationModal.QuatationModal
 const QuatationProduct = QuatationModal.QuatationProductModal
 const QuatationTermsandCondition = QuatationModal.QuatationTermsandCondition
@@ -9,8 +11,13 @@ const OrderProduct = OrderModal.OrderProductModal
 
 const addQuatation = asyncHandler(async (req, res) => {
     try {
-
+        let quatationNo = await Quatation.find({}, { QuatationNo: 1, _id: 0 }).sort({ QuatationNo: -1 }).limit(1);
+        let maxQuatation = 1;
+        if (quatationNo.length > 0) {
+            maxQuatation = quatationNo[0].QuatationNo + 1;
+        }
         const newQuatation = await Quatation.create({
+            QuatationNo: maxQuatation,
             Customer: req.body.customer,
             ShippingAddress: req.body.shippingAddress,
             BillingAddress: req.body.billingAddress,
@@ -73,8 +80,31 @@ const addQuatation = asyncHandler(async (req, res) => {
         newQuatation.save((err) => {
             if (err) throw err;
         });
+        if (newQuatation) {
+            let resuser = await User.find({ is_active: true, role: 'Admin' });
+            let date = new Date();
+            const savedNotification = await notificationModel.create({
+                description: `Quatation(${newQuatation.QuatationNo}) entry has been created`,
+                date: date,
+                userId: newQuatation.Sales,
+                Isread: false
+            });
+            let insertdata = resuser.map(f => ({
+                description: `Quatation(${newQuatation.QuatationNo}) entry has been created`,
+                date: date,
+                userId: f._id,
+                Isread: false
+            }));
+            if (insertdata.length > 0) {
+                const savedNotification = await notificationModel.insertMany(insertdata);
+            }
 
-        return res.status(200).json(newQuatation).end();
+            return res.status(200).json(newQuatation).end();
+        }
+        else {
+            res.status(400)
+            throw new Error("Invalid Quatation data!")
+        }
     } catch (err) {
         return res.status(400).json({
             success: false,

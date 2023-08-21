@@ -1,5 +1,7 @@
 const asyncHandler = require('express-async-handler')
 const InvoiceModal = require('../models/invoiceModel')
+const User = require('../models/userModel')
+const notificationModel = require('../models/notificationModel')
 const Invoice = InvoiceModal.InvoiceModal
 const InvoiceProduct = InvoiceModal.InvoiceProductModal
 const InvoiceTermsandCondition = InvoiceModal.InvoiceTermsandCondition
@@ -77,7 +79,30 @@ const addInvoice = asyncHandler(async (req, res) => {
             if (err) throw err;
         });
 
-        return res.status(200).json(newInvoice).end();
+        if (newInvoice) {
+            let resuser = await User.find({ is_active: true, role: 'Admin' });
+            let date = new Date();
+            const savedNotification = await notificationModel.create({
+                description: `Invoice(${newInvoice.InvoiceNo}) entry has been created`,
+                date: date,
+                userId: newInvoice.Sales,
+                Isread: false
+            });
+            let insertdata = resuser.map(f => ({
+                description: `Invoice(${newInvoice.InvoiceNo}) entry has been created`,
+                date: date,
+                userId: f._id,
+                Isread: false
+            }));
+            if (insertdata.length > 0) {
+                const savedNotification = await notificationModel.insertMany(insertdata);
+            }
+            return res.status(200).json(newInvoice).end();
+        }
+        else {
+            res.status(400)
+            throw new Error("Invalid Invoice data!")
+        }
     } catch (err) {
         return res.status(400).json({
             success: false,

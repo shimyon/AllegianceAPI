@@ -1,7 +1,8 @@
 const asyncHandler = require('express-async-handler')
 const ProspectModal = require('../models/prospectModel')
+const User = require('../models/userModel')
+const notificationModel = require('../models/notificationModel')
 const Prospect = ProspectModal.ProspectsModal;
-const Interaction = ProspectModal.ProInteractionModal;
 const NextOn = ProspectModal.ProNextOnModal;
 const ProspectOtherContactModal = ProspectModal.ProspectOtherContactModal;
 const uploadFile = require("../middleware/uploadFileMiddleware");
@@ -39,15 +40,35 @@ const addProspect = asyncHandler(async (req, res) => {
             StageDate: new Date(),
             is_active: true
         });
+        if (prospect) {
+            let resuser = await User.find({ is_active: true, role: 'Admin' });
+            let date = new Date();
+            const savedNotification = await notificationModel.create({
+                description: `Prospect(${req.body.company}) entry has been created`,
+                date: date,
+                userId: prospect.Sales,
+                Isread: false
+            });
+            let insertdata = resuser.map(f => ({
+                description: `Prospect(${req.body.company}) entry has been created`,
+                date: date,
+                userId: f._id,
+                Isread: false
+            }));
+            if (insertdata.length > 0) {
+                const savedNotification = await notificationModel.insertMany(insertdata);
+            }
 
-        return res.status(200).json({
-            success: true,
-            msg: "Prospect added successfully",
-        }).end();
+            return res.status(200).json(prospect).end();
+        }
+        else {
+            res.status(400)
+            throw new Error("Invalid Prospect data!")
+        }
     } catch (err) {
         return res.status(400).json({
             success: false,
-            msg: "Error in adding interaction. " + err.message,
+            msg: "Error in adding Prospect. " + err.message,
             data: null,
         });
     }
@@ -160,13 +181,7 @@ const getAllProspect = asyncHandler(async (req, res) => {
             condition.NextTalk = { $ne: null };
         }
 
-        let prospectList = await Prospect.find(condition).populate({
-            path: "Interaction",
-            populate: {
-                path: "user",
-                select: "_id name email role"
-            }
-        }).populate(
+        let prospectList = await Prospect.find(condition).populate(
             {
                 path: "NextTalk",
                 populate: {
@@ -217,7 +232,7 @@ const getAllProspect = asyncHandler(async (req, res) => {
                         if (val.NextTalk == null) {
                             addData = false;
                         } else {
-                            console.log(val.NextTalk.date+" "+fDate);
+                            console.log(val.NextTalk.date + " " + fDate);
                             if (val.NextTalk.date.toDateString() !== fDate.toDateString()) {
                                 addData = false;
                             }
@@ -245,13 +260,7 @@ const getAllProspect = asyncHandler(async (req, res) => {
 
 const getProspectById = asyncHandler(async (req, res) => {
     try {
-        let prospectList = await Prospect.find({ _id: req.params.id }).populate({
-            path: "Interaction",
-            populate: {
-                path: "user",
-                select: "_id name email role"
-            }
-        }).populate(
+        let prospectList = await Prospect.find({ _id: req.params.id }).populate(
             {
                 path: "NextTalk",
                 populate: {
@@ -275,14 +284,36 @@ const getProspectById = asyncHandler(async (req, res) => {
 
 const changeProspectStage = asyncHandler(async (req, res) => {
     try {
-        await Prospect.findByIdAndUpdate(req.body.id, {
+        let prospect = await Prospect.findByIdAndUpdate(req.body.id, {
             Stage: req.body.stage,
             StageDate: new Date()
         });
-        return res.status(200).json({
-            success: true,
-            msg: "Stage Changed",
-        }).end();
+        
+        if (prospect) {
+            let resuser = await User.find({ is_active: true, role: 'Admin' });
+            let date = new Date();
+            // const savedNotification = await notificationModel.create({
+            //     description: `Prospect(${prospect.Stage}) entry has been created`,
+            //     date: date,
+            //     userId: prospect.Sales,
+            //     Isread: false
+            // });
+            let insertdata = resuser.map(f => ({
+                description: `Prospect(${req.body.id}) move to ${req.body.stage} stage.`,
+                date: date,
+                userId: f._id,
+                Isread: false
+            }));
+            if (insertdata.length > 0) {
+                const savedNotification = await notificationModel.insertMany(insertdata);
+            }
+
+            return res.status(200).json(prospect).end();
+        }
+        else {
+            res.status(400)
+            throw new Error("Invalid Prospect data!")
+        }
     } catch (err) {
         return res.status(400).json({
             success: false,
@@ -296,7 +327,7 @@ const changeProspectStage = asyncHandler(async (req, res) => {
 const addNext = asyncHandler(async (req, res) => {
     try {
         let nextOn = await NextOn.create({
-            leadId: req.body.id,
+            prospectId: req.body.id,
             date: req.body.date,
             note: req.body.note,
             user: req.user._id
@@ -305,6 +336,7 @@ const addNext = asyncHandler(async (req, res) => {
         let leadExisting = await Prospect.findByIdAndUpdate(req.body.id, {
             NextTalk: nextOn._id
         });
+
         return res.status(200).json({
             success: true,
             msg: "Data added successfully",
@@ -318,33 +350,23 @@ const addNext = asyncHandler(async (req, res) => {
     }
 
 });
-
-const addInteraction = asyncHandler(async (req, res) => {
+const getNext = asyncHandler(async (req, res) => {
     try {
-        let interaction = await Interaction.create({
-            leadId: req.body.id,
-            date: req.body.date,
-            note: req.body.note,
-            user: req.user._id
-        });
+        const next = await NextOn.find({ prospectId: req.params.id }).sort({ date: -1 }).populate("user");
 
-        let leadExisting = await Prospect.findByIdAndUpdate(req.body.id, {
-            Interaction: interaction._id
-        });
-        return res.status(200).json({
+        res.status(200).json({
             success: true,
-            msg: "Data added successfully",
+            msg: "",
+            data: next,
         }).end();
     } catch (err) {
         return res.status(400).json({
             success: false,
-            msg: "Error in adding data. " + err.message,
+            msg: "Error in getting status. " + err.message,
             data: null,
         });
     }
-
 });
-
 const addOtherContact = asyncHandler(async (req, res) => {
     try {
         let prospectExist = await Prospect.findById(req.body.id);
@@ -534,8 +556,8 @@ const convertToCustomer = asyncHandler(async (req, res) => {
 
 const markAsRead = asyncHandler(async (req, res) => {
     try {
-        await Prospect.findByIdAndUpdate(req.params.id,{
-            is_readed:true
+        await Prospect.findByIdAndUpdate(req.params.id, {
+            is_readed: true
         })
         return res.status(200).json({
             success: true,
@@ -556,7 +578,7 @@ module.exports = {
     getAllProspect,
     getProspectById,
     addNext,
-    addInteraction,
+    getNext,
     removeProspect,
     changeProspectStage,
     addOtherContact,

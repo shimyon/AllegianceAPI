@@ -1,5 +1,7 @@
 const asyncHandler = require('express-async-handler')
 const OrderModal = require('../models/orderModel')
+const User = require('../models/userModel')
+const notificationModel = require('../models/notificationModel')
 const Order = OrderModal.OrderModal
 const OrderProduct = OrderModal.OrderProductModal
 const QuatationModal = require('../models/quatationModel')
@@ -20,8 +22,13 @@ const Template = require('../models/templateModel')
 
 const addOrder = asyncHandler(async (req, res) => {
     try {
-
+        let orderNo = await Order.find({}, { OrderNo: 1, _id: 0 }).sort({ OrderNo: -1 }).limit(1);
+        let maxOrder = 1;
+        if (orderNo.length > 0) {
+            maxOrder = orderNo[0].OrderNo + 1;
+        }
         const newOrder = await Order.create({
+            OrderNo: maxOrder,
             Customer: req.body.customer,
             ShippingAddress: req.body.shippingAddress,
             BillingAddress: req.body.billingAddress,
@@ -66,8 +73,30 @@ const addOrder = asyncHandler(async (req, res) => {
         newOrder.save((err) => {
             if (err) throw err;
         });
-
-        return res.status(200).json(newOrder).end();
+        if (newOrder) {
+            let resuser = await User.find({ is_active: true, role: 'Admin' });
+            let date = new Date();
+            const savedNotification = await notificationModel.create({
+                description: `Order(${newOrder.OrderNo}) entry has been created`,
+                date: date,
+                userId: newOrder.Sales,
+                Isread: false
+            });
+            let insertdata = resuser.map(f => ({
+                description: `Order(${newOrder.OrderNo}) entry has been created`,
+                date: date,
+                userId: f._id,
+                Isread: false
+            }));
+            if (insertdata.length > 0) {
+                const savedNotification = await notificationModel.insertMany(insertdata);
+            }
+            return res.status(200).json(newOrder).end();
+        }
+        else {
+            res.status(400)
+            throw new Error("Invalid Order data!")
+        }
     } catch (err) {
         return res.status(400).json({
             success: false,

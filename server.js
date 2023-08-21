@@ -7,6 +7,7 @@ const { errorHandler } = require('./middleware/errorMiddleware')
 const port = process.env.port || 5000
 const mongoose = require('mongoose');
 var cors = require('cors');
+var cron = require('node-cron');
 var cookieParser = require('cookie-parser');
 const path = require('path')
 
@@ -58,6 +59,11 @@ app.use('/api/recovery', require('./routes/recoveryRoute'));
 app.use('/api/support', require('./routes/supportRoute'));
 app.use('/api/dashboard', require('./routes/dashboardRoute'));
 app.use('/api/template', require('./routes/templateRoutes'));
+app.use('/api/notification', require('./routes/notificationRoute'));
 
 app.use(errorHandler)
+// cron.schedule('*/10 * * * *', () => {
+//     // debugger
+//     console.log('running a task every 10 second');
+// });
 app.listen(port, () => console.log(`Listening at port ${port}`))

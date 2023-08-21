@@ -63,11 +63,6 @@ const leadSchema = mongoose.Schema(
             //use for getting lead add date
             type: Date
         },
-        Interaction: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Interaction',
-            default: null
-        },
         NextTalk: {
             //this will use for appointment
             type: mongoose.Schema.Types.ObjectId,
@@ -114,9 +109,9 @@ const leadSchema = mongoose.Schema(
 
 const nextOnSchema = mongoose.Schema(
     {
-        proId: {
+        leadId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'Prospects'
+            ref: 'Leads'
         },
         date: {
             type: Date
@@ -127,27 +122,8 @@ const nextOnSchema = mongoose.Schema(
         user: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User'
-        }
+        },
     });
-
-const interactionSchema = mongoose.Schema(
-    {
-        proId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Prospects'
-        },
-        date: {
-            type: Date
-        },
-        note: {
-            type: String
-        },
-        user: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User'
-        }
-    });
-
 
 const leadOtherContact = mongoose.Schema(
     {
@@ -167,16 +143,14 @@ const leadOtherContact = mongoose.Schema(
     });
 
 const LeadsModal = mongoose.model('Leads', leadSchema);
-const InteractionModal = mongoose.model('Interaction', interactionSchema);
 const NextOnModal = mongoose.model('NextOn', nextOnSchema);
 const LeadOtherContact = mongoose.model('LeadOtherContact', leadOtherContact);
 
 const syncIndex = async () => {
     await LeadsModal.syncIndexes();
-    await InteractionModal.syncIndexes();
     await NextOnModal.syncIndexes();
     await LeadOtherContact.syncIndexes();
 }
 syncIndex();
 
-module.exports = { LeadsModal, InteractionModal, NextOnModal, LeadOtherContact };
+module.exports = { LeadsModal, NextOnModal, LeadOtherContact };
