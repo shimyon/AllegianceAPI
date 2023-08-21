@@ -17,6 +17,7 @@ const addCustomer = asyncHandler(async (req, res) => {
         }
         const newCustomer = await Customer.create({
             Company: req.body.company,
+            GSTNo: req.body.gstno,
             Title: req.body.title,
             FirstName: req.body.firstname,
             LastName: req.body.lastname,
@@ -57,6 +58,7 @@ const editCustomer = asyncHandler(async (req, res) => {
         const newCustomer = await Customer.findByIdAndUpdate(req.body.id, {
             Company: req.body.company,
             Title: req.body.title,
+            GSTNo: req.body.gstno,
             FirstName: req.body.firstname,
             LastName: req.body.lastname,
             Designation: req.body.designation,

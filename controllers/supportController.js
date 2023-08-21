@@ -7,9 +7,14 @@ const { sendMail } = require('../middleware/sendMail')
 
 const addSupport = asyncHandler(async (req, res) => {
     try {
+        let ticketNo = await Support.find({}, { TicketNo: 1, _id: 0 }).sort({ TicketNo: -1 }).limit(1);
+        let maxTicket = 1;
+        if (ticketNo.length >0) {
+            maxTicket = ticketNo[0].TicketNo + 1;
+        }
         const newSupport =  await Support.create({
             Customer: req.body.customer,
-            TicketNo: req.body.ticketNo,
+            TicketNo: maxTicket,
             Qty: req.body.qty,
             Price: req.body.price,
             TicketDate: req.body.ticketDate,

@@ -27,6 +27,7 @@ const addLead = asyncHandler(async (req, res) => {
         const newLead = await Lead.create({
             Company: req.body.company,
             Title: req.body.title,
+            GSTNo: req.body.gstno,
             FirstName: req.body.firstname,
             LastName: req.body.lastname,
             Designation: req.body.designation,
@@ -98,6 +99,7 @@ const editLead = asyncHandler(async (req, res) => {
         const newLead = await Lead.findByIdAndUpdate(req.body.id, {
             Company: req.body.company,
             Title: req.body.title,
+            GSTNo: req.body.gstno,
             FirstName: req.body.firstname,
             LastName: req.body.lastname,
             Designation: req.body.designation,
@@ -398,6 +400,7 @@ const moveToProspect = asyncHandler(async (req, res) => {
         let interaction = await Prospect.create({
             Company: leadExisting.Company,
             Title: leadExisting.Title,
+            GSTNo: leadExisting.GSTNo,
             FirstName: leadExisting.FirstName,
             LastName: leadExisting.LastName,
             Mobile: leadExisting.Mobile,
@@ -415,10 +418,31 @@ const moveToProspect = asyncHandler(async (req, res) => {
             StageDate: new Date(),
             is_active: true
         });
-        return res.status(200).json({
-            success: true,
-            msg: "Moved to prospect successfully",
-        }).end();
+        if (interaction) {
+            let resuser = await User.find({ is_active: true, role: 'Admin' });
+            let date = new Date();
+            const savedNotification = await notificationModel.create({
+                description: `lead(${interaction.Company}) Moved to prospect`,
+                date: date,
+                userId: interaction.Sales._id,
+                Isread: false
+            });
+            let insertdata = resuser.map(f => ({
+                description: `lead(${interaction.Company}) Moved to prospect`,
+                date: date,
+                userId: f._id,
+                Isread: false
+            }));
+            if (insertdata.length > 0) {
+                const savedNotification = await notificationModel.insertMany(insertdata);
+            }
+
+            return res.status(200).json(interaction).end();
+        }
+        else {
+            res.status(400)
+            throw new Error("Invalid Lead data!")
+        }
     } catch (err) {
         return res.status(400).json({
             success: false,

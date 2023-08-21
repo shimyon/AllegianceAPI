@@ -6,6 +6,9 @@ const customerSchema = mongoose.Schema(
             type: String,
             required: [true, 'Please add a company']
         },
+        GSTNo: {
+            type: String,
+        },
         Title: {
             type: String,
         },

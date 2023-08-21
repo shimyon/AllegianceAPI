@@ -6,11 +6,19 @@ const recoverySchema = mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Customers'
         },
+        RecoveryNo:
+        {
+            type:Number
+        },
         Amount:
         {
             type:Number
         },
         Reminder:
+        {
+            type:Date
+        },
+        NextFollowup:
         {
             type:Date
         },

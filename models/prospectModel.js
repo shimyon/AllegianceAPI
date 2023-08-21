@@ -6,6 +6,9 @@ const prospectSchema = mongoose.Schema(
             type: String,
             required: [true, 'Please add a company']
         },
+        GSTNo: {
+            type: String,
+        },
         CompanyCode: {
             type: String,
         },

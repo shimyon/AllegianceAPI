@@ -20,6 +20,7 @@ const addProspect = asyncHandler(async (req, res) => {
         let prospect = await Prospect.create({
             Company: req.body.company,
             Title: req.body.title,
+            GSTNo: req.body.gstno,
             FirstName: req.body.firstname,
             LastName: req.body.lastname,
             Mobile: req.body.mobile,
@@ -89,6 +90,7 @@ const editProspect = asyncHandler(async (req, res) => {
         const newProspect = await Prospect.findByIdAndUpdate(req.body.id, {
             Company: req.body.company,
             Title: req.body.title,
+            GSTNo: req.body.gstno,
             FirstName: req.body.firstname,
             LastName: req.body.lastname,
             Mobile: req.body.mobile,
@@ -531,6 +533,7 @@ const convertToCustomer = asyncHandler(async (req, res) => {
         const newCustomer = await Customer.create({
             Company: pros.Company,
             Title: pros.Title,
+            GSTNo: pros.GSTNo,
             FirstName: pros.FirstName,
             LastName: pros.LastName,
             Mobile: pros.Mobile,
