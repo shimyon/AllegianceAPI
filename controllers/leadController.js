@@ -307,10 +307,34 @@ const addNext = asyncHandler(async (req, res) => {
         let leadExisting = await Lead.findByIdAndUpdate(req.body.id, {
             NextTalk: nextOn._id
         });
-        return res.status(200).json({
-            success: true,
-            msg: "Data added successfully",
-        }).end();
+        if (nextOn) {
+            let resuser = await User.find({ is_active: true, role: 'Admin' });
+            let date = new Date();
+            const savedNotification = await notificationModel.create({
+                description: `lead(${leadExisting.Company}) Next Action Date ${req.body.date}`,
+                date: date,
+                userId: leadExisting.Sales._id,
+                Isread: false
+            });
+            let insertdata = resuser.map(f => ({
+                description: `lead(${leadExisting.Company}) Next Action Date ${req.body.date}`,
+                date: date,
+                userId: f._id,
+                Isread: false
+            }));
+            if (insertdata.length > 0) {
+                const savedNotification = await notificationModel.insertMany(insertdata);
+            }
+
+            return res.status(200).json({
+                success: true,
+                msg: "Data added successfully",
+            }).end();
+        }
+        else {
+            res.status(400)
+            throw new Error("Invalid data!")
+        }
     } catch (err) {
         return res.status(400).json({
             success: false,
