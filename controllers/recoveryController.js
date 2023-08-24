@@ -18,6 +18,7 @@ const addRecovery = asyncHandler(async (req, res) => {
             NextFollowup:req.body.nextfollowup,
             Note: req.body.note,
             Status: "In Complete",
+            OnHold:false,
             is_active: true,
             addedBy: req.user._id,
 
@@ -91,6 +92,30 @@ const complateRecovery = asyncHandler(async (req, res) => {
         }
         await Recovery.findByIdAndUpdate(req.params.id, {
             Status: "Completed",
+        });
+        return res.status(200).json({
+            success: true,
+            msg: "Recovery updated successfully"
+        });
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in updating Recovery. " + err.message
+        });
+    }
+})
+const onhold = asyncHandler(async (req, res) => {
+    try {
+        var existing = await Recovery.findById(req.params.id);
+        if (!existing) {
+            return res.status(400).json({
+                success: false,
+                msg: "Recovery not found. " + err.message,
+            });
+
+        }
+        await Recovery.findByIdAndUpdate(req.params.id, {
+            OnHold: req.body.active,
         });
         return res.status(200).json({
             success: true,
@@ -178,5 +203,6 @@ module.exports = {
     getRecoveryById,
     removeRecovery,
     editRecovery,
-    complateRecovery
+    complateRecovery,
+    onhold
 }

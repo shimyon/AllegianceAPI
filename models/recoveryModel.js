@@ -22,6 +22,11 @@ const recoverySchema = mongoose.Schema(
         {
             type:Date
         },
+        OnHold:
+        {
+            type:Boolean,
+            default:false
+        },
         Note:
         {
             type:String
