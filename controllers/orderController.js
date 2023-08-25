@@ -307,6 +307,8 @@ const pdfcreate = asyncHandler(async (req, res) => {
                 .populate("BillingAddress")
                 .populate("addedBy", 'name email')
             templateHtml = templateHtml.replace('{{token.billcompany}}', customerList[0].Customer?.Company)
+            templateHtml = templateHtml.replace('{{token.gstno}}', customerList[0].Customer?.GSTNo)
+            templateHtml = templateHtml.replace('{{token.invoiceno}}', customerList[0].InvoiceNo)
             templateHtml = templateHtml.replace('{{token.shipcompany}}', customerList[0].Customer?.Company)
             templateHtml = templateHtml.replace('{{token.billfirstname}}', customerList[0].Customer?.FirstName)
             templateHtml = templateHtml.replace('{{token.shipfirstname}}', customerList[0].Customer?.FirstName)
@@ -368,6 +370,7 @@ const pdfcreate = asyncHandler(async (req, res) => {
                 .populate("addedBy", 'name email')
 
             templateHtml = templateHtml.replace('{{token.billcompany}}', customerList[0].Customer?.Company)
+            templateHtml = templateHtml.replace('{{token.refno}}', customerList[0].QuatationNo)
             templateHtml = templateHtml.replace('{{token.shipcompany}}', customerList[0].Customer?.Company)
             templateHtml = templateHtml.replace('{{token.billfirstname}}', customerList[0].Customer?.FirstName)
             templateHtml = templateHtml.replace('{{token.shipfirstname}}', customerList[0].Customer?.FirstName)
