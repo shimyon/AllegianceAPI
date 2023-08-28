@@ -7,9 +7,9 @@ const { errorHandler } = require('./middleware/errorMiddleware')
 const port = process.env.port || 5000
 const mongoose = require('mongoose');
 var cors = require('cors');
-var cron = require('node-cron');
 var cookieParser = require('cookie-parser');
 const path = require('path')
+const loadCronJob = require('./cron-job')
 
 let databasestatus = "In-Progress";
 
@@ -23,12 +23,14 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 app.options("*", cors());
 
-const connectDB = async() => {
+const connectDB = async () => {
     try {
         await mongoose.connect(process.env.MONGO_URI).then(() => {
             databasestatus = "DB connected";
-        })
-        .catch((err) => {
+
+            //Load Cron Jobs
+            loadCronJob();
+        }).catch((err) => {
             databasestatus = err;
         });
     } catch (error) {
@@ -41,7 +43,7 @@ app.get("/api", (req, res) => {
     res.json({
         version: "v1.4-7.13.23.",
         dbstatus: databasestatus,
-        rand:  new Date()
+        rand: new Date()
     });
 });
 
@@ -62,8 +64,4 @@ app.use('/api/template', require('./routes/templateRoutes'));
 app.use('/api/notification', require('./routes/notificationRoute'));
 
 app.use(errorHandler)
-// cron.schedule('*/10 * * * *', () => {
-//     // debugger
-//     console.log('running a task every 10 second');
-// });
 app.listen(port, () => console.log(`Listening at port ${port}`))
