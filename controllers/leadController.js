@@ -1,7 +1,8 @@
 const asyncHandler = require('express-async-handler')
 const LeadModal = require('../models/leadModel')
+const User = require('../models/userModel')
+const notificationModel = require('../models/notificationModel')
 const Lead = LeadModal.LeadsModal;
-const Interaction = LeadModal.InteractionModal;
 const NextOn = LeadModal.NextOnModal;
 const LeadOtherContact = LeadModal.LeadOtherContact;
 const Master = require('../models/masterModel')
@@ -48,8 +49,31 @@ const addLead = asyncHandler(async (req, res) => {
             StageDate: new Date(),
             is_active: true
         });
+        if (newLead) {
+            let resuser = await User.find({ is_active: true, role: 'Admin' });
+            let date = new Date();
+            const savedNotification = await notificationModel.create({
+                description: `lead(${req.body.company}) entry has been created`,
+                date: date,
+                userId: newLead.Sales,
+                Isread: false
+            });
+            let insertdata = resuser.map(f => ({
+                description: `lead(${req.body.company}) entry has been created`,
+                date: date,
+                userId: f._id,
+                Isread: false
+            }));
+            if (insertdata.length > 0) {
+                const savedNotification = await notificationModel.insertMany(insertdata);
+            }
 
-        return res.status(200).json(newLead).end();
+            return res.status(200).json(newLead).end();
+        }
+        else {
+            res.status(400)
+            throw new Error("Invalid Lead data!")
+        }
     } catch (err) {
         return res.status(400).json({
             success: false,
@@ -119,7 +143,7 @@ const removeLead = asyncHandler(async (req, res) => {
 
         const newLead = await Lead.findByIdAndUpdate(req.body.id, {
             is_active: req.body.active,
-            RemoveReason:req.body.reason
+            RemoveReason: req.body.reason
         });
 
         return res.status(200).json({
@@ -139,9 +163,8 @@ const removeLead = asyncHandler(async (req, res) => {
 
 const getAllLead = asyncHandler(async (req, res) => {
     var condition = { is_active: req.body.active, Stage: "New" };
-    if(req.body.favorite)
-    {
-        condition.is_favorite=true;
+    if (req.body.favorite) {
+        condition.is_favorite = true;
     }
 
     if (req.body.source) {
@@ -159,8 +182,8 @@ const getAllLead = asyncHandler(async (req, res) => {
     if (req.body.appointment == "notset") {
         condition.NextTalk = null;
     }
-    else if (req.body.appointment != "all"){
-        condition.NextTalk = {$ne:null};
+    else if (req.body.appointment != "all") {
+        condition.NextTalk = { $ne: null };
     }
 
     if (req.body.month) {
@@ -199,12 +222,12 @@ const getAllLead = asyncHandler(async (req, res) => {
     }
 
     try {
-        let leadList = await Lead.find(condition).populate("Source").populate("OtherContact").populate("Product").populate("Sales").populate("Interaction").populate("NextTalk").populate("addedBy")
+        let leadList = await Lead.find(condition).populate("Source").populate("OtherContact").populate("Product").populate("Sales").populate("NextTalk").populate("addedBy")
             .exec((err, result) => {
                 var newResult = [];
                 result.forEach((val, idx) => {
                     var addData = true;
-                    if (req.body.appointment !="notset" && req.body.appointment !="all") {
+                    if (req.body.appointment != "notset" && req.body.appointment != "all") {
                         if (val.NextTalk) {
                             let dt = new Date();
                             let nDate = new Date();
@@ -254,7 +277,7 @@ const getAllLead = asyncHandler(async (req, res) => {
 
 const getLeadById = asyncHandler(async (req, res) => {
     try {
-        let leadList = await Lead.find({ Stage: "New", _id: req.params.id }).populate("Source").populate("OtherContact").populate("Product").populate("Sales").populate("Interaction").populate("NextTalk").populate("addedBy")
+        let leadList = await Lead.find({ Stage: "New", _id: req.params.id }).populate("Source").populate("OtherContact").populate("Product").populate("Sales").populate("NextTalk").populate("addedBy")
         return res.status(200).json({
             success: true,
             data: leadList
@@ -296,9 +319,27 @@ const addNext = asyncHandler(async (req, res) => {
 
 });
 
+const getNext = asyncHandler(async (req, res) => {
+    try {
+        const next = await NextOn.find({ leadId: req.params.id }).sort({ date: -1 }).populate("user");
+
+        res.status(200).json({
+            success: true,
+            msg: "",
+            data: next,
+        }).end();
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in getting status. " + err.message,
+            data: null,
+        });
+    }
+});
+
 const addOtherContact = asyncHandler(async (req, res) => {
     try {
-        let leadExist= await Lead.findById(req.body.id);
+        let leadExist = await Lead.findById(req.body.id);
         let nextOn = await LeadOtherContact.create({
             LeadId: req.body.id,
             Name: req.body.name,
@@ -323,9 +364,9 @@ const addOtherContact = asyncHandler(async (req, res) => {
 
 });
 
-const getOtherContact= asyncHandler(async(req,res)=>{
+const getOtherContact = asyncHandler(async (req, res) => {
     try {
-        let otherContact= await LeadOtherContact.find({LeadId: req.params.id});
+        let otherContact = await LeadOtherContact.find({ LeadId: req.params.id });
         return res.status(200).json({
             success: true,
             msg: "Success",
@@ -338,32 +379,6 @@ const getOtherContact= asyncHandler(async(req,res)=>{
         });
     }
 })
-
-const addInteraction = asyncHandler(async (req, res) => {
-    try {
-        let interaction = await Interaction.create({
-            leadId: req.body.id,
-            date: req.body.date,
-            note: req.body.note,
-            user: req.user._id
-        });
-
-        let leadExisting = await Lead.findByIdAndUpdate(req.body.id, {
-            Interaction: interaction._id
-        });
-        return res.status(200).json({
-            success: true,
-            msg: "Data added successfully",
-        }).end();
-    } catch (err) {
-        return res.status(400).json({
-            success: false,
-            msg: "Error in adding data. " + err.message,
-            data: null,
-        });
-    }
-
-});
 
 const moveToProspect = asyncHandler(async (req, res) => {
     try {
@@ -393,7 +408,7 @@ const moveToProspect = asyncHandler(async (req, res) => {
             Product: leadExisting.Product,
             Notes: leadExisting.Notes,
             Sales: leadExisting.Sales,
-            Source:leadExisting.Source,
+            Source: leadExisting.Source,
             Requirements: leadExisting.Requirements,
             addedBy: req.user._id,
             Stage: "New",
@@ -535,7 +550,7 @@ module.exports = {
     getAllLead,
     getLeadById,
     addNext,
-    addInteraction,
+    getNext,
     moveToProspect,
     importExcel,
     setAsFavorite,

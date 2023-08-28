@@ -2,6 +2,9 @@ const mongoose = require('mongoose')
 
 const quatationSchema = mongoose.Schema(
     {
+        QuatationNo: {
+            type: Number
+        },
         Customer: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Customers'

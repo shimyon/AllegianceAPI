@@ -7,8 +7,8 @@ const {
     removeLead,
     getAllLead,
     getLeadById,
-    addInteraction,
     addNext,
+    getNext,
     moveToProspect,
     importExcel,
     setAsFavorite,
@@ -20,7 +20,6 @@ const { protect } = require('../middleware/authMiddleware')
 router.post('/add', protect, addLead)
 router.post('/edit', protect, editLead)
 router.post('/addNext', protect, addNext)
-router.post('/addInteraction', protect, addInteraction)
 router.post('/importExcel', protect, importExcel)
 router.post('/getAll', protect, getAllLead)
 router.post('/moveToProspect/:id', protect, moveToProspect)
@@ -29,5 +28,6 @@ router.post('/remove', protect, removeLead)
 router.post('/addOtherContact', protect, addOtherContact)
 router.get('/otherContact/:id', protect, getOtherContact)
 router.get('/:id', protect, getLeadById)
+router.get('/getNext/:id', protect, getNext)
 
 module.exports = router

@@ -63,11 +63,6 @@ const prospectSchema = mongoose.Schema(
         Notes: {
             type: String
         },
-        Interaction: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'ProInteraction',
-            default: null
-        },
         NextTalk: {
             //this will use for appointment
             type: mongoose.Schema.Types.ObjectId,
@@ -127,7 +122,7 @@ const prospectSchema = mongoose.Schema(
 
 const proNextOnSchema = mongoose.Schema(
     {
-        proId: {
+        prospectId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Prospects'
         },
@@ -140,25 +135,7 @@ const proNextOnSchema = mongoose.Schema(
         user: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User'
-        }
-    });
-
-const proInteractionSchema = mongoose.Schema(
-    {
-        proId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Prospects'
         },
-        date: {
-            type: Date
-        },
-        note: {
-            type: String
-        },
-        user: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User'
-        }
     });
 
 const prospectOtherContact = mongoose.Schema(
@@ -179,16 +156,14 @@ const prospectOtherContact = mongoose.Schema(
     });
 
 const ProspectsModal = mongoose.model('Prospect', prospectSchema);
-const ProInteractionModal = mongoose.model('ProInteraction', proInteractionSchema);
 const ProNextOnModal = mongoose.model('ProNextOn', proNextOnSchema);
 const ProspectOtherContactModal = mongoose.model('ProspectOtherContact', prospectOtherContact);
 
 const syncIndex = async () => {
     await ProspectsModal.syncIndexes();
     await ProNextOnModal.syncIndexes();
-    await ProInteractionModal.syncIndexes();
     await ProspectOtherContactModal.syncIndexes();
 }
 syncIndex();
 
-module.exports = { ProspectsModal, ProInteractionModal, ProNextOnModal, ProspectOtherContactModal };
+module.exports = { ProspectsModal, ProNextOnModal, ProspectOtherContactModal };

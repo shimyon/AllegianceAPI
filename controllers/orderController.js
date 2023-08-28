@@ -1,5 +1,7 @@
 const asyncHandler = require('express-async-handler')
 const OrderModal = require('../models/orderModel')
+const User = require('../models/userModel')
+const notificationModel = require('../models/notificationModel')
 const Order = OrderModal.OrderModal
 const OrderProduct = OrderModal.OrderProductModal
 const QuatationModal = require('../models/quatationModel')
@@ -20,8 +22,13 @@ const Template = require('../models/templateModel')
 
 const addOrder = asyncHandler(async (req, res) => {
     try {
-
+        let orderNo = await Order.find({}, { OrderNo: 1, _id: 0 }).sort({ OrderNo: -1 }).limit(1);
+        let maxOrder = 1;
+        if (orderNo.length > 0) {
+            maxOrder = orderNo[0].OrderNo + 1;
+        }
         const newOrder = await Order.create({
+            OrderNo: maxOrder,
             Customer: req.body.customer,
             ShippingAddress: req.body.shippingAddress,
             BillingAddress: req.body.billingAddress,
@@ -66,8 +73,30 @@ const addOrder = asyncHandler(async (req, res) => {
         newOrder.save((err) => {
             if (err) throw err;
         });
-
-        return res.status(200).json(newOrder).end();
+        if (newOrder) {
+            let resuser = await User.find({ is_active: true, role: 'Admin' });
+            let date = new Date();
+            const savedNotification = await notificationModel.create({
+                description: `Order(${newOrder.OrderNo}) entry has been created`,
+                date: date,
+                userId: newOrder.Sales,
+                Isread: false
+            });
+            let insertdata = resuser.map(f => ({
+                description: `Order(${newOrder.OrderNo}) entry has been created`,
+                date: date,
+                userId: f._id,
+                Isread: false
+            }));
+            if (insertdata.length > 0) {
+                const savedNotification = await notificationModel.insertMany(insertdata);
+            }
+            return res.status(200).json(newOrder).end();
+        }
+        else {
+            res.status(400)
+            throw new Error("Invalid Order data!")
+        }
     } catch (err) {
         return res.status(400).json({
             success: false,
@@ -208,8 +237,8 @@ const getAllOrder = asyncHandler(async (req, res) => {
 })
 
 const pdfcreate = asyncHandler(async (req, res) => {
-    const data = await Template.findById(req.body.template_id)
     try {
+        const data = await Template.findById(req.body.template_id)
         var template = path.join(__dirname, '..', 'public', 'template.html')
         var templateHtml = fs.readFileSync(template, 'utf8')
         templateHtml = templateHtml.replace('{{Data}}', data.Detail)
@@ -240,7 +269,7 @@ const pdfcreate = asyncHandler(async (req, res) => {
             templateHtml = templateHtml.replace('{{token.discount}}', (customerList[0].Amount * customerList[0].Discount) / 100)
             templateHtml = templateHtml.replace('{{token.finalamount}}', customerList[0].TotalPrice)
             templateHtml = templateHtml.replace('{{token.finalamountword}}', converter.toWords(customerList[0].TotalPrice))
-            templateHtml = templateHtml.replace('{{token.table}}', `<table border="1" style="width:100%">
+            templateHtml = templateHtml.replace('{{token.table}}', `<table border="1" cellpadding="0" cellspacing="0" style="width:100%">
             <tbody>
                 <tr>
                 <th>Item</th>
@@ -300,7 +329,7 @@ const pdfcreate = asyncHandler(async (req, res) => {
             templateHtml = templateHtml.replace('{{token.discount}}', (customerList[0].Amount * customerList[0].Discount) / 100)
             templateHtml = templateHtml.replace('{{token.finalamount}}', customerList[0].TotalPrice)
             templateHtml = templateHtml.replace('{{token.finalamountword}}', converter.toWords(customerList[0].TotalPrice))
-            templateHtml = templateHtml.replace('{{token.table}}', `<table border="1" style="width:100%">
+            templateHtml = templateHtml.replace('{{token.table}}', `<table border="1" cellpadding="0" cellspacing="0" style="width:100%">
             <tbody>
                 <tr>
                 <th>Item</th>
@@ -362,7 +391,7 @@ const pdfcreate = asyncHandler(async (req, res) => {
             templateHtml = templateHtml.replace('{{token.discount}}', (customerList[0].Amount * customerList[0].Discount) / 100)
             templateHtml = templateHtml.replace('{{token.finalamount}}', customerList[0].TotalPrice)
             templateHtml = templateHtml.replace('{{token.finalamountword}}', converter.toWords(customerList[0].TotalPrice))
-            templateHtml = templateHtml.replace('{{token.table}}', `<table border="1" style="width:100%">
+            templateHtml = templateHtml.replace('{{token.table}}', `<table border="1" cellpadding="0" cellspacing="0" style="width:100%">
             <tbody>
                 <tr>
                 <th>Item</th>
@@ -388,15 +417,16 @@ const pdfcreate = asyncHandler(async (req, res) => {
             </table>`)
         }
 
-        pdf.create(templateHtml).toFile(filename, (err, resf) => {
-            const base64data = Buffer.from(templateHtml, 'binary')
+        pdf.create(templateHtml).toStream(function(err, stream) {
+            if (err) {
+                res.end();
+            } else {
+                res.set('Content-type', 'application/pdf');
+                res.setHeader('Content-Disposition', `attachment; filename=Print_${Math.random() * 1000000}.pdf`);
+                stream.pipe(res)
+            }
         });
-        var file = fs.createReadStream(filename);
-        var stat = fs.statSync(filename);
-        res.setHeader('Content-Length', stat.size);
-        res.setHeader('Content-Type', 'application/pdf');
-        res.setHeader('Content-Disposition', 'attachment; filename=Print.pdf');
-        file.pipe(res);
+        
     } catch (err) {
         return res.status(400).json({
             success: false,
@@ -553,7 +583,8 @@ module.exports = {
     editOrder,
     removeOrder,
     getAllOrder,
-    getOrderById, pdfcreate,
+    getOrderById,
+    pdfcreate,
     changeOrderStatus,
     moveToInvoice
 }
