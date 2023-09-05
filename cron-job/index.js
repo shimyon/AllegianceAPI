@@ -11,9 +11,9 @@ const loadCronJob = () => {
         
         LeadCronLoad();
         ProspectCronLoad();
-        SupportCronLoad();
-        ProjectCronLoad();
-        TaskCronLoad();
+        // SupportCronLoad();
+        // ProjectCronLoad();
+        // TaskCronLoad();
         ReCoveryCronLoad();
 
     } catch (error) {

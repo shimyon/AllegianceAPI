@@ -30,11 +30,15 @@ const addContract = asyncHandler(async (req, res) => {
 
 const insertContract = asyncHandler(async (req, res, fileName) => {
     try {
-
+        let contractNo = await Contract.find({}, { ContractNo: 1, _id: 0 }).sort({ ContractNo: -1 }).limit(1);
+        let maxcontractNo = 1;
+        if (contractNo.length >0) {
+            maxcontractNo = contractNo[0].ContractNo + 1;
+        }
         await Contract.create({
             Customer: req.body.customer,
             Name: req.body.name,
-            ContractNo: req.body.contracNo,
+            ContractNo: maxcontractNo,
             executive: req.body.executive,
             StartDate: req.body.startDate,
             ExpiryDate: req.body.expiryDate,
@@ -94,7 +98,6 @@ const insertEditContract = asyncHandler(async (req, res, fileName) => {
         var param = {
             Customer: req.body.customer,
             Name: req.body.name,
-            ContractNo: req.body.contracNo,
             StartDate: req.body.startDate,
             executive: req.body.executive,
             ExpiryDate: req.body.expiryDate,

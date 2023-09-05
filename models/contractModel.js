@@ -18,7 +18,7 @@ const contractSchema = mongoose.Schema(
             ref: 'User'
         },
         ContractNo: {
-            type: String
+            type: Number
         },
         StartDate: {
             type: Date
