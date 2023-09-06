@@ -1,17 +1,16 @@
 var cron = require('node-cron');
 const { sendMail } = require('../middleware/sendMail');
 const { getleadAction } = require('../services/leadService');
+const User = require('../models/userModel')
 
 const LeadCronLoad = () => {
-    cron.schedule('*/10 * * * * *', async () => {
+    cron.schedule('0 10 * * *', async () => {
         let nexts = await getleadAction();
-        nexts.forEach(element => {
-            debugger
-        // sendMail(process.env.Email_To,'Sample Mail', 'Sample Mail');
-            console.log(`Recovery element ${element._id}`);
+        nexts.forEach(async (element) =>  {
+            const sales = await User.findById(element.leadId.Sales);
+            sendMail(sales.email,`Followup for Lead- [CRM Bot]`, `${element.leadId.Title} ${element.leadId.FirstName} ${element.leadId.LastName} Lead Followup. Note:${element.note}`);
+            console.log(`Lead element ${element._id}`);
         });
-        // sendMail(process.env.Email_To,'Sample Mail', 'Sample Mail');
-        console.log('Lead cron running a task every 10 second' + new Date().toString());
     });
 }
 

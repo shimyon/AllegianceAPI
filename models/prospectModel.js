@@ -127,7 +127,7 @@ const proNextOnSchema = mongoose.Schema(
     {
         prospectId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'Prospects'
+            ref: 'Prospect'
         },
         date: {
             type: Date

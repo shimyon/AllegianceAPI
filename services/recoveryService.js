@@ -7,7 +7,7 @@ const getInCompleteRocovery = async () => {
         Status: 'In Complete',
         OnHold: false,
         NextFollowup:moment(new Date()).format("YYYY-MM-DD")
-    }).populate("Customer").lean();
+    }).populate("Customer").populate("addedBy").lean();
 
     return recovery;
 }

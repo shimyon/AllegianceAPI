@@ -6,7 +6,7 @@ const moment = require('moment')
 const getleadAction = async () => {
     const next = await NextOn.find({
         date:moment(new Date()).format("YYYY-MM-DD")
-    }).lean();
+    }).populate("leadId").lean();
 
     return next;
 }
