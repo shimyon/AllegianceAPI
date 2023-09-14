@@ -2,7 +2,9 @@ const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const asyncHandler = require('express-async-handler')
 const User = require('../models/userModel')
-
+const DashboardModal = require('../models/dashboardModel')
+const Dashboard = DashboardModal.Dashboard
+const moment = require('moment');
 //@desc Register New User
 //@route POST api/user
 //@access Public
@@ -34,7 +36,16 @@ const registerUser = asyncHandler(async (req, res) => {
         is_active: true
 
     })
-
+    await Dashboard.create({
+        Lead: 0,
+        Prospect: 0,
+        Support: 0,
+        Recovery: 0,
+        Project: 0,
+        Order: 0,
+        LastUpdate: moment(new Date()).format("YYYY-MM-DD HH:mm"),
+        UserId: user.id
+    });
     if (user) {
         res.status(201).json({
             _id: user.id,

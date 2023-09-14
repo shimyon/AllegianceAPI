@@ -1,9 +1,7 @@
 const LeadCronLoad = require('./leadCron');
 const ProspectCronLoad = require('./prospectCron');
-const SupportCronLoad = require('./supportCron');
-const ProjectCronLoad = require('./projectCron');
+const DashboardCronLoad = require('./dashboardCron');
 const ReCoveryCronLoad = require('./recoveryCron');
-const TaskCronLoad = require('./taskCron');
 
 
 const loadCronJob = () => {
@@ -11,9 +9,7 @@ const loadCronJob = () => {
         
         LeadCronLoad();
         ProspectCronLoad();
-        // SupportCronLoad();
-        // ProjectCronLoad();
-        // TaskCronLoad();
+        DashboardCronLoad();
         ReCoveryCronLoad();
 
     } catch (error) {

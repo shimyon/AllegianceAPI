@@ -1,5 +1,35 @@
 const mongoose = require('mongoose')
 
+const DashboardSchema = mongoose.Schema(
+    {
+        UserId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        },
+        Lead: {
+            type: Number
+        },
+        Prospect: {
+            type: Number
+        },
+        Support: {
+            type: Number
+        },
+        Recovery: {
+            type: Number
+        },
+        Project: {
+            type: Number
+        },
+        Order: {
+            type: Number
+        },
+        LastUpdate: {
+            type: Date
+        },
+    }
+)
+
 const newsFeedSchema = mongoose.Schema(
     {
         title: {
@@ -14,9 +44,9 @@ const newsFeedSchema = mongoose.Schema(
         url: {
             type: String
         },
-        is_active:{
-            type:Boolean,
-            default:true
+        is_active: {
+            type: Boolean,
+            default: true
         },
         replay: [{
             type: mongoose.Schema.Types.ObjectId,
@@ -34,7 +64,7 @@ const newsFeedSchema = mongoose.Schema(
 
 const newsFeedReplySchema = mongoose.Schema(
     {
-        newsId:{
+        newsId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'NewsFeed'
         },
@@ -52,12 +82,14 @@ const newsFeedReplySchema = mongoose.Schema(
 )
 
 const NewsFeed = mongoose.model('NewsFeed', newsFeedSchema);
+const Dashboard = mongoose.model('Dashboard', DashboardSchema);
 const NewsFeedReplay = mongoose.model('NewsFeedReplay', newsFeedReplySchema);
 
 const syncIndex = async () => {
     await NewsFeed.syncIndexes();
     await NewsFeedReplay.syncIndexes();
+    await Dashboard.syncIndexes();
 }
 syncIndex();
 
-module.exports = { NewsFeed, NewsFeedReplay};
+module.exports = { NewsFeed, NewsFeedReplay, Dashboard };
