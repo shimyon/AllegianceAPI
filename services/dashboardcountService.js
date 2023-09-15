@@ -3,6 +3,10 @@ const DashboardModal = require('../models/dashboardModel')
 const Dashboard = DashboardModal.Dashboard
 const LeadModal = require('../models/leadModel')
 const Lead = LeadModal.LeadsModal;
+const Master = require('../models/masterModel')
+const Product = Master.ProductModal;
+const CustomerModal = require('../models/customerModel')
+const Customer = CustomerModal.CustomerModal
 const ProspectModal = require('../models/prospectModel')
 const Prospect = ProspectModal.ProspectsModal;
 const ContractModel = require('../models/contractModel')
@@ -30,7 +34,9 @@ const setDashboardCount = async () => {
         processCount: 0,
         supportCount: 0,
         orderCount: 0,
-        recoveryCount: 0
+        recoveryCount: 0,
+        productCount: 0,
+        customerCount: 0,
     };
     for (const elements in newDashboardcount) {
         if (Object.hasOwnProperty.call(newDashboardcount, elements)) {
@@ -42,6 +48,8 @@ const setDashboardCount = async () => {
                 dashboardCount.supportCount = await Support.find({ is_active: true }).count({});
                 dashboardCount.recoveryCount = await Recovery.find({ is_active: true }).count({});
                 dashboardCount.orderCount = await Order.find({ is_active: true }).count({});
+                dashboardCount.productCount = await Product.find({ is_active: true}).count({});
+                dashboardCount.customerCount = await Customer.find({ is_active: true }).count({});
             }
             else {
                 dashboardCount.leadCount = await Lead.find({ is_active: true, addedBy: element.UserId._id, Stage: "New" }).count({});
@@ -50,6 +58,8 @@ const setDashboardCount = async () => {
                 dashboardCount.supportCount = await Support.find({ is_active: true, $or: [{ addedBy: element.UserId._id }, { Sales: element.UserId._id }] }).count({});
                 dashboardCount.recoveryCount = await Recovery.find({ is_active: true, addedBy: element.UserId._id }).count({});
                 dashboardCount.orderCount = await Order.find({ is_active: true, $or: [{ addedBy: element.UserId._id }, { Sales: element.UserId._id }] }).count({});
+                dashboardCount.productCount = 0;
+                dashboardCount.customerCount = 0;
             }
             let user = await Dashboard.findByIdAndUpdate(element._id, {
                 Lead: dashboardCount.leadCount,
@@ -58,7 +68,8 @@ const setDashboardCount = async () => {
                 Recovery: dashboardCount.recoveryCount,
                 Project: dashboardCount.processCount,
                 Order: dashboardCount.orderCount,
-                LastUpdate: moment(new Date()).format("YYYY-MM-DD HH:mm"),
+                Product: dashboardCount.productCount,
+                Customer: dashboardCount.customerCount,
             });
             user = await Dashboard.findOne({ _id: element._id });
             console.log(user)

@@ -41,9 +41,10 @@ const registerUser = asyncHandler(async (req, res) => {
         Prospect: 0,
         Support: 0,
         Recovery: 0,
+        Product:0,
+        Customer:0,
         Project: 0,
         Order: 0,
-        LastUpdate: moment(new Date()).format("YYYY-MM-DD HH:mm"),
         UserId: user.id
     });
     if (user) {

@@ -1,5 +1,6 @@
 const asyncHandler = require('express-async-handler')
 const DashboardModal = require('../models/dashboardModel')
+const Dashboard = DashboardModal.Dashboard
 const NewsFeed = DashboardModal.NewsFeed
 const NewsFeedReplay = DashboardModal.NewsFeedReplay
 const LeadModal = require('../models/leadModel')
@@ -214,30 +215,11 @@ const saveNewsReplay = asyncHandler(async (req, res, fileName) => {
 
 const getDashboardCount = asyncHandler(async (req, res) => {
     try {
-        var role = req.user.role;
-        var dashboardCount = {
-            leadCount:0,
-            prospectCount:0,
-            processCount:0,
-            supportCount:0,
-        };
-        
-        if (role == "admin") {
-            dashboardCount.leadCount = await Lead.find({is_active:true,Stage: "New"}).count({});
-            dashboardCount.prospectCount = await Prospect.find({is_active:true}).count({});
-            dashboardCount.processCount = await Contract.find({is_active:true}).count({});
-            dashboardCount.supportCount = await Support.find({is_active:true}).count({});
-        }
-        else {
-            dashboardCount.leadCount = await Lead.find({is_active:true,addedBy:req.user._id,Stage: "New"}).count({});
-            dashboardCount.prospectCount = await Prospect.find({is_active:true,addedBy:req.user._id}).count({});
-            dashboardCount.processCount = await Contract.find({is_active:true,"Process.sales":req.user._id}).count({});
-            dashboardCount.supportCount = await Support.find({is_active:true,$or:[{addedBy:req.user._id},{Sales:req.user._id}]}).count({});
-        }
+        user = await Dashboard.findOne({ UserId: req.user._id }).populate("UserId");
 
         return res.status(200).json({
             success: true,
-            data: dashboardCount
+            data: user
         }).end();
     } catch (err) {
         return res.status(400).json({

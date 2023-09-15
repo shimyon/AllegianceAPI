@@ -24,9 +24,15 @@ const DashboardSchema = mongoose.Schema(
         Order: {
             type: Number
         },
-        LastUpdate: {
-            type: Date
+        Product: {
+            type: Number
         },
+        Customer: {
+            type: Number
+        },
+    },
+    {
+        timestamps: true,
     }
 )
 
