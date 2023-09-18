@@ -44,7 +44,7 @@ const productSchema = mongoose.Schema(
         timestamps: true,
     });
 
-const sourceSchema = mongoose.Schema(
+const stateSchema = mongoose.Schema(
     {
         Name: {
             type: String
@@ -53,7 +53,15 @@ const sourceSchema = mongoose.Schema(
             type: Boolean
         }
     });
-
+    const sourceSchema = mongoose.Schema(
+        {
+            Name: {
+                type: String
+            },
+            is_active: {
+                type: Boolean
+            }
+        });
 const unitSchema = mongoose.Schema(
     {
         Name: {
@@ -96,6 +104,7 @@ const subCategorySchema = mongoose.Schema(
 
 const ProductModal = mongoose.model('Products', productSchema);
 const SourceModal = mongoose.model('Sources', sourceSchema);
+const StateModal = mongoose.model('States', stateSchema);
 const UnitModal = mongoose.model('Units', unitSchema);
 const CategoryModal = mongoose.model('Category', categorySchema);
 const SubCategoryModal = mongoose.model('SubCategory', subCategorySchema);
@@ -103,10 +112,11 @@ const SubCategoryModal = mongoose.model('SubCategory', subCategorySchema);
 const syncIndex = async () => {
     await ProductModal.syncIndexes();
     await SourceModal.syncIndexes();
+    await StateModal.syncIndexes();
     await UnitModal.syncIndexes();
     await CategoryModal.syncIndexes();
     await SubCategoryModal.syncIndexes();
 }
 syncIndex();
 
-module.exports = { ProductModal, SourceModal, UnitModal, CategoryModal, SubCategoryModal };
+module.exports = { ProductModal, StateModal,SourceModal, UnitModal, CategoryModal, SubCategoryModal };

@@ -190,7 +190,7 @@ const getAllProspect = asyncHandler(async (req, res) => {
                     path: "user",
                     select: "_id name email role"
                 }
-            }).populate("Product").populate("OtherContact").populate("Sales").populate("Source").populate("addedBy", "_id name email role")
+            }).populate("Product").populate("OtherContact").populate("Sales").populate("Source").populate("addedBy", "_id name email role").sort({ createdAt: -1 })
             .exec((err, result) => {
                 if (err) {
                     return res.status(400).json({

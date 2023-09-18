@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 
-const { 
+const {
     addProduct,
     editProduct,
     changeProductStatus,
@@ -28,8 +28,12 @@ const {
     editSubCategory,
     changeSubCategoryStatus,
     getSubCategorys,
-    getSubCategoryById
- } = require('../controllers/masterController')
+    getSubCategoryById,
+    addState,
+    editState,
+    getStates,
+    getStateById
+} = require('../controllers/masterController')
 const { protect } = require('../middleware/authMiddleware')
 
 router.get('/getSales', protect, getSales)
@@ -47,6 +51,10 @@ router.post('/changeSourceStatus', protect, changeSourceStatus)
 router.get('/getSource', protect, getSources)
 router.get('/source/:id', protect, getSourceById)
 
+router.post('/addState', protect, addState)
+router.post('/editState', protect, editState)
+router.get('/getState', protect, getStates)
+router.get('/state/:id', protect, getStateById)
 
 router.post('/addUnit', protect, addUnit)
 router.post('/editUnit', protect, editUnit)

@@ -1,6 +1,7 @@
 const asyncHandler = require('express-async-handler')
 const Master = require('../models/masterModel')
 const Product = Master.ProductModal;
+const State = Master.StateModal;
 const Source = Master.SourceModal;
 const Unit = Master.UnitModal;
 const Category = Master.CategoryModal;
@@ -234,7 +235,89 @@ const getSourceById = asyncHandler(async (req, res) => {
         return res.status(400).json(response);
     }
 })
+const addState = asyncHandler(async (req, res) => {
+    let response = new Response();
 
+    try {
+        let oldState = await State.findOne({ Name: req.body.name });
+
+        if (oldState) {
+            response.message = "State with same name already exist.";
+            return res.status(400).json(response);
+        }
+
+        let newState = await State.create({
+            Name: req.body.name,
+            is_active: true,
+        });
+
+        response.success = true;
+        response.message = "State added successfully";
+        response.data = newState;
+        return res.status(200).json(response);
+    } catch (err) {
+        response.message = "Error in adding State. " + err.message;
+        return res.status(400).json(response);
+    }
+
+});
+const editState = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let oldState = State.findById(req.body.id);
+
+        if (!oldState) {
+            response.message = "State not found.";
+            return res.status(400).json(response);
+        }
+
+        let newState = await State.findByIdAndUpdate(req.body.id, {
+            Name: req.body.name
+        });
+
+        response.success = true;
+        response.message = "State added successfully";
+        response.data = newState;
+        return res.status(200).json(response);
+    } catch (err) {
+        response.message = "Error in updating State. " + err.message;
+        return res.status(400).json(response);
+    }
+
+});
+
+const getStates = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let States = await State.find({ is_active: "true" });
+
+        response.success = true;
+        response.data = States;
+        return res.status(200).json(response);
+    }
+    catch (err) {
+        response.message = "Error in getting State. " + err.message;
+        return res.status(400).json(response);
+    }
+})
+
+const getStateById = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let States = await State.findOne({ is_active: true, _id: req.params.id });
+
+        response.success = true;
+        response.data = States;
+        return res.status(200).json(response);
+    }
+    catch (err) {
+        response.message = "Error in getting State by id. " + err.message;
+        return res.status(400).json(response);
+    }
+})
 const getSales = asyncHandler(async (req, res) => {
     let response = new Response();
 
@@ -608,5 +691,9 @@ module.exports = {
     editSubCategory,
     changeSubCategoryStatus,
     getSubCategorys,
-    getSubCategoryById
+    getSubCategoryById,
+    addState,
+    editState,
+    getStates,
+    getStateById,
 }
