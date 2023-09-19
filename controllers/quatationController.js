@@ -259,7 +259,7 @@ const getAllQuatation = asyncHandler(async (req, res) => {
             .populate("BillingAddress")
             .populate("Sales", 'name email')
             .populate("addedBy", 'name email')
-
+            .sort({ createdAt: -1 })
         return res.status(200).json({
             success: true,
             data: customerList

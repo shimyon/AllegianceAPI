@@ -387,7 +387,7 @@ const addDailyStatus = asyncHandler(async (req, res) => {
         }
         for (var i = 0; i < contract.length; i++) {
             var cro = contract[i]._id == oldProcess.id ? parseInt(req.body.progress) : contract[i].progress;
-            cProgress += cpro;
+            cProgress += cro;
         }
         if (tProgress > 0) {
             let percent = (tProgress * 100) / totalProgress;
@@ -555,7 +555,7 @@ const removeSubProcess = asyncHandler(async (req, res) => {
 
 const getAllDailyStatus = asyncHandler(async (req, res) => {
     try {
-        let StatusList = await DailyStatus.find({ subProcessId: req.params.id }).populate("addedBy", "_id name email role")
+        let StatusList = await DailyStatus.find({ subProcessId: req.params.id }).populate("addedBy", "_id name email role").sort({ statusDate: -1 })
         return res.status(200).json({
             success: true,
             data: StatusList

@@ -104,7 +104,7 @@ const getProduct = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let products = await Product.find({ is_active: req.body.active });
+        let products = await Product.find({ is_active: req.body.active }).sort({ createdAt: -1 });
 
         response.success = true;
         response.data = products;

@@ -224,7 +224,7 @@ const getAllLead = asyncHandler(async (req, res) => {
     }
 
     try {
-        let leadList = await Lead.find(condition).populate("Source").populate("OtherContact").populate("Product").populate("Sales").populate("NextTalk").populate("addedBy")
+        let leadList = await Lead.find(condition).populate("Source").populate("OtherContact").populate("Product").populate("Sales").populate("NextTalk").populate("addedBy").sort({ createdAt: -1 })
             .exec((err, result) => {
                 var newResult = [];
                 result.forEach((val, idx) => {

@@ -136,7 +136,7 @@ const getAllRecovery = asyncHandler(async (req, res) => {
         condition.Status=req.body.status;
     }
     try {
-        let RecoveryList = await Recovery.find(condition).populate("Customer").populate("addedBy", "_id name email role")
+        let RecoveryList = await Recovery.find(condition).populate("Customer").populate("addedBy", "_id name email role").sort({ createdAt: -1 })
         return res.status(200).json({
             success: true,
             data: RecoveryList
