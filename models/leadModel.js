@@ -126,6 +126,9 @@ const nextOnSchema = mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User'
         },
+    },
+    {
+        timestamps: true,
     });
 
 const leadOtherContact = mongoose.Schema(
@@ -143,6 +146,9 @@ const leadOtherContact = mongoose.Schema(
         Email: {
             type: String
         }
+    },
+    {
+        timestamps: true,
     });
 
 const LeadsModal = mongoose.model('Leads', leadSchema);

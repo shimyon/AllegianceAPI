@@ -116,6 +116,9 @@ const orderProductSchema = mongoose.Schema(
             type: Boolean,
             default: false
         }
+    },
+    {
+        timestamps: true,
     })
 
 const OrderModal = mongoose.model('Orders', orderSchema);

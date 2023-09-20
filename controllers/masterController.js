@@ -1,6 +1,7 @@
 const asyncHandler = require('express-async-handler')
 const Master = require('../models/masterModel')
 const Product = Master.ProductModal;
+const Type = Master.TypeModal;
 const State = Master.StateModal;
 const Source = Master.SourceModal;
 const Unit = Master.UnitModal;
@@ -128,6 +129,108 @@ const getProductById = asyncHandler(async (req, res) => {
     }
     catch (err) {
         response.message = "Error in getting product by id. " + err.message;
+        return res.status(400).json(response);
+    }
+})
+const addType = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let oldType = await Type.findOne({ Name: req.body.name });
+
+        if (oldType) {
+            response.message = "Type with same name already exist.";
+            return res.status(400).json(response);
+        }
+        let newType = await Type.create({
+            Name: req.body.name,
+            is_active: true,
+        });
+
+        response.success = true;
+        response.message = "Type added successfully";
+        response.data = newType;
+        return res.status(200).json(response);
+    } catch (err) {
+        response.message = "Error in adding Type. " + err.message;
+        return res.status(400).json(response);
+    }
+
+});
+
+const editType = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let oldType = Type.findById(req.body.id);
+
+        if (!oldType) {
+            response.message = "Type not found.";
+            return res.status(400).json(response);
+        }
+
+        let newType = await Type.findByIdAndUpdate(req.body.id, {
+            Name: req.body.name,
+            is_active: true,
+        });
+
+        response.success = true;
+        response.message = "Type updated successfully";
+        return res.status(200).json(response);
+    } catch (err) {
+        response.message = "Error in updating Type. " + err.message;
+        return res.status(400).json(response);
+    }
+
+});
+
+const changeTypeStatus = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let newType = await Type.findByIdAndUpdate(req.body.id, {
+            is_active: req.body.active
+        });
+
+        response.success = true;
+        response.message = "Type status updated successfully";
+        return res.status(200).json(response);
+    }
+    catch (err) {
+        response.message = "Error in updating status. " + err.message;
+        return res.status(400).json(response);
+    }
+
+})
+
+const getType = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let Types = await Type.find({ is_active: req.body.active }).sort({ createdAt: -1 });
+
+        response.success = true;
+        response.data = Types;
+        return res.status(200).json(response);
+    }
+    catch (err) {
+        response.message = "Error in getting Type. " + err.message;
+        return res.status(400).json(response);
+    }
+})
+
+const getTypeById = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let Types = await Type.findOne({ is_active: true, _id: req.params.id });
+
+        response.success = true;
+        response.data = Types;
+        return res.status(200).json(response);
+    }
+    catch (err) {
+        response.message = "Error in getting Type by id. " + err.message;
         return res.status(400).json(response);
     }
 })
@@ -670,6 +773,11 @@ module.exports = {
     changeProductStatus,
     getProduct,
     getProductById,
+    addType,
+    editType,
+    changeTypeStatus,
+    getType,
+    getTypeById,
     addSource,
     editSource,
     changeSourceStatus,

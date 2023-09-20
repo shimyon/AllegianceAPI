@@ -72,6 +72,9 @@ const quatationSchema = mongoose.Schema(
             type: String
         }
 
+    },
+    {
+        timestamps: true,
     })
 
 const quatationProductSchema = mongoose.Schema(
@@ -108,6 +111,9 @@ const quatationProductSchema = mongoose.Schema(
         Note: {
             type: String
         }
+    },
+    {
+        timestamps: true,
     })
 
 const quatationTermsandCondition = mongoose.Schema(

@@ -30,7 +30,8 @@ const contractSchema = mongoose.Schema(
             type: Date
         },
         Type: {
-            type: String
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Types'
         },
         Item: {
             type: String

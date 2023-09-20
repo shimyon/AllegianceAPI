@@ -32,7 +32,12 @@ const {
     addState,
     editState,
     getStates,
-    getStateById
+    getStateById,
+    addType,
+    editType,
+    changeTypeStatus,
+    getType,
+    getTypeById
 } = require('../controllers/masterController')
 const { protect } = require('../middleware/authMiddleware')
 
@@ -44,6 +49,12 @@ router.post('/editProduct', protect, editProduct)
 router.post('/changeProductStatus', protect, changeProductStatus)
 router.post('/getProduct', protect, getProduct)
 router.get('/product/:id', protect, getProductById)
+
+router.post('/addType', protect, addType)
+router.post('/editType', protect, editType)
+router.post('/changeTypeStatus', protect, changeTypeStatus)
+router.post('/getType', protect, getType)
+router.get('/Type/:id', protect, getTypeById)
 
 router.post('/addSource', protect, addSource)
 router.post('/editSource', protect, editSource)

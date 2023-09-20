@@ -139,6 +139,9 @@ const proNextOnSchema = mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User'
         },
+    },
+    {
+        timestamps: true,
     });
 
 const prospectOtherContact = mongoose.Schema(
@@ -156,6 +159,9 @@ const prospectOtherContact = mongoose.Schema(
         Email: {
             type: String
         }
+    },
+    {
+        timestamps: true,
     });
 
 const ProspectsModal = mongoose.model('Prospect', prospectSchema);

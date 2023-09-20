@@ -52,16 +52,22 @@ const stateSchema = mongoose.Schema(
         is_active: {
             type: Boolean
         }
+    },
+    {
+        timestamps: true,
     });
-    const sourceSchema = mongoose.Schema(
-        {
-            Name: {
-                type: String
-            },
-            is_active: {
-                type: Boolean
-            }
-        });
+const sourceSchema = mongoose.Schema(
+    {
+        Name: {
+            type: String
+        },
+        is_active: {
+            type: Boolean
+        }
+    },
+    {
+        timestamps: true,
+    });
 const unitSchema = mongoose.Schema(
     {
         Name: {
@@ -70,6 +76,9 @@ const unitSchema = mongoose.Schema(
         is_active: {
             type: Boolean
         }
+    },
+    {
+        timestamps: true,
     });
 
 const categorySchema = mongoose.Schema(
@@ -84,6 +93,9 @@ const categorySchema = mongoose.Schema(
         is_active: {
             type: Boolean
         }
+    },
+    {
+        timestamps: true,
     });
 
 const subCategorySchema = mongoose.Schema(
@@ -100,9 +112,25 @@ const subCategorySchema = mongoose.Schema(
         is_active: {
             type: Boolean
         }
+    },
+    {
+        timestamps: true,
     });
-
+const typeSchema = mongoose.Schema(
+    {
+        Name: {
+            type: String,
+            required: [true, 'Please add name']
+        },
+        is_active: {
+            type: Boolean
+        }
+    },
+    {
+        timestamps: true,
+    });
 const ProductModal = mongoose.model('Products', productSchema);
+const TypeModal = mongoose.model('Types', typeSchema);
 const SourceModal = mongoose.model('Sources', sourceSchema);
 const StateModal = mongoose.model('States', stateSchema);
 const UnitModal = mongoose.model('Units', unitSchema);
@@ -111,6 +139,7 @@ const SubCategoryModal = mongoose.model('SubCategory', subCategorySchema);
 
 const syncIndex = async () => {
     await ProductModal.syncIndexes();
+    await TypeModal.syncIndexes();
     await SourceModal.syncIndexes();
     await StateModal.syncIndexes();
     await UnitModal.syncIndexes();
@@ -119,4 +148,4 @@ const syncIndex = async () => {
 }
 syncIndex();
 
-module.exports = { ProductModal, StateModal,SourceModal, UnitModal, CategoryModal, SubCategoryModal };
+module.exports = { ProductModal, TypeModal, StateModal, SourceModal, UnitModal, CategoryModal, SubCategoryModal };

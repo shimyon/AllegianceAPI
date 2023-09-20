@@ -2,7 +2,6 @@ const asyncHandler = require('express-async-handler')
 const DashboardModal = require('../models/dashboardModel')
 const Dashboard = DashboardModal.Dashboard
 const NewsFeed = DashboardModal.NewsFeed
-const NewsFeedReplay = DashboardModal.NewsFeedReplay
 const LeadModal = require('../models/leadModel')
 const Lead = LeadModal.LeadsModal;
 const ProspectModal = require('../models/prospectModel')
@@ -108,14 +107,8 @@ const editSave = asyncHandler(async (req, res, fileName) => {
 })
 const getAllNews = asyncHandler(async (req, res) => {
     try {
-        let newsList = await NewsFeed.find({ is_active: req.body.active }).sort({ createdAt: -1 }).populate(
-            {
-                path:"replay",
-                populate:{
-                   path: "addedBy",
-                   select:'name email'
-                }
-        }).populate("addedBy", 'name email')
+        let newsList = await NewsFeed.find({ is_active: req.body.active }).sort({ createdAt: -1 })
+            .populate("addedBy", 'name email')
         return res.status(200).json({
             success: true,
             data: newsList
@@ -130,14 +123,7 @@ const getAllNews = asyncHandler(async (req, res) => {
 })
 const getNewsById = asyncHandler(async (req, res) => {
     try {
-        let newsList = await NewsFeed.find({ _id: req.params.id }).populate(
-            {
-                path:"replay",
-                populate:{
-                   path: "addedBy",
-                   select:'name email'
-                }
-        }).populate("addedBy", 'name email')
+        let newsList = await NewsFeed.find({ _id: req.params.id }).populate("addedBy", 'name email')
         return res.status(200).json({
             success: true,
             data: newsList
@@ -180,39 +166,6 @@ const removeNewsFeed = asyncHandler(async (req, res) => {
 
 });
 
-const saveNewsReplay = asyncHandler(async (req, res, fileName) => {
-    try {
-
-        let news = await NewsFeed.findById(req.body.newsId);
-        if (!news) {
-            return res.status(400).json({
-                success: false,
-                msg: "News not found. " + err.message
-            });
-        }
-
-        let replay = await NewsFeedReplay.create({
-            newsId: req.body.newsId,
-            replay: req.body.title,
-            addedBy: req.user._id,
-
-        });
-        news.replay.push(replay);
-        news.save((err) => {
-            if (err) throw err;
-        });
-        return res.status(200).json({
-            success: true,
-            msg: "Replied successfully"
-        });
-    } catch (err) {
-        return res.status(400).json({
-            success: false,
-            msg: "Error in replay. " + err.message
-        });
-    }
-})
-
 const getDashboardCount = asyncHandler(async (req, res) => {
     try {
         user = await Dashboard.findOne({ UserId: req.user._id }).populate("UserId");
@@ -235,6 +188,5 @@ module.exports = {
     getAllNews,
     getNewsById,
     removeNewsFeed,
-    saveNewsReplay,
     getDashboardCount
 }
