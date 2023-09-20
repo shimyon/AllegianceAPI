@@ -12,7 +12,6 @@ const {
     getAllProcess,
     getProcessById,
     removeProcess,
-    updateProcess,
     addDailyStatus,
     getAllDailyStatus,
     addSubProcess,
@@ -33,7 +32,6 @@ router.post('/editProcess', protect, editProcess)
 router.post('/getAllProcess', protect, getAllProcess)
 router.post('/getProcessById', protect, getProcessById)
 router.get('/removeProcess/:id', protect, removeProcess)
-router.post('/updateProcess', protect, updateProcess)
 router.post('/addDailyStatus', protect, addDailyStatus)
 router.get('/getAllDailyStatus/:id', protect, getAllDailyStatus)
 router.post('/addSubProcess', protect, addSubProcess)

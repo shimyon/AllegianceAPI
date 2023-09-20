@@ -172,7 +172,6 @@ const addProcess = asyncHandler(async (req, res) => {
             contractId: req.body.contractId,
             Name: req.body.name,
             executive: req.body.executive,
-            status: req.body.status,
             note: req.body.note,
             startDate: req.body.startDate,
             dueDate: req.body.dueDate,
@@ -207,7 +206,6 @@ const editProcess = asyncHandler(async (req, res) => {
         await Process.findByIdAndUpdate(req.body.id, {
             executive: req.body.executive,
             Name: req.body.name,
-            status: req.body.status,
             note: req.body.note,
             startDate: req.body.startDate,
             dueDate: req.body.dueDate,
@@ -331,25 +329,6 @@ const removeContract = asyncHandler(async (req, res) => {
 
 });
 
-const updateProcess = asyncHandler(async (req, res) => {
-    try {
-        await Process.findByIdAndUpdate(req.body.id, {
-            status: req.body.status
-        });
-        return res.status(200).json({
-            success: true,
-            msg: "Status updated"
-        }).end();
-    } catch (err) {
-        return res.status(400).json({
-            success: false,
-            msg: "Error in getting Process. " + err.message,
-            data: null,
-        });
-    }
-
-});
-
 const addDailyStatus = asyncHandler(async (req, res) => {
     try {
         let oldSubProcess = await SubProcess.findById(req.body.subProcessId);
@@ -363,11 +342,11 @@ const addDailyStatus = asyncHandler(async (req, res) => {
         }
         let newStatus = await DailyStatus.create({
             subProcessId: req.body.subProcessId,
-            status: req.body.status,
             note: req.body.note,
             progress: req.body.progress,
             addedBy: req.user._id,
-            statusDate: req.body.date
+            startDate: req.body.startDate,
+            endDate: req.body.endDate
         });
         oldSubProcess.dailyStatus.push(newStatus);
         oldSubProcess.progress = req.body.progress;
@@ -376,29 +355,32 @@ const addDailyStatus = asyncHandler(async (req, res) => {
         });
 
         let exProcess = await SubProcess.find({ processId: oldSubProcess.processId });
-        let contract = await Process.find({ contractId: oldProcess.contractId });
         let tProgress = 0;
         let cProgress = 0;
+        let percent1 = 0;
+        let percent2 = 0;
         let totalProgress = 100 * exProcess.length;
-        let totalcontract = 100 * contract.length;
         for (var i = 0; i < exProcess.length; i++) {
             var pro = exProcess[i]._id == req.body.subProcessId ? parseInt(req.body.progress) : exProcess[i].progress;
             tProgress += pro;
         }
-        for (var i = 0; i < contract.length; i++) {
-            var cro = contract[i]._id == oldProcess.id ? parseInt(req.body.progress) : contract[i].progress;
-            cProgress += cro;
-        }
         if (tProgress > 0) {
-            let percent = (tProgress * 100) / totalProgress;
+            percent1 = (tProgress * 100) / totalProgress;
             await Process.findByIdAndUpdate(oldSubProcess.processId, {
-                progress: percent
+                progress: percent1
             })
         }
+        
+        let contract = await Process.find({ contractId: oldProcess.contractId });
+        let totalcontract = 100 * contract.length;
+        for (var i = 0; i < contract.length; i++) {
+            // var cro =  contract[i].progress;
+            cProgress += contract[i].progress;
+        }
         if (cProgress > 0) {
-            let percent = (cProgress * 100) / totalcontract;
+            percent2 = (cProgress * 100) / totalcontract;
             await Contract.findByIdAndUpdate(oldProcess.contractId, {
-                progress: percent
+                progress: percent2
             })
         }
 
@@ -430,7 +412,6 @@ const addSubProcess = asyncHandler(async (req, res) => {
             processId: req.body.processId,
             Name: req.body.name,
             executive: req.body.executive,
-            status: req.body.status,
             note: req.body.note,
             startDate: req.body.startDate,
             dueDate: req.body.dueDate,
@@ -465,7 +446,6 @@ const editSubProcess = asyncHandler(async (req, res) => {
         await SubProcess.findByIdAndUpdate(req.body.id, {
             executive: req.body.executive,
             Name: req.body.name,
-            status: req.body.status,
             note: req.body.note,
             startDate: req.body.startDate,
             dueDate: req.body.dueDate,
@@ -555,7 +535,7 @@ const removeSubProcess = asyncHandler(async (req, res) => {
 
 const getAllDailyStatus = asyncHandler(async (req, res) => {
     try {
-        let StatusList = await DailyStatus.find({ subProcessId: req.params.id }).populate("addedBy", "_id name email role").sort({ statusDate: -1 })
+        let StatusList = await DailyStatus.find({ subProcessId: req.params.id }).populate("addedBy", "_id name email role").sort({ createdAt: -1 })
         return res.status(200).json({
             success: true,
             data: StatusList
@@ -580,7 +560,6 @@ module.exports = {
     getAllProcess,
     getProcessById,
     removeProcess,
-    updateProcess,
     addDailyStatus,
     getAllDailyStatus,
     addSubProcess,
