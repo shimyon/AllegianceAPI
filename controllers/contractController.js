@@ -345,8 +345,7 @@ const addDailyStatus = asyncHandler(async (req, res) => {
             note: req.body.note,
             progress: req.body.progress,
             addedBy: req.user._id,
-            startDate: req.body.startDate,
-            endDate: req.body.endDate
+            Date: req.body.Date
         });
         oldSubProcess.dailyStatus.push(newStatus);
         oldSubProcess.progress = req.body.progress;
