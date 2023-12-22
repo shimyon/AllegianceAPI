@@ -7,6 +7,7 @@ const Source = Master.SourceModal;
 const Unit = Master.UnitModal;
 const Category = Master.CategoryModal;
 const SubCategory = Master.SubCategoryModal;
+const Module = Master.ModuleModal;
 const Response = require('../models/responseModel')
 const User = require('../models/userModel')
 
@@ -438,9 +439,9 @@ const getSales = asyncHandler(async (req, res) => {
 })
 const getProjectrole = asyncHandler(async (req, res) => {
     let response = new Response();
-    var condition = ["Project Manager","Worker","Sales"]
+    var condition = ["Project Manager", "Worker", "Sales"]
     try {
-        let sources = await User.find({is_active: true,role:condition});
+        let sources = await User.find({ is_active: true, role: condition });
 
         response.success = true;
         response.data = sources;
@@ -455,7 +456,7 @@ const addUnit = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let oldUnit = await Unit.findOne({ Name:req.body.name });
+        let oldUnit = await Unit.findOne({ Name: req.body.name });
 
         if (oldUnit) {
             response.message = "Unit with same name already exist.";
@@ -663,7 +664,7 @@ const addSubCategory = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let oldSubCategory = await SubCategory.findOne({ Name:  req.body.name , Category: req.body.category });
+        let oldSubCategory = await SubCategory.findOne({ Name: req.body.name, Category: req.body.category });
 
         if (oldSubCategory) {
             response.message = "SubCategory with same name already exist.";
@@ -675,7 +676,7 @@ const addSubCategory = asyncHandler(async (req, res) => {
             Category: req.body.category,
             is_active: true,
         });
-        let category= await Category.findById(req.body.category);
+        let category = await Category.findById(req.body.category);
         category.subCategory.push(newSubCategory);
         category.save((err) => {
             if (err) throw err;
@@ -767,6 +768,126 @@ const getSubCategoryById = asyncHandler(async (req, res) => {
         return res.status(400).json(response);
     }
 })
+const addModule = asyncHandler(async (req, res) => {
+    let response = new Response();
+    try {
+        let oldModule = await Module.findOne({ Name: req.body.name, GroupName: req.body.groupname });
+
+        if (oldModule) {
+            response.message = "Module with same name already exist.";
+            return res.status(400).json(response);
+        }
+
+        let newModule = await Module.create({
+            Name: req.body.name,
+            GroupName: req.body.groupname,
+            is_active: true,
+        });
+        response.success = true;
+        response.message = "Module added successfully";
+        response.data = newModule;
+        return res.status(200).json(response);
+    } catch (err) {
+        response.message = "Error in adding source. " + err.message;
+        return res.status(400).json(response);
+    }
+});
+
+const editModule = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let oldModule = Module.findById(req.body.id);
+
+        if (!oldModule) {
+            response.message = "Module not found.";
+            return res.status(400).json(response);
+        }
+
+        let newModule = await Module.findByIdAndUpdate(req.body.id, {
+            Name: req.body.name
+        });
+
+        response.success = true;
+        response.message = "Module added successfully";
+        response.data = newModule;
+        return res.status(200).json(response);
+    } catch (err) {
+        response.message = "Error in updating source. " + err.message;
+        return res.status(400).json(response);
+    }
+
+});
+
+const changeModuleStatus = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let newModule = await Module.findByIdAndUpdate(req.body.id, {
+            is_active: req.body.active
+        });
+
+        response.success = true;
+        response.message = "Module status updated successfully";
+        return res.status(200).json(response);
+    }
+    catch (err) {
+        response.message = "Error in updating status. " + err.message;
+        return res.status(400).json(response);
+    }
+
+})
+
+const getModule = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let sources = await Module.find({ is_active: req.body.active });
+
+        response.success = true;
+        response.data = sources;
+        return res.status(200).json(response);
+    }
+    catch (err) {
+        response.message = "Error in getting sources. " + err.message;
+        return res.status(400).json(response);
+    }
+})
+const getModulegroup = asyncHandler(async (req, res) => {
+    let response = new Response();
+    try {
+        const sources = await Module.aggregate([
+            {
+                $group: {
+                    _id: "$GroupName",
+                    obj: {
+                        $push: "$$ROOT",
+                    },
+                },
+            },
+        ]);
+        res.status(200).json(sources).end();
+    }
+    catch (err) {
+        response.message = "Error in getting sources. " + err.message;
+        return res.status(400).json(response);
+    }
+})
+const getModuleById = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let sources = await Module.findOne({ is_active: true, _id: req.params.id });
+
+        response.success = true;
+        response.data = sources;
+        return res.status(200).json(response);
+    }
+    catch (err) {
+        response.message = "Error in getting source by id. " + err.message;
+        return res.status(400).json(response);
+    }
+})
 module.exports = {
     addProduct,
     editProduct,
@@ -804,4 +925,10 @@ module.exports = {
     editState,
     getStates,
     getStateById,
+    addModule,
+    editModule,
+    changeModuleStatus,
+    getModule,
+    getModuleById,
+    getModulegroup
 }

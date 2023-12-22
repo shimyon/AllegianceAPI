@@ -37,7 +37,13 @@ const {
     editType,
     changeTypeStatus,
     getType,
-    getTypeById
+    getTypeById,
+    addModule,
+    editModule,
+    changeModuleStatus,
+    getModule,
+    getModuleById,
+    getModulegroup
 } = require('../controllers/masterController')
 const { protect } = require('../middleware/authMiddleware')
 
@@ -84,5 +90,12 @@ router.post('/editSubCategory', protect, editSubCategory)
 router.post('/changeSubCategoryStatus', protect, changeSubCategoryStatus)
 router.post('/getSubCategorys', protect, getSubCategorys)
 router.get('/subcategory/:id', protect, getSubCategoryById)
+
+router.post('/addModule', protect, addModule)
+router.post('/editModule', protect, editModule)
+router.post('/changeModuleStatus', protect, changeModuleStatus)
+router.post('/getModule', protect, getModule)
+router.get('/Module/:id', protect, getModuleById)
+router.get('/getModulegroup', protect, getModulegroup)
 
 module.exports = router
