@@ -1,5 +1,6 @@
 const asyncHandler = require('express-async-handler')
-const moduleRight = require('../models/moduleRightModel')
+const moduleRight = require('../models/moduleRightModel');
+const { ModuleModal } = require('../models/masterModel');
 
 const AddModuleRight = asyncHandler(async (req, res) => {
     try {
@@ -37,10 +38,32 @@ const AddModuleRight = asyncHandler(async (req, res) => {
 
 const GetModuleRightByRole = asyncHandler(async (req, res) => {
     try {
-        let moduleRightList = await moduleRight.find({role:req.params.role}).populate("moduleId")
+        let modules = await ModuleModal.find({}).lean();
+        let moduleRightList = await moduleRight.find({ role: req.params.role }).lean();
+        let modulerights = [];
+        for (const key in modules) {
+            if (Object.hasOwnProperty.call(modules, key)) {
+                const element = modules[key];
+                let right = {
+                    modulename: element.Name,
+                    read: false,
+                    write: false,
+                    delete: false,
+                    all: false,
+                };
+                let rightmap = moduleRightList.find(f => f.moduleId.toString() == element._id.toString());
+                if (rightmap) {
+                    right.read = rightmap.read;
+                    right.write = rightmap.write;
+                    right.delete = rightmap.read;
+                    right.all = rightmap.all;
+                }
+                modulerights.push(right);
+            }
+        }
         return res.status(200).json({
             success: true,
-            data: moduleRightList
+            data: modulerights
         }).end();
     } catch (err) {
         return res.status(400).json({
