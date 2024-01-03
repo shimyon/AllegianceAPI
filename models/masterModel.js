@@ -137,6 +137,22 @@ const ModuleSchema = mongoose.Schema(
         GroupName: {
             type: String
         },
+        is_group: {
+            type: Boolean,
+            default:false,
+        },
+        is_active: {
+            type: Boolean
+        }
+    },
+    {
+        timestamps: true,
+    });
+const RoleSchema = mongoose.Schema(
+    {
+        Name: {
+            type: String
+        },
         is_active: {
             type: Boolean
         }
@@ -152,6 +168,7 @@ const UnitModal = mongoose.model('Units', unitSchema);
 const CategoryModal = mongoose.model('Category', categorySchema);
 const SubCategoryModal = mongoose.model('SubCategory', subCategorySchema);
 const ModuleModal = mongoose.model('Module_Master', ModuleSchema);
+const RoleModal = mongoose.model('Role', RoleSchema);
 
 const syncIndex = async () => {
     await ProductModal.syncIndexes();
@@ -162,7 +179,8 @@ const syncIndex = async () => {
     await CategoryModal.syncIndexes();
     await SubCategoryModal.syncIndexes();
     await ModuleModal.syncIndexes();
+    await RoleModal.syncIndexes();
 }
 syncIndex();
 
-module.exports = { ProductModal, TypeModal, StateModal, SourceModal, UnitModal, CategoryModal, SubCategoryModal, ModuleModal };
+module.exports = { ProductModal, TypeModal, StateModal, SourceModal, UnitModal, CategoryModal, SubCategoryModal, ModuleModal, RoleModal };

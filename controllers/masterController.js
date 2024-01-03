@@ -8,6 +8,7 @@ const Unit = Master.UnitModal;
 const Category = Master.CategoryModal;
 const SubCategory = Master.SubCategoryModal;
 const Module = Master.ModuleModal;
+const Role = Master.RoleModal;
 const Response = require('../models/responseModel')
 const User = require('../models/userModel')
 
@@ -312,7 +313,7 @@ const getSources = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let sources = await Source.find({ is_active: "true" });
+        let sources = await Source.find({ is_active: req.body.active });
 
         response.success = true;
         response.data = sources;
@@ -528,7 +529,7 @@ const getUnits = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let sources = await Unit.find({ is_active: "true" });
+        let sources = await Unit.find({ is_active: req.body.active });
 
         response.success = true;
         response.data = sources;
@@ -857,6 +858,12 @@ const getModulegroup = asyncHandler(async (req, res) => {
     let response = new Response();
     try {
         const sources = await Module.aggregate([
+            
+            {
+                $match: {
+                    is_group: false,
+                },
+              },
             {
                 $group: {
                     _id: "$GroupName",
@@ -865,7 +872,7 @@ const getModulegroup = asyncHandler(async (req, res) => {
                     },
                 },
             },
-        ]);
+        ]).sort("GroupName");
         res.status(200).json(sources).end();
     }
     catch (err) {
@@ -885,6 +892,109 @@ const getModuleById = asyncHandler(async (req, res) => {
     }
     catch (err) {
         response.message = "Error in getting source by id. " + err.message;
+        return res.status(400).json(response);
+    }
+})
+const addRole = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let oldRole = await Role.findOne({ Name: req.body.name });
+
+        if (oldRole) {
+            response.message = "Role with same name already exist.";
+            return res.status(400).json(response);
+        }
+
+        let newRole = await Role.create({
+            Name: req.body.name,
+            is_active: true,
+        });
+
+        response.success = true;
+        response.message = "Role added successfully";
+        response.data = newRole;
+        return res.status(200).json(response);
+    } catch (err) {
+        response.message = "Error in adding Role. " + err.message;
+        return res.status(400).json(response);
+    }
+
+});
+
+const editRole = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let oldRole = Role.findById(req.body.id);
+
+        if (!oldRole) {
+            response.message = "Role not found.";
+            return res.status(400).json(response);
+        }
+
+        let newRole = await Role.findByIdAndUpdate(req.body.id, {
+            Name: req.body.name
+        });
+
+        response.success = true;
+        response.message = "Role added successfully";
+        response.data = newRole;
+        return res.status(200).json(response);
+    } catch (err) {
+        response.message = "Error in updating Role. " + err.message;
+        return res.status(400).json(response);
+    }
+
+});
+
+const changeRoleStatus = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let newRole = await Role.findByIdAndUpdate(req.body.id, {
+            is_active: req.body.active
+        });
+
+        response.success = true;
+        response.message = "Role status updated successfully";
+        return res.status(200).json(response);
+    }
+    catch (err) {
+        response.message = "Error in updating Role. " + err.message;
+        return res.status(400).json(response);
+    }
+
+})
+
+const getRoles = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let sources = await Role.find({ is_active: req.body.active });
+
+        response.success = true;
+        response.data = sources;
+        return res.status(200).json(response);
+    }
+    catch (err) {
+        response.message = "Error in getting Role. " + err.message;
+        return res.status(400).json(response);
+    }
+})
+
+const getRoleById = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let sources = await Role.findOne({ is_active: true, _id: req.params.id });
+
+        response.success = true;
+        response.data = sources;
+        return res.status(200).json(response);
+    }
+    catch (err) {
+        response.message = "Error in getting Role by id. " + err.message;
         return res.status(400).json(response);
     }
 })
@@ -930,5 +1040,10 @@ module.exports = {
     changeModuleStatus,
     getModule,
     getModuleById,
-    getModulegroup
+    getModulegroup,
+    addRole,
+    editRole,
+    changeRoleStatus,
+    getRoles,
+    getRoleById,
 }

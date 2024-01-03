@@ -43,7 +43,12 @@ const {
     changeModuleStatus,
     getModule,
     getModuleById,
-    getModulegroup
+    getModulegroup,
+    addRole,
+    editRole,
+    changeRoleStatus,
+    getRoles,
+    getRoleById,
 } = require('../controllers/masterController')
 const { protect } = require('../middleware/authMiddleware')
 
@@ -65,7 +70,7 @@ router.get('/Type/:id', protect, getTypeById)
 router.post('/addSource', protect, addSource)
 router.post('/editSource', protect, editSource)
 router.post('/changeSourceStatus', protect, changeSourceStatus)
-router.get('/getSource', protect, getSources)
+router.post('/getSource', protect, getSources)
 router.get('/source/:id', protect, getSourceById)
 
 router.post('/addState', protect, addState)
@@ -76,7 +81,7 @@ router.get('/state/:id', protect, getStateById)
 router.post('/addUnit', protect, addUnit)
 router.post('/editUnit', protect, editUnit)
 router.post('/changeUnitStatus', protect, changeUnitStatus)
-router.get('/getUnit', protect, getUnits)
+router.post('/getUnit', protect, getUnits)
 router.get('/unit/:id', protect, getUnitById)
 
 router.post('/addCategory', protect, addCategory)
@@ -97,5 +102,11 @@ router.post('/changeModuleStatus', protect, changeModuleStatus)
 router.post('/getModule', protect, getModule)
 router.get('/Module/:id', protect, getModuleById)
 router.get('/getModulegroup', protect, getModulegroup)
+
+router.post('/addRole', protect, addRole)
+router.post('/editRole', protect, editRole)
+router.post('/changeRoleStatus', protect, changeRoleStatus)
+router.post('/getRole', protect, getRoles)
+router.get('/Role/:id', protect, getRoleById)
 
 module.exports = router
