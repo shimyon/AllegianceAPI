@@ -20,10 +20,6 @@ const moduleRightSchema = mongoose.Schema(
       type: Boolean,
       default: false
     },
-    all: {
-      type: Boolean,
-      default: false
-    },
   },
   {
     timestamps: true,
