@@ -196,7 +196,10 @@ const getAllLead = asyncHandler(async (req, res) => {
             };
         }
         if (req.body.month == "last") {
-            const currentMonth = new Date().getMonth();
+            let currentMonth = new Date().getMonth();
+            if(currentMonth==0){
+                currentMonth=currentMonth+12
+            }
             condition.$expr = {
                 $eq: [{ $month: "$LeadSince" }, currentMonth]
             };

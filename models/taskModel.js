@@ -10,11 +10,18 @@ const taskSchema = mongoose.Schema(
       type: String
     },
     Status: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Status'
     },
     Assign: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
+    },
+    Priority: {
+      type: String
+    },
+    Date: {
+      type: Date,
     },
     is_active: {
       type: Boolean,

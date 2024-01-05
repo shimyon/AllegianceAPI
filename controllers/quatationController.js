@@ -19,8 +19,8 @@ const addQuatation = asyncHandler(async (req, res) => {
         const newQuatation = await Quatation.create({
             QuatationNo: maxQuatation,
             Customer: req.body.customer,
-            ShippingAddress: req.body.shippingAddress,
-            BillingAddress: req.body.billingAddress,
+            ShippingAddress: req.body.shippingAddress||null,
+            BillingAddress: req.body.billingAddress||null,
             Status: "New",
             Stage: "New",
             Sales: req.body.sales,

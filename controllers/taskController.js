@@ -7,6 +7,8 @@ const addtask = asyncHandler(async (req, res) => {
             Description: req.body.Description,
             Status: req.body.Status,
             Assign: req.body.Assign,
+            Priority: req.body.Priority,
+            Date: req.body.Date,
             is_active: true
         });
         return res.status(200).json({
@@ -30,6 +32,8 @@ const edittask = asyncHandler(async (req, res) => {
             Description: req.body.Description,
             Status: req.body.Status,
             Assign: req.body.Assign,
+            Priority: req.body.Priority,
+            Date: req.body.Date,
         });
 
         return res.status(200).json({
@@ -75,7 +79,7 @@ const removetask = asyncHandler(async (req, res) => {
 
 const getAlltask = asyncHandler(async (req, res) => {
     try {
-        let taskList = await Task.find({ is_active: req.body.active })
+        let taskList = await Task.find({ is_active: req.body.active }).populate("Status").populate("Assign")
             .sort({ createdAt: -1 })
         return res.status(200).json({
             success: true,
@@ -92,7 +96,7 @@ const getAlltask = asyncHandler(async (req, res) => {
 
 const gettaskById = asyncHandler(async (req, res) => {
     try {
-        let TaskList = await Task.find({ _id: req.params.id })
+        let TaskList = await Task.findOne({ _id: req.params.id })
 
         return res.status(200).json({
             success: true,
