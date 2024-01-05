@@ -9,6 +9,7 @@ const Category = Master.CategoryModal;
 const SubCategory = Master.SubCategoryModal;
 const Module = Master.ModuleModal;
 const Role = Master.RoleModal;
+const Status = Master.StatusModal;
 const Response = require('../models/responseModel')
 const User = require('../models/userModel')
 
@@ -858,12 +859,12 @@ const getModulegroup = asyncHandler(async (req, res) => {
     let response = new Response();
     try {
         const sources = await Module.aggregate([
-            
+
             {
                 $match: {
                     is_group: false,
                 },
-              },
+            },
             {
                 $group: {
                     _id: "$GroupName",
@@ -998,6 +999,110 @@ const getRoleById = asyncHandler(async (req, res) => {
         return res.status(400).json(response);
     }
 })
+const addStatus = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let oldStatus = await Status.findOne({ Name: req.body.name, GroupName: req.body.groupname });
+
+        if (oldStatus) {
+            response.message = "Status with same name already exist.";
+            return res.status(400).json(response);
+        }
+
+        let newStatus = await Status.create({
+            Name: req.body.name,
+            GroupName: req.body.groupname,
+            is_active: true,
+        });
+
+        response.success = true;
+        response.message = "Status added successfully";
+        response.data = newStatus;
+        return res.status(200).json(response);
+    } catch (err) {
+        response.message = "Error in adding Status. " + err.message;
+        return res.status(400).json(response);
+    }
+
+});
+
+const editStatus = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let oldStatus = Status.findById(req.body.id);
+
+        if (!oldStatus) {
+            response.message = "Status not found.";
+            return res.status(400).json(response);
+        }
+
+        let newStatus = await Status.findByIdAndUpdate(req.body.id, {
+            Name: req.body.name
+        });
+
+        response.success = true;
+        response.message = "Status added successfully";
+        response.data = newStatus;
+        return res.status(200).json(response);
+    } catch (err) {
+        response.message = "Error in updating Status. " + err.message;
+        return res.status(400).json(response);
+    }
+
+});
+
+const changeStatus = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let newStatus = await Status.findByIdAndUpdate(req.body.id, {
+            is_active: req.body.active
+        });
+
+        response.success = true;
+        response.message = "Status updated successfully";
+        return res.status(200).json(response);
+    }
+    catch (err) {
+        response.message = "Error in updating Status. " + err.message;
+        return res.status(400).json(response);
+    }
+
+})
+
+const getStatus = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let sources = await Status.find({ is_active: req.body.active });
+
+        response.success = true;
+        response.data = sources;
+        return res.status(200).json(response);
+    }
+    catch (err) {
+        response.message = "Error in getting Status. " + err.message;
+        return res.status(400).json(response);
+    }
+})
+
+const getStatusById = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let sources = await Status.findOne({ is_active: true, _id: req.params.id });
+
+        response.success = true;
+        response.data = sources;
+        return res.status(200).json(response);
+    }
+    catch (err) {
+        response.message = "Error in getting Status by id. " + err.message;
+        return res.status(400).json(response);
+    }
+})
 module.exports = {
     addProduct,
     editProduct,
@@ -1046,4 +1151,10 @@ module.exports = {
     changeRoleStatus,
     getRoles,
     getRoleById,
+    addStatus,
+    editStatus,
+    changeStatus,
+    getStatus,
+    getStatusById,
+
 }

@@ -49,6 +49,11 @@ const {
     changeRoleStatus,
     getRoles,
     getRoleById,
+    addStatus,
+    editStatus,
+    changeStatus,
+    getStatus,
+    getStatusById,
 } = require('../controllers/masterController')
 const { protect } = require('../middleware/authMiddleware')
 
@@ -108,5 +113,11 @@ router.post('/editRole', protect, editRole)
 router.post('/changeRoleStatus', protect, changeRoleStatus)
 router.post('/getRole', protect, getRoles)
 router.get('/Role/:id', protect, getRoleById)
+
+router.post('/addStatus', protect, addStatus)
+router.post('/editStatus', protect, editStatus)
+router.post('/changeStatus', protect, changeStatus)
+router.post('/getStatus', protect, getStatus)
+router.get('/Status/:id', protect, getStatusById)
 
 module.exports = router
