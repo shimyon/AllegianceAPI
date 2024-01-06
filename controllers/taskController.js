@@ -61,7 +61,7 @@ const removetask = asyncHandler(async (req, res) => {
         }
 
         const newTask = await Task.findByIdAndUpdate(req.params.id, {
-            is_active: true
+            is_active: false
         });
 
         return res.status(200).json({
