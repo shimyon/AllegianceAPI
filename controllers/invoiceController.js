@@ -19,8 +19,8 @@ const addInvoice = asyncHandler(async (req, res) => {
         const newInvoice = await Invoice.create({
             InvoiceNo: maxInvoice,
             Customer: req.body.customer,
-            ShippingAddress: req.body.shippingAddress,
-            BillingAddress: req.body.billingAddress,
+            ShippingAddress: req.body.shippingAddress||null,
+            BillingAddress: req.body.billingAddress||null,
             Order: req.body.orderId,
             Amount: req.body.amount,
             CGST: req.body.CGST,

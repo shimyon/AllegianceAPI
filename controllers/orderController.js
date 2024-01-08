@@ -30,8 +30,8 @@ const addOrder = asyncHandler(async (req, res) => {
         const newOrder = await Order.create({
             OrderNo: maxOrder,
             Customer: req.body.customer,
-            ShippingAddress: req.body.shippingAddress,
-            BillingAddress: req.body.billingAddress,
+            ShippingAddress: req.body.shippingAddress||null,
+            BillingAddress: req.body.billingAddress||null,
             Status: "New",
             Stage: "New",
             Amount: req.body.amount,
