@@ -79,7 +79,7 @@ const removetask = asyncHandler(async (req, res) => {
 
 const getAlltask = asyncHandler(async (req, res) => {
     try {
-        let taskList = await Task.find({ is_active: req.body.active }).populate("Status").populate("Assign")
+        let taskList = await Task.find({ is_active: req.body.active ,Assign:req.body.user}).populate("Status").populate("Assign")
             .sort({ createdAt: -1 })
         return res.status(200).json({
             success: true,
