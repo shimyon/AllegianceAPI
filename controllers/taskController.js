@@ -9,7 +9,8 @@ const addtask = asyncHandler(async (req, res) => {
             Assign: req.body.Assign,
             Priority: req.body.Priority,
             Date: req.body.Date,
-            is_active: true
+            is_active: true,
+            addedBy: req.user._id
         });
         return res.status(200).json({
             success: true,

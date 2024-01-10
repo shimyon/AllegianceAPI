@@ -11,7 +11,6 @@ const Module = Master.ModuleModal;
 const Role = Master.RoleModal;
 const Status = Master.StatusModal;
 const Response = require('../models/responseModel')
-const User = require('../models/userModel')
 
 const addProduct = asyncHandler(async (req, res) => {
     let response = new Response();
@@ -421,36 +420,6 @@ const getStateById = asyncHandler(async (req, res) => {
     }
     catch (err) {
         response.message = "Error in getting State by id. " + err.message;
-        return res.status(400).json(response);
-    }
-})
-const getSales = asyncHandler(async (req, res) => {
-    let response = new Response();
-
-    try {
-        let sources = await User.find({ is_active: true, role: "Sales" });
-
-        response.success = true;
-        response.data = sources;
-        return res.status(200).json(response);
-    }
-    catch (err) {
-        response.message = "Error in getting Sales. " + err.message;
-        return res.status(400).json(response);
-    }
-})
-const getProjectrole = asyncHandler(async (req, res) => {
-    let response = new Response();
-    var condition = ["Project Manager", "Worker", "Sales"]
-    try {
-        let sources = await User.find({ is_active: true, role: condition });
-
-        response.success = true;
-        response.data = sources;
-        return res.status(200).json(response);
-    }
-    catch (err) {
-        response.message = "Error in getting project manager. " + err.message;
         return res.status(400).json(response);
     }
 })
@@ -1124,8 +1093,6 @@ module.exports = {
     changeUnitStatus,
     getUnits,
     getUnitById,
-    getSales,
-    getProjectrole,
     addCategory,
     editCategory,
     changeCategoryStatus,

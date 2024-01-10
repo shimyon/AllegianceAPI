@@ -191,23 +191,6 @@ const getUserById = asyncHandler(async (req, res) => {
 //@desc Get User Data
 //@route POST api/users/me
 //@access Private
-const getManager = asyncHandler(async (req, res) => {
-    try {
-        const user = await User.findOne({ role: new RegExp("manager", 'i'), is_active: true },{_id:1,email:1,name:1,role:1});
-
-        res.status(200).json(user).end();
-    } catch (err) {
-        return res.status(400).json({
-            success: false,
-            msg: "Error in getting manager. " + err.message,
-            data: null,
-        });
-    }
-})
-
-//@desc Get User Data
-//@route POST api/users/me
-//@access Private
 const getAllUser = asyncHandler(async (req, res) => {
     try {
         const user = await User.find({ is_active: req.body.active },{_id:1,email:1,name:1,role:1}).sort({ createdAt: -1 });
@@ -235,6 +218,5 @@ module.exports = {
     getUserById,
     updateUser,
     changePassword,
-    getManager,
     getAllUser
 }

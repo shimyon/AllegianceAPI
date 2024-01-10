@@ -23,6 +23,10 @@ const taskSchema = mongoose.Schema(
     Date: {
       type: Date,
     },
+    addedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
     is_active: {
       type: Boolean,
       default: true
