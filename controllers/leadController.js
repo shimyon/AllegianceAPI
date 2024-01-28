@@ -228,7 +228,7 @@ const getAllLead = asyncHandler(async (req, res) => {
 
     try {
         let leadList = await Lead
-            .find(condition, "Company GSTNo Title FirstName LastName Designation Mobile Email City State Country Notes Requirements is_favorite")
+            .find(condition, "Company GSTNo Title FirstName LastName Designation Mobile Email City State Country Notes Requirements is_favorite is_active")
             .populate("Source")
             .populate("OtherContact")
             .populate("Product", "Name")
