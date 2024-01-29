@@ -6,10 +6,22 @@ const attendanceSchema = mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User'
         },
-        startDate: {
+        Punchin_location: {
+            type: String
+        },
+        Punchin_photo: {
+            type: String
+        },
+        Punchin_time: {
             type: Date
         },
-        endDate: {
+        Punchout_location: {
+            type: String
+        },
+        Punchout_photo: {
+            type: String
+        },
+        Punchout_time: {
             type: Date
         },
         addedBy: {

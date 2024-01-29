@@ -7,8 +7,8 @@ const addAttendance = asyncHandler(async (req, res) => {
     try {
         const newAttendance =  await Attendance.create({
             UserId: req.body.UserId,
-            startDate: req.body.startDate,
-            endDate: req.body.endDate,
+            Punchin_time: req.body.Punchin_time,
+            Punchout_time: req.body.Punchout_time,
             addedBy: req.user._id
         });
 
@@ -16,7 +16,6 @@ const addAttendance = asyncHandler(async (req, res) => {
             success: true,
             msg: "Attendance added successfully"
         });
-            return res.status(200).json(newAttendance).end();
     } catch (err) {
         return res.status(400).json({
             success: false,
@@ -39,8 +38,8 @@ const editAttendance = asyncHandler(async (req, res) => {
 
         await Attendance.findByIdAndUpdate(req.body.id, {
             UserId: req.body.UserId,
-            startDate: req.body.startDate,
-            endDate: req.body.endDate,
+            Punchin_time: req.body.Punchin_time,
+            Punchout_time: req.body.Punchout_time,
         });
         return res.status(200).json({
             success: true,
