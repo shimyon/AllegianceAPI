@@ -30,6 +30,7 @@
         "node-cron": "^3.0.2",
         "nodemailer": "^6.9.3",
         "number-to-words": "^1.2.4",
+        "puppeteer": "^21.9.0",
         "read-excel-file": "^5.6.1",
         "swagger-ui-express": "^4.6.2",
         "tape": "^5.6.6"

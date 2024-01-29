@@ -197,8 +197,8 @@ const getAllLead = asyncHandler(async (req, res) => {
         }
         if (req.body.month == "last") {
             let currentMonth = new Date().getMonth();
-            if(currentMonth==0){
-                currentMonth=currentMonth+12
+            if (currentMonth == 0) {
+                currentMonth = currentMonth + 12
             }
             condition.$expr = {
                 $eq: [{ $month: "$LeadSince" }, currentMonth]
@@ -227,7 +227,15 @@ const getAllLead = asyncHandler(async (req, res) => {
     }
 
     try {
-        let leadList = await Lead.find(condition).populate("Source").populate("OtherContact").populate("Product").populate("Sales").populate("NextTalk").populate("addedBy").sort({ createdAt: -1 })
+        let leadList = await Lead
+            .find(condition, "Company GSTNo Title FirstName LastName Designation Mobile Email City State Country Notes Requirements is_favorite is_active")
+            .populate("Source")
+            .populate("OtherContact")
+            .populate("Product", "Name")
+            .populate("Sales", "name")
+            .populate("NextTalk")
+            .populate("addedBy", "name")
+            .sort({ createdAt: -1 })
             .exec((err, result) => {
                 var newResult = [];
                 result.forEach((val, idx) => {
