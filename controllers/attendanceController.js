@@ -168,13 +168,11 @@ const saveeditAttendance = asyncHandler(async (req, res, fileName) => {
             });
         }
 
-        fileName = fileName != "" ? fileName.replace(",", "") : existNews.image;
-
         await Attendance.findByIdAndUpdate(req.body.id, {
             UserId: req.body.UserId,
             Punchout_time: req.body.Punchout_time,
             Punchout_location: req.body.Punchout_location,
-            Punchout_photo: fileName,
+            Punchout_photo: fileName.replace(",", ""),
         });
         return res.status(200).json({
             success: true,
