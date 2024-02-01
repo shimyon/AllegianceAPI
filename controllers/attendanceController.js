@@ -198,7 +198,7 @@ const gettodayAttendance = asyncHandler(async (req, res) => {
             }]
         };
         let AttendanceList = await Attendance.find(condition)
-        var newResult = [];
+        var newResult = "";
         AttendanceList.forEach((val, idx) => {
             var addData = true;
             let dt = new Date();
@@ -208,11 +208,11 @@ const gettodayAttendance = asyncHandler(async (req, res) => {
                 addData = true;
             }
             if (addData) {
-                if (val.Punchin_time) {
-                    newResult.push(val._id);
+                if (val.Punchout_time) {
+                    newResult = "Punchout";
                 }
-                else if (val.Punchout_time) {
-                    newResult.push("Punchout");
+                else if (val.Punchin_time) {
+                    newResult = val._id;
                 }
             }
         })
