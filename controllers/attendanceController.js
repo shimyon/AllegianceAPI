@@ -3,6 +3,7 @@ const AttendanceModel = require('../models/attendanceModel')
 const User = require('../models/userModel')
 const Attendance = AttendanceModel.AttendanceModal;
 const uploadFile = require("../middleware/uploadFileMiddleware");
+const moment = require('moment');
 
 const addAttendance = asyncHandler(async (req, res) => {
     try {
@@ -185,11 +186,55 @@ const saveeditAttendance = asyncHandler(async (req, res, fileName) => {
         });
     }
 })
+const gettodayAttendance = asyncHandler(async (req, res) => {
+    try {
+        var condition = { UserId: req.body.UserId };
+        const currentMonth = new Date().getMonth() + 1;
+        const currentyear = new Date().getFullYear();
+        condition.$expr = {
+            $and: [{
+                $eq: [{ $year: "$createdAt" }, currentyear],
+                $eq: [{ $month: "$createdAt" }, currentMonth],
+            }]
+        };
+        let AttendanceList = await Attendance.find(condition)
+        var newResult = [];
+        AttendanceList.forEach((val, idx) => {
+            var addData = true;
+            let dt = new Date();
+            let apptDate = new Date(val.createdAt);
+            addData = false;
+            if (dt.toDateString() == apptDate.toDateString()) {
+                addData = true;
+            }
+            if (addData) {
+                if (val.Punchin_time) {
+                    newResult.push(val._id);
+                }
+                else if (val.Punchout_time) {
+                    newResult.push("Punchout");
+                }
+            }
+        })
+        return res.status(200).json({
+            success: true,
+            data: newResult
+        }).end();
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in getting Attendance. " + err.message,
+            data: null,
+        });
+    }
+
+});
 module.exports = {
     addAttendance,
     getAllAttendance,
     getAttendanceById,
     editAttendance,
     deleteAttendanceById,
-    AppAttendance
+    AppAttendance,
+    gettodayAttendance
 }

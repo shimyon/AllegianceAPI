@@ -7,7 +7,8 @@ const {
     getAttendanceById,
     editAttendance,
     deleteAttendanceById,
-    AppAttendance
+    AppAttendance,
+    gettodayAttendance
  } = require('../controllers/attendanceController')
 const { protect } = require('../middleware/authMiddleware')
 
@@ -17,5 +18,7 @@ router.post('/getAllAttendance', protect, getAllAttendance)
 router.get('/getAttendanceById/:id', protect, getAttendanceById)
 router.post('/deleteAttendanceById/:id', protect, deleteAttendanceById)
 router.post('/addappAttendance', AppAttendance)
+router.post('/gettodayAttendance', gettodayAttendance)
+
 
 module.exports = router
