@@ -5,9 +5,9 @@ const User = require('../models/userModel')
 const DashboardModal = require('../models/dashboardModel')
 const Dashboard = DashboardModal.Dashboard
 const moment = require('moment');
-//@desc Register New User
-//@route POST api/user
-//@access Public
+const { sendMail } = require('../middleware/sendMail')
+
+
 const registerUser = asyncHandler(async (req, res) => {
     const { name, email, password, role } = req.body
 
@@ -41,8 +41,8 @@ const registerUser = asyncHandler(async (req, res) => {
         Prospect: 0,
         Support: 0,
         Recovery: 0,
-        Product:0,
-        Customer:0,
+        Product: 0,
+        Customer: 0,
         Project: 0,
         Order: 0,
         UserId: user.id
@@ -145,9 +145,6 @@ const changePassword = asyncHandler(async (req, res) => {
     }
 })
 
-//@desc Authenticate a User
-//@route POST api/users/login
-//@access Public
 const loginUser = asyncHandler(async (req, res) => {
     const { email, password } = req.body
 
@@ -171,12 +168,8 @@ const loginUser = asyncHandler(async (req, res) => {
     }
 })
 
-
-//@desc Get User Data
-//@route POST api/users/me
-//@access Private
 const getUserById = asyncHandler(async (req, res) => {
-    const { _id, name, email,role,is_active } = await User.findById(req.params.id)
+    const { _id, name, email, role, is_active } = await User.findById(req.params.id)
 
     res.status(200).json({
         id: _id,
@@ -187,12 +180,9 @@ const getUserById = asyncHandler(async (req, res) => {
     })
 })
 
-//@desc Get User Data
-//@route POST api/users/me
-//@access Private
 const getAllUser = asyncHandler(async (req, res) => {
     try {
-        const user = await User.find({ is_active: req.body.active },{_id:1,email:1,name:1,role:1}).sort({ createdAt: -1 });
+        const user = await User.find({ is_active: req.body.active }, { _id: 1, email: 1, name: 1, role: 1 }).sort({ createdAt: -1 });
 
         res.status(200).json(user).end();
     } catch (err) {
@@ -203,8 +193,57 @@ const getAllUser = asyncHandler(async (req, res) => {
         });
     }
 })
+function generateRandomPassword() {
+    const length = 6;
+    const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let password = "";
 
-//Generate JWT
+    for (let i = 0; i < length; i++) {
+        const randomIndex = Math.floor(Math.random() * charset.length);
+        password += charset.charAt(randomIndex);
+    }
+
+    return password;
+}
+const forgotPassword = asyncHandler(async (req, res) => {
+    const { email } = req.body
+
+    if (!email) {
+        res.status(400)
+        throw new Error('email field not found!')
+    }
+
+    //check if user exist
+    const userExists = await User.findOne({ email: email });
+    if (!userExists) {
+        res.status(400)
+        throw new Error('User Not Found')
+    }
+
+    if (userExists) {
+        //Hash password
+        const newPassword = generateRandomPassword();
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+        let user = await User.findByIdAndUpdate(userExists._id, {
+            password: hashedPassword
+        });
+        if (user) {
+            let html =
+                `<html>Dear User,<br/><br/>Good news! Your password has been reset. Here is your new password:<br/><br/><b>New Password:</b> ${newPassword}<br/><br/>Please use this password to log in to your account. If you have any questions or concerns, feel free to reach out to our support team.<br/><br/>Best regards,<br/><b>Team Emoiss</b></html>`;
+            sendMail(userExists.email, "Your New Password", html);
+        }
+        return res.status(201).json({
+            success: true,
+            msg: "Reset Password is sent to you in email"
+        });
+    }
+    else {
+        res.status(400)
+        throw new Error("Invalid user data!")
+    }
+})
+
 const generateToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, {
         expiresIn: '30d',
@@ -217,5 +256,6 @@ module.exports = {
     getUserById,
     updateUser,
     changePassword,
-    getAllUser
+    getAllUser,
+    forgotPassword
 }
