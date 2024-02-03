@@ -1,5 +1,7 @@
 const asyncHandler = require('express-async-handler')
 const Task = require('../models/taskModel')
+const Master = require('../models/masterModel')
+const Status = Master.StatusModal;
 const addtask = asyncHandler(async (req, res) => {
     try {
         await Task.create({
@@ -8,7 +10,8 @@ const addtask = asyncHandler(async (req, res) => {
             Status: req.body.Status,
             Assign: req.body.Assign,
             Priority: req.body.Priority,
-            Date: req.body.Date,
+            StartDate: req.body.StartDate,
+            EndDate: req.body.EndDate,
             is_active: true,
             addedBy: req.user._id
         });
@@ -34,7 +37,8 @@ const edittask = asyncHandler(async (req, res) => {
             Status: req.body.Status,
             Assign: req.body.Assign,
             Priority: req.body.Priority,
-            Date: req.body.Date,
+            StartDate: req.body.StartDate,
+            EndDate: req.body.EndDate,
         });
 
         return res.status(200).json({
@@ -80,7 +84,7 @@ const removetask = asyncHandler(async (req, res) => {
 
 const getAlltask = asyncHandler(async (req, res) => {
     try {
-        let taskList = await Task.find({ is_active: req.body.active ,Assign:req.body.user}).populate("Status").populate("Assign")
+        let taskList = await Task.find({ is_active: req.body.active, Assign: req.body.user }).populate("Status").populate("Assign")
             .sort({ createdAt: -1 })
         return res.status(200).json({
             success: true,
@@ -112,6 +116,47 @@ const gettaskById = asyncHandler(async (req, res) => {
     }
 })
 
+const gettaskboardCount = asyncHandler(async (req, res) => {
+    try {
+        const Lookup = await Task.aggregate([
+            {
+                $match: {
+                    is_active: true,
+                    Assign: req.user._id,
+                },
+            },
+            {
+                $lookup: {
+                    from: "status",
+                    localField: "Status",
+                    foreignField: "_id",
+                    as: "products",
+                },
+            },
+            {
+                $group: {
+                    _id: "$products.Name",
+                    count: { $sum: 1 }
+                },
+            },
+        ]).sort("Status");
+        let list = [];
+        Lookup.forEach(option => {
+            list.push({ count: option.count, name: option._id[0] })
+        })
+
+        return res.status(200).json({
+            success: true,
+            data: list
+        }).end();
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in getting count. " + err.message,
+            data: null,
+        });
+    }
+})
 
 module.exports = {
     addtask,
@@ -119,4 +164,5 @@ module.exports = {
     removetask,
     getAlltask,
     gettaskById,
+    gettaskboardCount
 }
