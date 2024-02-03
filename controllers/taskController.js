@@ -118,36 +118,50 @@ const gettaskById = asyncHandler(async (req, res) => {
 
 const gettaskboardCount = asyncHandler(async (req, res) => {
     try {
-        const Lookup = await Task.aggregate([
+        
+        const Lookup = await Status.aggregate([
             {
-                $match: {
-                    is_active: true,
-                    Assign: req.user._id,
-                },
-            },
-            {
-                $lookup: {
-                    from: "status",
-                    localField: "Status",
-                    foreignField: "_id",
-                    as: "products",
-                },
-            },
-            {
-                $group: {
-                    _id: "$products.Name",
-                    count: { $sum: 1 }
-                },
-            },
-        ]).sort("Status");
-        let list = [];
-        Lookup.forEach(option => {
-            list.push({ count: option.count, name: option._id[0] })
-        })
-
+              '$match': {
+                'GroupName': 'Tasks'
+              }
+            }, {
+              '$lookup': {
+                'from': 'tasks', 
+                'localField': '_id', 
+                'foreignField': 'Status', 
+                'as': 'tasks'
+              }
+            }, {
+              '$addFields': {
+                'tasksid': '$tasks.Assign'
+              }
+            }, {
+              '$project': {
+                'Name': 1, 
+                'tasksid': 1, 
+                'tasksnewid': {
+                  '$filter': {
+                    'input': '$tasksid', 
+                    'as': 'item', 
+                    'cond': {
+                      '$eq': [
+                        '$$item', req.user._id
+                      ]
+                    }
+                  }
+                }
+              }
+            }, {
+              '$addFields': {
+                'count': {
+                  '$size': '$tasksnewid'
+                }
+              }
+            }
+          ]);
         return res.status(200).json({
             success: true,
-            data: list
+            data: Lookup
         }).end();
     } catch (err) {
         return res.status(400).json({
