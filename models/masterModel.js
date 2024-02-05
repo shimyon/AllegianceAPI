@@ -139,7 +139,7 @@ const ModuleSchema = mongoose.Schema(
         },
         is_group: {
             type: Boolean,
-            default:false,
+            default: false,
         },
         is_active: {
             type: Boolean
@@ -176,6 +176,37 @@ const statusSchema = mongoose.Schema(
     {
         timestamps: true,
     });
+const MailAddressSchema = mongoose.Schema(
+    {
+        Name: {
+            type: String
+        },
+        Address:
+        {
+            type: String
+        },
+        Password:
+        {
+            type: String
+        },
+        Server:
+        {
+            type: String
+        },
+        Port:
+        {
+            type: String
+        },
+        is_default: {
+            type: Boolean
+        },
+        is_active: {
+            type: Boolean
+        }
+    },
+    {
+        timestamps: true,
+    });
 const ProductModal = mongoose.model('Products', productSchema);
 const TypeModal = mongoose.model('Types', typeSchema);
 const SourceModal = mongoose.model('Sources', sourceSchema);
@@ -186,6 +217,7 @@ const SubCategoryModal = mongoose.model('SubCategory', subCategorySchema);
 const ModuleModal = mongoose.model('Module_Master', ModuleSchema);
 const RoleModal = mongoose.model('Role', RoleSchema);
 const StatusModal = mongoose.model('Status', statusSchema);
+const MailAddressModal = mongoose.model('MailAddress', MailAddressSchema);
 
 const syncIndex = async () => {
     await ProductModal.syncIndexes();
@@ -198,7 +230,8 @@ const syncIndex = async () => {
     await ModuleModal.syncIndexes();
     await RoleModal.syncIndexes();
     await StatusModal.syncIndexes();
+    await MailAddressModal.syncIndexes();
 }
 syncIndex();
 
-module.exports = { ProductModal, TypeModal, StateModal, SourceModal, UnitModal, CategoryModal, SubCategoryModal, ModuleModal, RoleModal, StatusModal };
+module.exports = { ProductModal, TypeModal, StateModal, SourceModal, UnitModal, CategoryModal, SubCategoryModal, ModuleModal, RoleModal, StatusModal, MailAddressModal };

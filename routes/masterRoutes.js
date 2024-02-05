@@ -52,6 +52,12 @@ const {
     changeStatus,
     getStatus,
     getStatusById,
+    addMailAddress,
+    editMailAddress,
+    changeMailAddressStatus,
+    getMailAddress,
+    getMailAddressById,
+    setDefaultMailAddress
 } = require('../controllers/masterController')
 const { protect } = require('../middleware/authMiddleware')
 
@@ -114,5 +120,12 @@ router.post('/editStatus', protect, editStatus)
 router.post('/changeStatus', protect, changeStatus)
 router.post('/getStatus', protect, getStatus)
 router.get('/Status/:id', protect, getStatusById)
+
+router.post('/addMailAddress', protect, addMailAddress)
+router.post('/editMailAddress', protect, editMailAddress)
+router.post('/changeMailAddressStatus', protect, changeMailAddressStatus)
+router.post('/getMailAddress', protect, getMailAddress)
+router.get('/MailAddress/:id', protect, getMailAddressById)
+router.post('/setDefaultMailAddress', protect, setDefaultMailAddress)
 
 module.exports = router

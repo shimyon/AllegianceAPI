@@ -10,6 +10,8 @@ const SubCategory = Master.SubCategoryModal;
 const Module = Master.ModuleModal;
 const Role = Master.RoleModal;
 const Status = Master.StatusModal;
+const MailAddress = Master.MailAddressModal;
+
 const Response = require('../models/responseModel')
 
 const addProduct = asyncHandler(async (req, res) => {
@@ -1072,6 +1074,139 @@ const getStatusById = asyncHandler(async (req, res) => {
         return res.status(400).json(response);
     }
 })
+
+const addMailAddress = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let oldMailAddress = await MailAddress.findOne({ Address: req.body.Address });
+
+        if (oldMailAddress) {
+            response.message = "MailAddress with same Address already exist.";
+            return res.status(400).json(response);
+        }
+        let newMailAddress = await MailAddress.create({
+            Name: req.body.Name,
+            Address: req.body.Address,
+            Password: req.body.Password,
+            Server: req.body.Server,
+            Port: req.body.Port,
+            is_default: false,
+            is_active: true,
+        });
+
+        response.success = true;
+        response.message = "MailAddress added successfully";
+        response.data = newMailAddress;
+        return res.status(200).json(response);
+    } catch (err) {
+        response.message = "Error in adding MailAddress. " + err.message;
+        return res.status(400).json(response);
+    }
+
+});
+
+const editMailAddress = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let oldMailAddress = MailAddress.findById(req.body.id);
+
+        if (!oldMailAddress) {
+            response.message = "MailAddress not found.";
+            return res.status(400).json(response);
+        }
+
+        let newMailAddress = await MailAddress.findByIdAndUpdate(req.body.id, {
+            Name: req.body.Name,
+            Address: req.body.Address,
+            Password: req.body.Password,
+            Server: req.body.Server,
+            Port: req.body.Port,
+        });
+
+        response.success = true;
+        response.message = "MailAddress updated successfully";
+        return res.status(200).json(response);
+    } catch (err) {
+        response.message = "Error in updating MailAddress. " + err.message;
+        return res.status(400).json(response);
+    }
+
+});
+
+const changeMailAddressStatus = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let newMailAddress = await MailAddress.findByIdAndUpdate(req.body.id, {
+            is_active: req.body.active
+        });
+
+        response.success = true;
+        response.message = "MailAddress status updated successfully";
+        return res.status(200).json(response);
+    }
+    catch (err) {
+        response.message = "Error in updating status. " + err.message;
+        return res.status(400).json(response);
+    }
+
+})
+
+const getMailAddress = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let MailAddresss = await MailAddress.find({ is_active: req.body.active }).sort({ createdAt: -1 });
+
+        response.success = true;
+        response.data = MailAddresss;
+        return res.status(200).json(response);
+    }
+    catch (err) {
+        response.message = "Error in getting MailAddress. " + err.message;
+        return res.status(400).json(response);
+    }
+})
+
+const getMailAddressById = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let MailAddresss = await MailAddress.findOne({ is_active: true, _id: req.params.id });
+
+        response.success = true;
+        response.data = MailAddresss;
+        return res.status(200).json(response);
+    }
+    catch (err) {
+        response.message = "Error in getting MailAddress by id. " + err.message;
+        return res.status(400).json(response);
+    }
+})
+
+const setDefaultMailAddress = asyncHandler(async (req, res) => {
+    try {
+        await MailAddress.updateMany({
+            is_default: false
+        });
+        await MailAddress.findByIdAndUpdate(req.body.addressId, {
+            is_default: req.body.default
+        });
+        return res.status(200).json({
+            success: true,
+            msg: "Default Mail Address set"
+        });
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in removing Mail Address. " + err.message,
+            data: null,
+        });
+    }
+
+});
 module.exports = {
     addProduct,
     editProduct,
@@ -1123,5 +1258,10 @@ module.exports = {
     changeStatus,
     getStatus,
     getStatusById,
-
+    addMailAddress,
+    editMailAddress,
+    changeMailAddressStatus,
+    getMailAddress,
+    getMailAddressById,
+    setDefaultMailAddress
 }
