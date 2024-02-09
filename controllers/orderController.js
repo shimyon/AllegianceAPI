@@ -259,6 +259,7 @@ const pdfcreate = asyncHandler(async (req, res) => {
                 .populate("addedBy", 'name email')
             templateHtml = templateHtml.replace('{{Data}}', data.Detail || '')
             templateHtml = templateHtml.replace('{{token.company}}', customerList[0].Customer?.Company  || '')
+            templateHtml = templateHtml.replace('{{token.OrderNo}}', customerList[0].OrderNo || '')
             templateHtml = templateHtml.replace('{{token.firstname}}', customerList[0].Customer?.FirstName || '')
             templateHtml = templateHtml.replace('{{token.lastname}}', customerList[0].Customer?.LastName || '')
             templateHtml = templateHtml.replace('{{token.email}}', customerList[0].Customer?.Email || '')
@@ -269,8 +270,8 @@ const pdfcreate = asyncHandler(async (req, res) => {
             templateHtml = templateHtml.replace('{{token.sgst}}', customerList[0].SGST || '')
             templateHtml = templateHtml.replace('{{token.discount}}', (customerList[0].Amount * customerList[0].Discount) / 100)
             templateHtml = templateHtml.replace('{{token.finalamount}}', customerList[0].TotalPrice || '')
-            templateHtml = templateHtml.replace('{{token.finalamountword}}', converter.toWords(customerList[0].TotalPrice))
-            templateHtml = templateHtml.replace('{{token.table}}', `<table border="1" cellpadding="0" cellspacing="0" style="width:100%">
+            templateHtml = templateHtml.replace('{{token.finalamountword}}', converter.toWords(customerList[0].TotalPrice).toUpperCase())
+            templateHtml = templateHtml.replace('{{token.table}}', `<table border="1" cellpadding="10" cellspacing="0" style="width:100%">
             <tbody>
                 <tr>
                 <th>Item</th>
@@ -283,13 +284,13 @@ const pdfcreate = asyncHandler(async (req, res) => {
                 </tr>
                 ${customerList[0].Products.map((x, i) => (
                 `<tr>
-                <td>${x.Product?.Name}</td>
-                <td>${x.Quantity}</td>
-                <td>${x.Unit}</td>
-                <td>${x.Price}</td>
-                <td>${(x.Price * x.Quantity * x.CGST) / 100} (${x.CGST}%)</td>
-                <td>${(x.Price * x.Quantity * x.SGST) / 100} (${x.SGST}%)</td>
-                <td>${x.TotalAmount}</td>
+                <td style="text-align:center">${x.Product?.Name}</td>
+                <td style="text-align:center">${x.Quantity}</td>
+                <td style="text-align:center">${x.Unit}</td>
+                <td style="text-align:center">${x.Price}</td>
+                <td style="text-align:center">${(x.Price * x.Quantity * x.CGST) / 100} (${x.CGST}%)</td>
+                <td style="text-align:center">${(x.Price * x.Quantity * x.SGST) / 100} (${x.SGST}%)</td>
+                <td style="text-align:center">${x.TotalAmount}</td>
                 </tr>`
             ))}
             </tbody>
@@ -307,32 +308,41 @@ const pdfcreate = asyncHandler(async (req, res) => {
                 .populate("ShippingAddress")
                 .populate("BillingAddress")
                 .populate("addedBy", 'name email')
-            templateHtml = templateHtml.replace('{{token.billcompany}}', customerList[0].Customer?.Company || '')
+
+            let shipcitystate = customerList[0].ShippingAddress?.City || "";
+            if (shipcitystate != "") {
+                shipcitystate += ',' + customerList[0].ShippingAddress?.State
+            }
+            let shipaddress = customerList[0].Customer?.Company || "";
+            if (shipaddress != "") {
+                shipaddress += '<br/>' + customerList[0].Customer?.FirstName + ' ' + customerList[0].Customer?.LastName + '<br/>' + shipcitystate
+            }
+
+            let billcitystate = customerList[0].BillingAddress?.City || "";
+            if (billcitystate != "") {
+                billcitystate += ',' + customerList[0].BillingAddress?.State
+            }
+            let billaddress = customerList[0].Customer?.Company || "";
+            if (billaddress != "") {
+                billaddress += '<br/>' + customerList[0].Customer?.FirstName + ' ' + customerList[0].Customer?.LastName + '<br/>' + billcitystate
+            }
+
             templateHtml = templateHtml.replace('{{token.gstno}}', customerList[0].Customer?.GSTNo || '')
             templateHtml = templateHtml.replace('{{token.invoiceno}}', customerList[0].InvoiceNo || '')
-            templateHtml = templateHtml.replace('{{token.shipcompany}}', customerList[0].Customer?.Company || '')
-            templateHtml = templateHtml.replace('{{token.billfirstname}}', customerList[0].Customer?.FirstName || '')
-            templateHtml = templateHtml.replace('{{token.shipfirstname}}', customerList[0].Customer?.FirstName || '')
-            templateHtml = templateHtml.replace('{{token.billlastname}}', customerList[0].Customer?.LastName || '')
-            templateHtml = templateHtml.replace('{{token.shiplastname}}', customerList[0].Customer?.LastName || '')
             templateHtml = templateHtml.replace('{{token.billemail}}', customerList[0].Customer?.Email || '')
             templateHtml = templateHtml.replace('{{token.shipemail}}', customerList[0].Customer?.Email || '')
             templateHtml = templateHtml.replace('{{token.billmobile}}', customerList[0].Customer?.Mobile || '')
             templateHtml = templateHtml.replace('{{token.shipmobile}}', customerList[0].Customer?.Mobile || '')
-            templateHtml = templateHtml.replace('{{token.shipaddress}}', customerList[0].ShippingAddress?.Address || '')
-            templateHtml = templateHtml.replace('{{token.billaddress}}', customerList[0].BillingAddress?.Address || '')
-            templateHtml = templateHtml.replace('{{token.shipcity}}', customerList[0].ShippingAddress?.City || '')
-            templateHtml = templateHtml.replace('{{token.billcity}}', customerList[0].BillingAddress?.City || '')
-            templateHtml = templateHtml.replace('{{token.shipstate}}', customerList[0].ShippingAddress?.State || '')
-            templateHtml = templateHtml.replace('{{token.billstate}}', customerList[0].BillingAddress?.State || '')
+            templateHtml = templateHtml.replace('{{token.shipaddress}}', shipaddress)
+            templateHtml = templateHtml.replace('{{token.billaddress}}', billaddress)
             templateHtml = templateHtml.replace('{{token.date}}', format('dd-MM-yyyy', customerList[0].InvoiceDate))
             templateHtml = templateHtml.replace('{{token.amount}}', customerList[0].Amount - customerList[0].TotalTax)
             templateHtml = templateHtml.replace('{{token.cgst}}', customerList[0].CGST || '')
             templateHtml = templateHtml.replace('{{token.sgst}}', customerList[0].SGST || '')
             templateHtml = templateHtml.replace('{{token.discount}}', (customerList[0].Amount * customerList[0].Discount) / 100)
             templateHtml = templateHtml.replace('{{token.finalamount}}', customerList[0].TotalPrice || '')
-            templateHtml = templateHtml.replace('{{token.finalamountword}}', converter.toWords(customerList[0].TotalPrice))
-            templateHtml = templateHtml.replace('{{token.table}}', `<table border="1" cellpadding="0" cellspacing="0" style="width:100%">
+            templateHtml = templateHtml.replace('{{token.finalamountword}}', converter.toWords(customerList[0].TotalPrice).toUpperCase())
+            templateHtml = templateHtml.replace('{{token.table}}', `<table border="1" cellpadding="10" cellspacing="0" style="width:100%">
             <tbody>
                 <tr>
                 <th>Item</th>
@@ -345,13 +355,13 @@ const pdfcreate = asyncHandler(async (req, res) => {
                 </tr>
                 ${customerList[0].Products.map((x, i) => (
                 `<tr>
-                <td>${x.Product?.Name}</td>
-                <td>${x.Quantity}</td>
-                <td>${x.Unit}</td>
-                <td>${x.Price}</td>
-                <td>${(x.Price * x.Quantity * x.CGST) / 100} (${x.CGST}%)</td>
-                <td>${(x.Price * x.Quantity * x.SGST) / 100} (${x.SGST}%)</td>
-                <td>${x.TotalAmount}</td>
+                <td style="text-align:center">${x.Product?.Name}</td>
+                <td style="text-align:center">${x.Quantity}</td>
+                <td style="text-align:center">${x.Unit}</td>
+                <td style="text-align:center">${x.Price}</td>
+                <td style="text-align:center">${(x.Price * x.Quantity * x.CGST) / 100} (${x.CGST}%)</td>
+                <td style="text-align:center">${(x.Price * x.Quantity * x.SGST) / 100} (${x.SGST}%)</td>
+                <td style="text-align:center">${x.TotalAmount}</td>
                 </tr>`
             ))}
             </tbody>
@@ -370,23 +380,32 @@ const pdfcreate = asyncHandler(async (req, res) => {
                 .populate("BillingAddress")
                 .populate("addedBy", 'name email')
 
-            templateHtml = templateHtml.replace('{{token.billcompany}}', customerList[0].Customer?.Company || '')
+                let shipcitystate = customerList[0].ShippingAddress?.City || "";
+                if (shipcitystate != "") {
+                    shipcitystate += ',' + customerList[0].ShippingAddress?.State
+                }
+                let shipaddress = customerList[0].Customer?.Company || "";
+                if (shipaddress != "") {
+                    shipaddress += '<br/>' + customerList[0].Customer?.FirstName + ' ' + customerList[0].Customer?.LastName + '<br/>' + shipcitystate
+                }
+    
+                let billcitystate = customerList[0].BillingAddress?.City || "";
+                if (billcitystate != "") {
+                    billcitystate += ',' + customerList[0].BillingAddress?.State
+                }
+                let billaddress = customerList[0].Customer?.Company || "";
+                if (billaddress != "") {
+                    billaddress += '<br/>' + customerList[0].Customer?.FirstName + ' ' + customerList[0].Customer?.LastName + '<br/>' + billcitystate
+                }
+
+            templateHtml = templateHtml.replace('{{token.QuatationNo}}', customerList[0].QuatationNo || '')
             templateHtml = templateHtml.replace('{{token.refno}}', customerList[0].QuatationNo || '')
-            templateHtml = templateHtml.replace('{{token.shipcompany}}', customerList[0].Customer?.Company || '')
-            templateHtml = templateHtml.replace('{{token.billfirstname}}', customerList[0].Customer?.FirstName || '')
-            templateHtml = templateHtml.replace('{{token.shipfirstname}}', customerList[0].Customer?.FirstName || '')
-            templateHtml = templateHtml.replace('{{token.billlastname}}', customerList[0].Customer?.LastName || '')
-            templateHtml = templateHtml.replace('{{token.shiplastname}}', customerList[0].Customer?.LastName || '')
+            templateHtml = templateHtml.replace('{{token.shipaddress}}', shipaddress)
+            templateHtml = templateHtml.replace('{{token.billaddress}}', billaddress)
             templateHtml = templateHtml.replace('{{token.billemail}}', customerList[0].Customer?.Email || '')
             templateHtml = templateHtml.replace('{{token.shipemail}}', customerList[0].Customer?.Email || '')
             templateHtml = templateHtml.replace('{{token.billmobile}}', customerList[0].Customer?.Mobile || '')
             templateHtml = templateHtml.replace('{{token.shipmobile}}', customerList[0].Customer?.Mobile || '')
-            templateHtml = templateHtml.replace('{{token.shipaddress}}', customerList[0].ShippingAddress?.Address || '')
-            templateHtml = templateHtml.replace('{{token.billaddress}}', customerList[0].BillingAddress?.Address || '')
-            templateHtml = templateHtml.replace('{{token.shipcity}}', customerList[0].ShippingAddress?.City || '')
-            templateHtml = templateHtml.replace('{{token.billcity}}', customerList[0].BillingAddress?.City || '')
-            templateHtml = templateHtml.replace('{{token.shipstate}}', customerList[0].ShippingAddress?.State || '')
-            templateHtml = templateHtml.replace('{{token.billstate}}', customerList[0].BillingAddress?.State || '')
             templateHtml = templateHtml.replace('{{token.date}}', format('dd-MM-yyyy', customerList[0].QuatationDate))
             templateHtml = templateHtml.replace('{{token.validdate}}', format('dd-MM-yyyy', customerList[0].ValidDate))
             templateHtml = templateHtml.replace('{{token.amount}}', customerList[0].Amount - customerList[0].TotalTax)
@@ -394,8 +413,8 @@ const pdfcreate = asyncHandler(async (req, res) => {
             templateHtml = templateHtml.replace('{{token.sgst}}', customerList[0].SGST || '')
             templateHtml = templateHtml.replace('{{token.discount}}', (customerList[0].Amount * customerList[0].Discount) / 100)
             templateHtml = templateHtml.replace('{{token.finalamount}}', customerList[0].TotalPrice || '')
-            templateHtml = templateHtml.replace('{{token.finalamountword}}', converter.toWords(customerList[0].TotalPrice))
-            templateHtml = templateHtml.replace('{{token.table}}', `<table border="1" cellpadding="0" cellspacing="0" style="width:100%">
+            templateHtml = templateHtml.replace('{{token.finalamountword}}', converter.toWords(customerList[0].TotalPrice).toUpperCase())
+            templateHtml = templateHtml.replace('{{token.table}}', `<table border="1" cellpadding="10" cellspacing="0" style="width:100%">
             <tbody>
                 <tr>
                 <th>Item</th>
@@ -408,13 +427,13 @@ const pdfcreate = asyncHandler(async (req, res) => {
                 </tr>
                 ${customerList[0].Products.map((x, i) => (
                 `<tr>
-                <td>${x.Product?.Name}</td>
-                <td>${x.Quantity}</td>
-                <td>${x.Unit}</td>
-                <td>${x.Price}</td>
-                <td>${(x.Price * x.Quantity * x.CGST) / 100} (${x.CGST}%)</td>
-                <td>${(x.Price * x.Quantity * x.SGST) / 100} (${x.SGST}%)</td>
-                <td>${x.TotalAmount}</td>
+                <td style="text-align:center">${x.Product?.Name}</td>
+                <td style="text-align:center">${x.Quantity}</td>
+                <td style="text-align:center">${x.Unit}</td>
+                <td style="text-align:center">${x.Price}</td>
+                <td style="text-align:center">${(x.Price * x.Quantity * x.CGST) / 100} (${x.CGST}%)</td>
+                <td style="text-align:center">${(x.Price * x.Quantity * x.SGST) / 100} (${x.SGST}%)</td>
+                <td style="text-align:center">${x.TotalAmount}</td>
                 </tr>`
             ))}
             </tbody>
@@ -436,7 +455,7 @@ const pdfcreate = asyncHandler(async (req, res) => {
         // res.setHeader('Content-Disposition', `attachment; filename=Print_${Math.random() * 1000000}.pdf`);
         res.contentType('application/pdf');
         res.send(pdfBufferHtml);
-        
+
     } catch (err) {
         return res.status(400).json({
             success: false,
