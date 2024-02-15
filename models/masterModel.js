@@ -6,6 +6,9 @@ const productSchema = mongoose.Schema(
             type: String,
             required: [true, 'Please add name']
         },
+        Type: {
+            type: String
+        },
         Code: {
             type: String
         },

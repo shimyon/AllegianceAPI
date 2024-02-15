@@ -18,7 +18,7 @@ const addProduct = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let oldProduct = await Product.findOne({ Name: req.body.name });
+        let oldProduct = await Product.findOne({ Name: req.body.name, Type: req.body.type });
 
         if (oldProduct) {
             response.message = "Product with same name already exist.";
@@ -36,6 +36,7 @@ const addProduct = asyncHandler(async (req, res) => {
             MaxStock: req.body.maxStock,
             AvailableStock: req.body.availableStock,
             Description: req.body.description,
+            Type: req.body.type,
             is_active: true,
         });
 
@@ -73,6 +74,7 @@ const editProduct = asyncHandler(async (req, res) => {
             MaxStock: req.body.maxStock,
             AvailableStock: req.body.availableStock,
             Description: req.body.description,
+            Type: req.body.type,
             is_active: true,
         });
 
