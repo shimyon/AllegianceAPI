@@ -105,6 +105,9 @@ const quatationProductSchema = mongoose.Schema(
         SGST: {
             type: String
         },
+        Amount: {
+            type: String
+        },
         TotalAmount: {
             type: String
         },

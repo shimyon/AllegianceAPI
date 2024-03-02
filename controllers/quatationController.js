@@ -8,6 +8,14 @@ const QuatationTermsandCondition = QuatationModal.QuatationTermsandCondition
 const OrderModal = require('../models/orderModel')
 const Order = OrderModal.OrderModal
 const OrderProduct = OrderModal.OrderProductModal
+var pdf = require('html-pdf')
+var fs = require('fs')
+var converter = require('number-to-words')
+var format = require('date-format')
+var test = require('tape')
+var path = require('path')
+const Template = require('../models/templateModel')
+const { generatePDF } = require('../services/pdfService')
 
 const addQuatation = asyncHandler(async (req, res) => {
     try {
@@ -19,8 +27,8 @@ const addQuatation = asyncHandler(async (req, res) => {
         const newQuatation = await Quatation.create({
             QuatationNo: maxQuatation,
             Customer: req.body.customer,
-            ShippingAddress: req.body.shippingAddress||null,
-            BillingAddress: req.body.billingAddress||null,
+            ShippingAddress: req.body.shippingAddress || null,
+            BillingAddress: req.body.billingAddress || null,
             Status: "New",
             Stage: "New",
             Sales: req.body.sales,
@@ -50,6 +58,7 @@ const addQuatation = asyncHandler(async (req, res) => {
                 Price: pr.price,
                 CGST: pr.CGST,
                 SGST: pr.SGST,
+                Amount: pr.Amount,
                 TotalAmount: pr.totalAmount,
                 Note: pr.note
             }
@@ -173,6 +182,7 @@ const editQuatation = asyncHandler(async (req, res) => {
                 Price: pr.price,
                 CGST: pr.CGST,
                 SGST: pr.SGST,
+                Amount: pr.Amount,
                 TotalAmount: pr.totalAmount,
                 Note: pr.note
             }
@@ -382,6 +392,7 @@ const moveToOrder = asyncHandler(async (req, res) => {
                 Price: pr.Price,
                 CGST: pr.CGST,
                 SGST: pr.SGST,
+                Amount: pr.Amount,
                 TotalAmount: pr.TotalAmount,
                 Note: pr.Note
             }
@@ -409,6 +420,94 @@ const moveToOrder = asyncHandler(async (req, res) => {
     }
 
 });
+
+const Quatationpdfcreate = asyncHandler(async (req, res) => {
+    try {
+        const data = await Template.findById(req.body.template_id)
+        var template = path.join(__dirname, '..', 'public', 'template.html')
+        var templateHtml = fs.readFileSync(template, 'utf8')
+        templateHtml = templateHtml.replace('{{Data}}', data.Detail)
+        var filename = template.replace('template.html', `Print.pdf`)
+        let customerList = await Quatation.find({ is_deleted: false, _id: req.body.id })
+            .populate("TermsAndCondition")
+            .populate("Customer")
+            .populate({
+                path: 'Products',
+                populate: {
+                    path: 'Product',
+                }
+            })
+            .populate("addedBy", 'name email')
+        let cmname = customerList[0].Customer?.Title || "";
+        if (cmname != "") {
+            cmname += ' ' + customerList[0].Customer?.FirstName + ' ' + customerList[0].Customer?.LastName
+        }
+        let cmaddress = customerList[0].Customer?.Address || "";
+        if (cmaddress != "") {
+            cmaddress += '<br/>' + customerList[0].Customer?.City + ' ' + customerList[0].Customer?.State
+        }
+        let termsandcondition = [];
+        if (customerList[0].TermsAndCondition.length != 0) {
+            let term = customerList[0].TermsAndCondition.map(x => { return '<br/>' + x.condition })
+            termsandcondition.push(term)
+        }
+        else {
+            termsandcondition = ''
+        }
+
+        templateHtml = templateHtml.replace('{{token.QuatationNo}}', customerList[0].QuatationNo || '')
+        templateHtml = templateHtml.replace('{{token.date}}', format('dd-MM-yyyy', customerList[0].QuatationDate))
+        templateHtml = templateHtml.replace('{{token.validdate}}', format('dd-MM-yyyy', customerList[0].ValidDate))
+        templateHtml = templateHtml.replace('{{token.email}}', customerList[0].Customer?.Email || '')
+        templateHtml = templateHtml.replace('{{token.mobile}}', customerList[0].Customer?.Mobile || '')
+        templateHtml = templateHtml.replace('{{token.cmaddress}}', cmaddress)
+        templateHtml = templateHtml.replace('{{token.cmname}}', cmname)
+        templateHtml = templateHtml.replace('{{token.note}}', customerList[0].Note || '')
+        templateHtml = templateHtml.replace('{{token.termsandcondition}}', termsandcondition)
+
+        templateHtml = templateHtml.replace('{{token.amount}}', customerList[0].Amount - customerList[0].TotalTax)
+        // templateHtml = templateHtml.replace('{{token.cgst}}', customerList[0].CGST || '')
+        // templateHtml = templateHtml.replace('{{token.sgst}}', customerList[0].SGST || '')
+        // templateHtml = templateHtml.replace('{{token.discount}}', (customerList[0].Amount * customerList[0].Discount) / 100)
+        // templateHtml = templateHtml.replace('{{token.finalamount}}', customerList[0].TotalPrice || '')
+        // templateHtml = templateHtml.replace('{{token.finalamountword}}', converter.toWords(customerList[0].TotalPrice).toUpperCase())
+        templateHtml = templateHtml.replace('{{token.table}}', `<table border="1" cellpadding="10" cellspacing="0" style="width:100%">
+        <tbody>
+            <tr>
+            <th>S No.</th>
+            <th>Description</th>
+            <th>QTY</th>
+            <th>Unit Price</th>
+            <th>Unit</th>
+            <th>Amount</th>
+            </tr>
+            ${customerList[0].Products.map((x, i) => (
+            `<tr>
+            <td style="text-align:center">${i+1}</td>
+            <td style="text-align:left"><b>${x.Product?.Name}</b><br/>${x.Product?.Description}</td>
+            <td style="text-align:center">${x.Quantity}</td>
+            <td style="text-align:center">${x.Price}</td>
+            <td style="text-align:center">${x.Unit}</td>
+            <td style="text-align:center">${x.Price * x.Quantity}</td>
+            </tr>`
+        ))}
+        </tbody>
+        </table>`)
+
+        const pdfBufferHtml = await generatePDF(templateHtml);
+        res.contentType('application/pdf');
+        res.send(pdfBufferHtml);
+
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: err.message,
+            data: null,
+        });
+    }
+
+})
+
 module.exports = {
     addQuatation,
     editQuatation,
@@ -416,5 +515,6 @@ module.exports = {
     getAllQuatation,
     getCustomerById,
     changeQuatationStatus,
-    moveToOrder
+    moveToOrder,
+    Quatationpdfcreate
 }

@@ -8,7 +8,8 @@ const {
     getAllQuatation,
     getCustomerById,
     changeQuatationStatus,
-    moveToOrder
+    moveToOrder,
+    Quatationpdfcreate
 } = require('../controllers/quatationController')
 const { protect } = require('../middleware/authMiddleware')
 
@@ -19,5 +20,6 @@ router.post('/changeQuatationStatus', protect, changeQuatationStatus)
 router.get('/getAll', protect, getAllQuatation)
 router.post('/moveToOrder/:id', protect, moveToOrder)
 router.get('/getById/:id', protect, getCustomerById)
+router.post('/Quatationpdfcreate', Quatationpdfcreate)
 
 module.exports = router
