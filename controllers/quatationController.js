@@ -33,12 +33,13 @@ const addQuatation = asyncHandler(async (req, res) => {
             Stage: "New",
             Sales: req.body.sales,
             addedBy: req.user._id,
-            Amount: req.body.amount,
+            BeforeTaxPrice: req.body.BeforeTaxPrice,
             CGST: req.body.CGST,
             SGST: req.body.SGST,
             Discount: req.body.discount,
             TotalTax: req.body.totalTax,
-            TotalPrice: req.body.totalPrice,
+            AfterTaxPrice: req.body.AfterTaxPrice,
+            FinalPrice: req.body.finalPrice,
             QuatationDate: req.body.quatattionDate,
             ValidDate: req.body.vaidDate,
             Note: req.body.note,
@@ -58,8 +59,8 @@ const addQuatation = asyncHandler(async (req, res) => {
                 Price: pr.price,
                 CGST: pr.CGST,
                 SGST: pr.SGST,
-                Amount: pr.Amount,
-                TotalAmount: pr.totalAmount,
+                TotalAmount: pr.TotalAmount,
+                FinalAmount: pr.FinalAmount,
                 Note: pr.note
             }
             products.push(newPr);
@@ -140,12 +141,13 @@ const editQuatation = asyncHandler(async (req, res) => {
             BillingAddress: req.body.billingAddress,
             Sales: req.body.sales,
             addedBy: req.user._id,
-            Amount: req.body.amount,
+            BeforeTaxPrice: req.body.BeforeTaxPrice,
             CGST: req.body.CGST,
             SGST: req.body.SGST,
             Discount: req.body.discount,
             TotalTax: req.body.totalTax,
-            TotalPrice: req.body.totalPrice,
+            AfterTaxPrice: req.body.AfterTaxPrice,
+            FinalPrice: req.body.finalPrice,
             QuatationDate: req.body.quatattionDate,
             ValidDate: req.body.vaidDate,
             Note: req.body.note,
@@ -182,8 +184,8 @@ const editQuatation = asyncHandler(async (req, res) => {
                 Price: pr.price,
                 CGST: pr.CGST,
                 SGST: pr.SGST,
-                Amount: pr.Amount,
-                TotalAmount: pr.totalAmount,
+                TotalAmount: pr.TotalAmount,
+                FinalAmount: pr.FinalAmount,
                 Note: pr.note
             }
             products.push(newPr);
@@ -464,13 +466,13 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
         templateHtml = templateHtml.replace('{{token.cmname}}', cmname)
         templateHtml = templateHtml.replace('{{token.note}}', customerList[0].Note || '')
         templateHtml = templateHtml.replace('{{token.termsandcondition}}', termsandcondition)
-
-        templateHtml = templateHtml.replace('{{token.amount}}', customerList[0].Amount - customerList[0].TotalTax)
-        // templateHtml = templateHtml.replace('{{token.cgst}}', customerList[0].CGST || '')
-        // templateHtml = templateHtml.replace('{{token.sgst}}', customerList[0].SGST || '')
-        // templateHtml = templateHtml.replace('{{token.discount}}', (customerList[0].Amount * customerList[0].Discount) / 100)
-        // templateHtml = templateHtml.replace('{{token.finalamount}}', customerList[0].TotalPrice || '')
-        // templateHtml = templateHtml.replace('{{token.finalamountword}}', converter.toWords(customerList[0].TotalPrice).toUpperCase())
+        templateHtml = templateHtml.replace('{{token.BeforeTaxPrice}}', customerList[0].BeforeTaxPrice||'0')
+        templateHtml = templateHtml.replace('{{token.AfterTaxPrice}}', customerList[0].AfterTaxPrice||'0')
+        templateHtml = templateHtml.replace('{{token.cgst}}', customerList[0].CGST || '0')
+        templateHtml = templateHtml.replace('{{token.sgst}}', customerList[0].SGST || '0')
+        templateHtml = templateHtml.replace('{{token.discount}}', (customerList[0].AfterTaxPrice * customerList[0].Discount) / 100)
+        templateHtml = templateHtml.replace('{{token.finalamount}}', customerList[0].FinalPrice || '0')
+        templateHtml = templateHtml.replace('{{token.finalamountword}}', converter.toWords(customerList[0].FinalPrice).toUpperCase())
         templateHtml = templateHtml.replace('{{token.table}}', `<table border="1" cellpadding="10" cellspacing="0" style="width:100%">
         <tbody>
             <tr>
@@ -488,7 +490,35 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
             <td style="text-align:center">${x.Quantity}</td>
             <td style="text-align:center">${x.Price}</td>
             <td style="text-align:center">${x.Unit}</td>
-            <td style="text-align:center">${x.Price * x.Quantity}</td>
+            <td style="text-align:center">${x.TotalAmount}</td>
+            </tr>`
+        ))}
+        </tbody>
+        </table>`)
+        templateHtml = templateHtml.replace('{{token.gsttable}}', `<table border="1" cellpadding="10" cellspacing="0" style="width:100%">
+        <tbody>
+            <tr>
+            <th>S No.</th>
+            <th>Description</th>
+            <th>QTY</th>
+            <th>Unit Price</th>
+            <th>Unit</th>
+            <th>Amount</th>
+            <th>CGST</th>
+            <th>SGST</th>
+            <th>Total (₹)</th>
+            </tr>
+            ${customerList[0].Products.map((x, i) => (
+            `<tr>
+            <td style="text-align:center">${i+1}</td>
+            <td style="text-align:left"><b>${x.Product?.Name}</b><br/>${x.Product?.Description}</td>
+            <td style="text-align:center">${x.Quantity}</td>
+            <td style="text-align:center">${x.Price}</td>
+            <td style="text-align:center">${x.Unit}</td>
+            <td style="text-align:center">${x.TotalAmount}</td>
+            <td style="text-align:center">${(x.TotalAmount * x.CGST) / 100} (${x.CGST}%)</td>
+            <td style="text-align:center">${(x.TotalAmount * x.SGST) / 100} (${x.SGST}%)</td>
+            <td style="text-align:center">${x.FinalAmount}</td>
             </tr>`
         ))}
         </tbody>

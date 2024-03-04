@@ -3,7 +3,7 @@ const mongoose = require('mongoose')
 const quatationSchema = mongoose.Schema(
     {
         QuatationNo: {
-            type: Number
+            type: String
         },
         Customer: {
             type: mongoose.Schema.Types.ObjectId,
@@ -29,9 +29,6 @@ const quatationSchema = mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User'
         },
-        Amount: {
-            type: Number
-        },
         CGST: {
             type: Number
         },
@@ -44,7 +41,13 @@ const quatationSchema = mongoose.Schema(
         TotalTax: {
             type: Number
         },
-        TotalPrice: {
+        BeforeTaxPrice: {
+            type: Number
+        },
+        AfterTaxPrice: {
+            type: Number
+        },
+        FinalPrice: {
             type: Number
         },
         QuatationDate: {
@@ -105,10 +108,10 @@ const quatationProductSchema = mongoose.Schema(
         SGST: {
             type: String
         },
-        Amount: {
+        TotalAmount: {
             type: String
         },
-        TotalAmount: {
+        FinalAmount: {
             type: String
         },
         Note: {

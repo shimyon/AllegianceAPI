@@ -210,6 +210,54 @@ const MailAddressSchema = mongoose.Schema(
     {
         timestamps: true,
     });
+    const ApplicationSettingSchema = mongoose.Schema(
+        {
+            CompanyTitle: {
+                type: String
+            },
+            CompanySubTitle:{
+                type: String
+            },
+            QuotationPrefix:{
+                type: String
+            },
+            QuotationSuffix:{
+                type: String
+            },
+            InvoicePrefix:{
+                type: String
+            },
+            InvoiceSuffix:{
+                type: String
+            },
+            CustomerPrefix:{
+                type: String
+            },
+            CustomerSuffix:{
+                type: String
+            },
+            OrderPrefix:{
+                type: String
+            },
+            OrderSuffix:{
+                type: String
+            },
+            OfficeAddress:{
+                type: String
+            },
+            OfficeEmail:{
+                type: String
+            },
+            OfficePhone1:{
+                type: String
+            },
+            OfficePhone2:{
+                type: String
+            }
+        },
+        {
+            timestamps: true,
+        });
 const ProductModal = mongoose.model('Products', productSchema);
 const TypeModal = mongoose.model('Types', typeSchema);
 const SourceModal = mongoose.model('Sources', sourceSchema);
@@ -221,6 +269,7 @@ const ModuleModal = mongoose.model('Module_Master', ModuleSchema);
 const RoleModal = mongoose.model('Role', RoleSchema);
 const StatusModal = mongoose.model('Status', statusSchema);
 const MailAddressModal = mongoose.model('MailAddress', MailAddressSchema);
+const ApplicationSettingModal = mongoose.model('ApplicationSetting', ApplicationSettingSchema);
 
 const syncIndex = async () => {
     await ProductModal.syncIndexes();
@@ -234,7 +283,8 @@ const syncIndex = async () => {
     await RoleModal.syncIndexes();
     await StatusModal.syncIndexes();
     await MailAddressModal.syncIndexes();
+    await ApplicationSettingModal.syncIndexes();
 }
 syncIndex();
 
-module.exports = { ProductModal, TypeModal, StateModal, SourceModal, UnitModal, CategoryModal, SubCategoryModal, ModuleModal, RoleModal, StatusModal, MailAddressModal };
+module.exports = { ProductModal, TypeModal, StateModal, SourceModal, UnitModal, CategoryModal, SubCategoryModal, ModuleModal, RoleModal, StatusModal, MailAddressModal,ApplicationSettingModal };

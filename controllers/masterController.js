@@ -11,9 +11,55 @@ const Module = Master.ModuleModal;
 const Role = Master.RoleModal;
 const Status = Master.StatusModal;
 const MailAddress = Master.MailAddressModal;
+const ApplicationSetting = Master.ApplicationSettingModal;
 
 const Response = require('../models/responseModel')
+const getApplicationSetting = asyncHandler(async (req, res) => {
+    let response = new Response();
 
+    try {
+        let applicationSetting = await ApplicationSetting.findOne();
+
+        response.success = true;
+        response.data = applicationSetting;
+        return res.status(200).json(response);
+    }
+    catch (err) {
+        response.message = "Error in getting Application Setting. " + err.message;
+        return res.status(400).json(response);
+    }
+})
+const addApplicationSetting = asyncHandler(async (req, res) => {
+    let response = new Response();
+    const { Id, CompanyTitle, CompanySubTitle, QuotationPrefix, QuotationSuffix, InvoicePrefix, InvoiceSuffix, CustomerPrefix, CustomerSuffix, OrderPrefix, OrderSuffix, OfficeAddress, OfficeEmail, OfficePhone1, OfficePhone2 } = req.body
+    try {
+        let newApplicationSetting = await ApplicationSetting.findByIdAndUpdate(Id, {
+            CompanyTitle,
+            CompanySubTitle,
+            QuotationPrefix,
+            QuotationSuffix,
+            InvoicePrefix,
+            InvoiceSuffix,
+            CustomerPrefix,
+            CustomerSuffix,
+            OrderPrefix,
+            OrderSuffix,
+            OfficeAddress,
+            OfficeEmail,
+            OfficePhone1,
+            OfficePhone2
+        });
+
+        response.success = true;
+        response.message = "Application Setting updated successfully";
+        response.data = newApplicationSetting;
+        return res.status(200).json(response);
+    } catch (err) {
+        response.message = "Error in adding Application Setting. " + err.message;
+        return res.status(400).json(response);
+    }
+
+});
 const addProduct = asyncHandler(async (req, res) => {
     let response = new Response();
 
@@ -1210,6 +1256,8 @@ const setDefaultMailAddress = asyncHandler(async (req, res) => {
 
 });
 module.exports = {
+    getApplicationSetting,
+    addApplicationSetting,
     addProduct,
     editProduct,
     changeProductStatus,

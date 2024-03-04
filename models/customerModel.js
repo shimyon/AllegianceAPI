@@ -6,6 +6,9 @@ const customerSchema = mongoose.Schema(
             type: String,
             required: [true, 'Please add a company']
         },
+        CustomerId: {
+            type: String,
+        },
         GSTNo: {
             type: String,
         },
@@ -18,7 +21,6 @@ const customerSchema = mongoose.Schema(
         },
         LastName: {
             type: String,
-            required: [true, 'Please add Last Name']
         },
         Designation: {
             type: String

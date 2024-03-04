@@ -57,9 +57,14 @@ const {
     changeMailAddressStatus,
     getMailAddress,
     getMailAddressById,
-    setDefaultMailAddress
+    setDefaultMailAddress,
+    getApplicationSetting,
+    addApplicationSetting
 } = require('../controllers/masterController')
 const { protect } = require('../middleware/authMiddleware')
+
+router.get('/getApplicationSetting', protect, getApplicationSetting)
+router.post('/addApplicationSetting', protect, addApplicationSetting)
 
 router.post('/addProduct', protect, addProduct)
 router.post('/editProduct', protect, editProduct)
