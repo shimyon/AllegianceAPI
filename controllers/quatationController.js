@@ -36,6 +36,8 @@ const addQuatation = asyncHandler(async (req, res) => {
             BeforeTaxPrice: req.body.BeforeTaxPrice,
             CGST: req.body.CGST,
             SGST: req.body.SGST,
+            OtherChargeName: req.body.OtherChargeName,
+            OtherCharge: req.body.OtherCharge,
             Discount: req.body.discount,
             TotalTax: req.body.totalTax,
             AfterTaxPrice: req.body.AfterTaxPrice,
@@ -144,6 +146,8 @@ const editQuatation = asyncHandler(async (req, res) => {
             BeforeTaxPrice: req.body.BeforeTaxPrice,
             CGST: req.body.CGST,
             SGST: req.body.SGST,
+            OtherChargeName: req.body.OtherChargeName,
+            OtherCharge: req.body.OtherCharge,
             Discount: req.body.discount,
             TotalTax: req.body.totalTax,
             AfterTaxPrice: req.body.AfterTaxPrice,
@@ -466,14 +470,14 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
         templateHtml = templateHtml.replace('{{token.cmname}}', cmname)
         templateHtml = templateHtml.replace('{{token.note}}', customerList[0].Note || '')
         templateHtml = templateHtml.replace('{{token.termsandcondition}}', termsandcondition)
-        templateHtml = templateHtml.replace('{{token.BeforeTaxPrice}}', customerList[0].BeforeTaxPrice||'0')
-        templateHtml = templateHtml.replace('{{token.AfterTaxPrice}}', customerList[0].AfterTaxPrice||'0')
+        templateHtml = templateHtml.replace('{{token.BeforeTaxPrice}}', customerList[0].BeforeTaxPrice || '0')
+        templateHtml = templateHtml.replace('{{token.AfterTaxPrice}}', customerList[0].AfterTaxPrice || '0')
         templateHtml = templateHtml.replace('{{token.cgst}}', customerList[0].CGST || '0')
         templateHtml = templateHtml.replace('{{token.sgst}}', customerList[0].SGST || '0')
         templateHtml = templateHtml.replace('{{token.discount}}', (customerList[0].AfterTaxPrice * customerList[0].Discount) / 100)
         templateHtml = templateHtml.replace('{{token.finalamount}}', customerList[0].FinalPrice || '0')
         templateHtml = templateHtml.replace('{{token.finalamountword}}', converter.toWords(customerList[0].FinalPrice).toUpperCase())
-        templateHtml = templateHtml.replace('{{token.table}}', `<table border="1" cellpadding="10" cellspacing="0" style="width:100%">
+        templateHtml = templateHtml.replace('{{token.table}}', `<table border="1" cellpadding="10" cellspacing="0" style="width:100%;border-collapse: collapse;">
         <tbody>
             <tr>
             <th>S No.</th>
@@ -485,7 +489,7 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
             </tr>
             ${customerList[0].Products.map((x, i) => (
             `<tr>
-            <td style="text-align:center">${i+1}</td>
+            <td style="text-align:center">${i + 1}</td>
             <td style="text-align:left"><b>${x.Product?.Name}</b><br/>${x.Product?.Description}</td>
             <td style="text-align:center">${x.Quantity}</td>
             <td style="text-align:center">${x.Price}</td>
@@ -510,7 +514,7 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
             </tr>
             ${customerList[0].Products.map((x, i) => (
             `<tr>
-            <td style="text-align:center">${i+1}</td>
+            <td style="text-align:center">${i + 1}</td>
             <td style="text-align:left"><b>${x.Product?.Name}</b><br/>${x.Product?.Description}</td>
             <td style="text-align:center">${x.Quantity}</td>
             <td style="text-align:center">${x.Price}</td>

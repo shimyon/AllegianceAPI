@@ -56,6 +56,12 @@ const quatationSchema = mongoose.Schema(
         ValidDate: {
             type: Date
         },
+        OtherChargeName: {
+            type: String
+        },
+        OtherCharge: {
+            type: Number
+        },
         Stage: {
             type: String
         },
