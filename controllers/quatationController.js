@@ -490,6 +490,7 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
         templateHtml = templateHtml.replace('{{token.note}}', customerList[0].Note || '')
         templateHtml = templateHtml.replace('{{token.termsandcondition}}', termsandcondition)
         templateHtml = templateHtml.replace('{{token.BeforeTaxPrice}}', customerList[0].BeforeTaxPrice || '0')
+        templateHtml = templateHtml.replace('{{token.Price}}', customerList[0].BeforeTaxPrice + customerList[0].OtherCharge)
         templateHtml = templateHtml.replace('{{token.AfterTaxPrice}}', customerList[0].AfterTaxPrice || '0')
         templateHtml = templateHtml.replace('{{token.cgst}}', customerList[0].CGST || '0')
         templateHtml = templateHtml.replace('{{token.sgst}}', customerList[0].SGST || '0')
@@ -516,6 +517,14 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
             <td style="text-align:center">${x.TotalAmount}</td>
             </tr>`
         ))}
+        <tr>
+            <td style="text-align:center"></td>
+            <td style="text-align:left">${customerList[0].OtherChargeName}</td>
+            <td style="text-align:center"></td>
+            <td style="text-align:center"></td>
+            <td style="text-align:center"></td>
+            <td style="text-align:center">${customerList[0].OtherCharge}</td>
+            </tr>
         </tbody>
         </table>`)
         templateHtml = templateHtml.replace('{{token.gsttable}}', `<table border="1" cellpadding="10" cellspacing="0" style="width:100%">
