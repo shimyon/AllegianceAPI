@@ -8,6 +8,8 @@ const QuatationTermsandCondition = QuatationModal.QuatationTermsandCondition
 const OrderModal = require('../models/orderModel')
 const Order = OrderModal.OrderModal
 const OrderProduct = OrderModal.OrderProductModal
+const Master = require('../models/masterModel')
+const ApplicationSetting = Master.ApplicationSettingModal;
 var pdf = require('html-pdf')
 var fs = require('fs')
 var converter = require('number-to-words')
@@ -22,10 +24,13 @@ const addQuatation = asyncHandler(async (req, res) => {
         let quatationNo = await Quatation.find({}, { QuatationNo: 1, _id: 0 }).sort({ QuatationNo: -1 }).limit(1);
         let maxQuatation = 1;
         if (quatationNo.length > 0) {
-            maxQuatation = quatationNo[0].QuatationNo + 1;
+            maxQuatation = quatationNo[0].QuatationNo||0 + 1;
         }
+        let applicationSetting = await ApplicationSetting.findOne();
+        let code = applicationSetting.QuotationPrefix+maxQuatation+applicationSetting.QuotationSuffix;
         const newQuatation = await Quatation.create({
             QuatationNo: maxQuatation,
+            QuatationCode: code,
             Customer: req.body.customer,
             ShippingAddress: req.body.shippingAddress || null,
             BillingAddress: req.body.billingAddress || null,
@@ -434,6 +439,7 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
         var templateHtml = fs.readFileSync(template, 'utf8')
         templateHtml = templateHtml.replace('{{Data}}', data.Detail)
         var filename = template.replace('template.html', `Print.pdf`)
+        let applicationSetting = await ApplicationSetting.findOne();
         let customerList = await Quatation.find({ is_deleted: false, _id: req.body.id })
             .populate("TermsAndCondition")
             .populate("Customer")
@@ -444,14 +450,8 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
                 }
             })
             .populate("addedBy", 'name email')
-        let cmname = customerList[0].Customer?.Title || "";
-        if (cmname != "") {
-            cmname += ' ' + customerList[0].Customer?.FirstName + ' ' + customerList[0].Customer?.LastName
-        }
-        let cmaddress = customerList[0].Customer?.Address || "";
-        if (cmaddress != "") {
-            cmaddress += '<br/>' + customerList[0].Customer?.City + ' ' + customerList[0].Customer?.State
-        }
+        let cmname = customerList[0].Customer?.Title || ""+ customerList[0].Customer?.FirstName + ' ' + customerList[0].Customer?.LastName;
+        let cmaddress = customerList[0].Customer?.Address || ""+'<br/>' + customerList[0].Customer?.City + ' ' + customerList[0].Customer?.State;
         let termsandcondition = [];
         if (customerList[0].TermsAndCondition.length != 0) {
             let term = customerList[0].TermsAndCondition.map(x => { return '<br/>' + x.condition })
@@ -461,7 +461,26 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
             termsandcondition = ''
         }
 
-        templateHtml = templateHtml.replace('{{token.QuatationNo}}', customerList[0].QuatationNo || '')
+        templateHtml = templateHtml.replace('{{token.companytitle}}', applicationSetting.CompanyTitle || '')
+        templateHtml = templateHtml.replace('{{token.companysubtitle}}', applicationSetting.CompanySubTitle || '')
+        templateHtml = templateHtml.replace('{{token.company}}', `<table border="0" align="right" cellpadding="0" cellspacing="0" style="width:60%">
+        <tbody>
+            <tr>
+            <td style="text-align:right">Email: </td>
+            <td style="text-align:right">${applicationSetting.OfficeEmail}</td>
+            </tr>
+            <tr>
+            <td style="text-align:right">Contact: </td>
+            <td style="text-align:right">${applicationSetting.OfficePhone1},${applicationSetting.OfficePhone2}</td>
+            </tr>
+            <tr>
+            <td style="text-align:right;vertical-align: top;">Address: </td>
+            <td style="text-align:right">${applicationSetting.OfficeAddress}</td>
+            </tr>
+        </tbody>
+        </table>`)
+        templateHtml = templateHtml.replace('{{token.QuatationNo}}', customerList[0].QuatationCode || '')
+        templateHtml = templateHtml.replace('{{token.CustomerNo}}', customerList[0].Customer?.CustomerCode || '')
         templateHtml = templateHtml.replace('{{token.date}}', format('dd-MM-yyyy', customerList[0].QuatationDate))
         templateHtml = templateHtml.replace('{{token.validdate}}', format('dd-MM-yyyy', customerList[0].ValidDate))
         templateHtml = templateHtml.replace('{{token.email}}', customerList[0].Customer?.Email || '')

@@ -3,7 +3,8 @@ const CustomerModal = require('../models/customerModel')
 const Customer = CustomerModal.CustomerModal
 const BillingAddress = CustomerModal.BillingAddressModal
 const ShippingAddress = CustomerModal.ShippingAddressModal
-
+const Master = require('../models/masterModel')
+const ApplicationSetting = Master.ApplicationSettingModal;
 
 const addCustomer = asyncHandler(async (req, res) => {
     try {
@@ -15,7 +16,16 @@ const addCustomer = asyncHandler(async (req, res) => {
                 data: null,
             });
         }
+        let customerNo = await Customer.find({}, { CustomerNo: 1, _id: 0 }).sort({ CustomerNo: -1 }).limit(1);
+        let maxCustomer = 1;
+        if (customerNo.length > 0) {
+            maxCustomer = customerNo[0].CustomerNo||0 + 1;
+        }
+        let applicationSetting = await ApplicationSetting.findOne();
+        let code = applicationSetting.CustomerPrefix+maxCustomer+applicationSetting.CustomerSuffix;
         const newCustomer = await Customer.create({
+            CustomerNo: maxCustomer||1,
+            CustomerCode: code,
             Company: req.body.company,
             GSTNo: req.body.gstno,
             Title: req.body.title,

@@ -6,8 +6,12 @@ const customerSchema = mongoose.Schema(
             type: String,
             required: [true, 'Please add a company']
         },
-        CustomerId: {
-            type: String,
+        CustomerNo: {
+            type: Number,
+            unique: true,
+        },
+        CustomerCode: {
+            type: String
         },
         GSTNo: {
             type: String,

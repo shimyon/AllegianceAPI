@@ -3,6 +3,10 @@ const mongoose = require('mongoose')
 const quatationSchema = mongoose.Schema(
     {
         QuatationNo: {
+            type: Number,
+            unique: true,
+        },
+        QuatationCode: {
             type: String
         },
         Customer: {
