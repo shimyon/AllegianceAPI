@@ -24,7 +24,7 @@ const addQuatation = asyncHandler(async (req, res) => {
         let quatationNo = await Quatation.find({}, { QuatationNo: 1, _id: 0 }).sort({ QuatationNo: -1 }).limit(1);
         let maxQuatation = 1;
         if (quatationNo.length > 0) {
-            maxQuatation = quatationNo[0].QuatationNo||0 + 1;
+            maxQuatation = quatationNo[0].QuatationNo + 1;
         }
         let applicationSetting = await ApplicationSetting.findOne();
         let code = applicationSetting.QuotationPrefix+maxQuatation+applicationSetting.QuotationSuffix;

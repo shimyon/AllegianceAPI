@@ -19,7 +19,7 @@ const addCustomer = asyncHandler(async (req, res) => {
         let customerNo = await Customer.find({}, { CustomerNo: 1, _id: 0 }).sort({ CustomerNo: -1 }).limit(1);
         let maxCustomer = 1;
         if (customerNo.length > 0) {
-            maxCustomer = customerNo[0].CustomerNo||0 + 1;
+            maxCustomer = customerNo[0].CustomerNo + 1;
         }
         let applicationSetting = await ApplicationSetting.findOne();
         let code = applicationSetting.CustomerPrefix+maxCustomer+applicationSetting.CustomerSuffix;
