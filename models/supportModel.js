@@ -54,6 +54,11 @@ const supportSchema = mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User'
         },
+        is_active:
+        {
+            type:Boolean,
+            default:true
+        },
         Products: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Products'

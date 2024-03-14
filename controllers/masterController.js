@@ -12,6 +12,7 @@ const Role = Master.RoleModal;
 const Status = Master.StatusModal;
 const MailAddress = Master.MailAddressModal;
 const ApplicationSetting = Master.ApplicationSettingModal;
+const uploadFile = require("../middleware/uploadFileMiddleware");
 
 const Response = require('../models/responseModel')
 const getApplicationSetting = asyncHandler(async (req, res) => {
@@ -30,18 +31,53 @@ const getApplicationSetting = asyncHandler(async (req, res) => {
     }
 })
 const addApplicationSetting = asyncHandler(async (req, res) => {
-    let response = new Response();
-    const { Id, CompanyTitle, CompanySubTitle, QuotationPrefix, QuotationSuffix, InvoicePrefix, InvoiceSuffix, CustomerPrefix, CustomerSuffix, OrderPrefix, OrderSuffix, OfficeAddress, OfficeEmail, OfficePhone1, OfficePhone2 } = req.body
     try {
+        process.env.UPLOADFILE = "";
+        await uploadFile(req, res, function (err) {
+            if (err) {
+                return ("Error uploading file.");
+            } else {
+                editSave(req, res, process.env.UPLOADFILE)
+            }
+        })
+
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in editing data. " + err.message,
+            data: null,
+        });
+
+    }
+})
+const editSave = asyncHandler(async (req, res, fileName) => {
+    try {
+        const { Id, CompanyTitle, CompanySubTitle, CompanyLogo, Quotation, QuotationPrefix, QuotationSuffix, Invoice, InvoicePrefix, InvoiceSuffix, Customer, CustomerPrefix, CustomerSuffix, Order, OrderPrefix, OrderSuffix, OfficeAddress, OfficeEmail, OfficePhone1, OfficePhone2 } = req.body
+    
+        let existNews = await ApplicationSetting.findById(Id);
+        if (!existNews) {
+            return res.status(400).json({
+                success: false,
+                msg: "Application Setting not found"
+            });
+        }
+
+        fileName = fileName != "" ? fileName.replace(",", "") : existNews.CompanyLogo;
+
         let newApplicationSetting = await ApplicationSetting.findByIdAndUpdate(Id, {
             CompanyTitle,
             CompanySubTitle,
+            CompanyLogo: fileName,
+            Quotation,
             QuotationPrefix,
             QuotationSuffix,
+            Invoice,
             InvoicePrefix,
             InvoiceSuffix,
+            Customer,
             CustomerPrefix,
             CustomerSuffix,
+            Order,
             OrderPrefix,
             OrderSuffix,
             OfficeAddress,
@@ -49,17 +85,19 @@ const addApplicationSetting = asyncHandler(async (req, res) => {
             OfficePhone1,
             OfficePhone2
         });
-
-        response.success = true;
-        response.message = "Application Setting updated successfully";
-        response.data = newApplicationSetting;
-        return res.status(200).json(response);
+        return res.status(200).json({
+            success: true,
+            data:newApplicationSetting,
+            msg: "Application Setting updated successfully"
+        });
     } catch (err) {
-        response.message = "Error in adding Application Setting. " + err.message;
-        return res.status(400).json(response);
+        return res.status(400).json({
+            success: false,
+            msg: "Error in updating Application Setting. " + err.message
+        });
     }
+})
 
-});
 const addProduct = asyncHandler(async (req, res) => {
     let response = new Response();
 

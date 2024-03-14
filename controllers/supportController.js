@@ -190,7 +190,35 @@ const updateStatus = asyncHandler(async (req, res) => {
     }
 
 });
+const removeSupport = asyncHandler(async (req, res) => {
+    try {
+        const existSupport = await Support.findById(req.body.id);
+        if (!existSupport) {
+            return res.status(200).json({
+                success: false,
+                msg: "Support not found.",
+                data: null,
+            });
+        }
 
+        const newSupport = await Support.findByIdAndUpdate(req.body.id, {
+            is_active: req.body.active
+        });
+
+        return res.status(200).json({
+            success: true,
+            msg: "Support removed. ",
+            data: null
+        }).end();
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in removing Support. " + err.message,
+            data: null,
+        });
+    }
+
+});
 
 module.exports = {
     addSupport,
@@ -198,5 +226,6 @@ module.exports = {
     getSupportById,
     updateSupport,
     editSupport,
-    updateStatus
+    updateStatus,
+    removeSupport
 }

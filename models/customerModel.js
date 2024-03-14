@@ -11,7 +11,8 @@ const customerSchema = mongoose.Schema(
             unique: true,
         },
         CustomerCode: {
-            type: String
+            type: String,
+            unique: true,
         },
         GSTNo: {
             type: String,

@@ -4,7 +4,6 @@ const User = require('../models/userModel')
 const notificationModel = require('../models/notificationModel')
 const Invoice = InvoiceModal.InvoiceModal
 const InvoiceProduct = InvoiceModal.InvoiceProductModal
-const InvoiceTermsandCondition = InvoiceModal.InvoiceTermsandCondition
 const OrderModal = require('../models/orderModel')
 const OrderObject = OrderModal.OrderModal
 
@@ -28,6 +27,7 @@ const addInvoice = asyncHandler(async (req, res) => {
             Discount: req.body.discount,
             TotalTax: req.body.totalTax,
             TotalPrice: req.body.totalPrice,
+            TermsAndCondition: req.body.TermsAndCondition,
             InvoiceDate: new Date(),
             DeliveryDate: req.body.deliveryDate,
             Sales: req.body.sales,
@@ -60,21 +60,6 @@ const addInvoice = asyncHandler(async (req, res) => {
             newInvoice.Products.push(prInvoice[i]);
         }
 
-        //adding terms and condition
-        var condition = [];
-        for (var i = 0; i < req.body.TermsAndCondition.length; i++) {
-            var tr = req.body.TermsAndCondition[i];
-            var newTr = {
-                InvoiceId: newInvoice._id.toString(),
-                condition: tr
-            }
-            condition.push(newTr);
-        }
-        const trInvoice = await InvoiceTermsandCondition.create(condition);
-
-        for (var i = 0; i < trInvoice.length; i++) {
-            newInvoice.TermsAndCondition.push(trInvoice[i]);
-        }
         newInvoice.save((err) => {
             if (err) throw err;
         });
@@ -151,6 +136,7 @@ const createOrderInvoice = asyncHandler(async (req, res) => {
             Discount: orderDetail.Discount,
             TotalTax: orderDetail.TotalTax,
             TotalPrice: orderDetail.TotalPrice,
+            TermsAndCondition: req.body.TermsAndCondition,
             InvoiceDate: new Date(),
             Sales: orderDetail.Sales,
             Note: orderDetail.Note,
@@ -221,21 +207,12 @@ const editInvoice = asyncHandler(async (req, res) => {
             TotalPrice: req.body.totalPrice,
             DeliveryDate: req.body.deliveryDate,
             Sales: req.body.sales,
-            TermsAndCondition: req.body.termsCondition,
+            TermsAndCondition: req.body.TermsAndCondition,
             InvoiceDate: req.body.invoiceDate,
             Note: req.body.note
         });
 
         await InvoiceProduct.deleteMany({ InvoiceId: req.body.id }).lean().exec((err, doc) => {
-            if (err) {
-                return res.status(401).json({
-                    success: false,
-                    msg: err
-                }).end();
-            }
-        });
-
-        await InvoiceTermsandCondition.deleteMany({ InvoiceId: req.body.id }).lean().exec((err, doc) => {
             if (err) {
                 return res.status(401).json({
                     success: false,
@@ -267,22 +244,6 @@ const editInvoice = asyncHandler(async (req, res) => {
 
         for (var i = 0; i < prInvoice.length; i++) {
             oldInvoice.Products.push(prInvoice[i]);
-        }
-
-        //adding terms and condition
-        var condition = [];
-        for (var i = 0; i < req.body.TermsAndCondition.length; i++) {
-            var tr = req.body.TermsAndCondition[i];
-            var newTr = {
-                InvoiceId: oldInvoice._id.toString(),
-                condition: tr
-            }
-            condition.push(newTr);
-        }
-        const trInvoice = await InvoiceTermsandCondition.create(condition);
-
-        for (var i = 0; i < trInvoice.length; i++) {
-            oldInvoice.TermsAndCondition.push(trInvoice[i]);
         }
 
         oldInvoice.save((err) => {
@@ -341,7 +302,6 @@ const getAllInvoice = asyncHandler(async (req, res) => {
             })
             .populate("ShippingAddress")
             .populate("BillingAddress")
-            .populate("TermsAndCondition")
             .populate("Sales", 'name email')
             .populate("addedBy", 'name email')
             .sort({ createdAt: -1 })
@@ -370,7 +330,6 @@ const getInvoiceById = asyncHandler(async (req, res) => {
             })
             .populate("ShippingAddress")
             .populate("BillingAddress")
-            .populate("TermsAndCondition")
             .populate("Sales", 'name email')
             .populate("addedBy", 'name email')
 

@@ -63,7 +63,7 @@ const registerUser = asyncHandler(async (req, res) => {
 })
 
 const updateUser = asyncHandler(async (req, res) => {
-    const { name, id, role, active } = req.body
+    const { name, id, role } = req.body
 
     if (!name || !role) {
         res.status(400)
@@ -84,7 +84,6 @@ const updateUser = asyncHandler(async (req, res) => {
     let user = await User.findByIdAndUpdate(id, {
         name: name,
         role: role,
-        is_active: active
     });
     user = await User.findOne({ _id: id });
     if (user) {
@@ -101,7 +100,35 @@ const updateUser = asyncHandler(async (req, res) => {
         throw new Error("Invalid user data!")
     }
 })
+const removeUser = asyncHandler(async (req, res) => {
+    try {
+        const existUser = await User.findById(req.body.id);
+        if (!existUser) {
+            return res.status(200).json({
+                success: false,
+                msg: "User not found.",
+                data: null,
+            });
+        }
 
+        const newUser = await User.findByIdAndUpdate(req.body.id, {
+            is_active: req.body.active
+        });
+
+        return res.status(200).json({
+            success: true,
+            msg: "User removed. ",
+            data: null
+        }).end();
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in removing User. " + err.message,
+            data: null,
+        });
+    }
+
+});
 const changePassword = asyncHandler(async (req, res) => {
     const { id, currentPassword, newPassword } = req.body
 
@@ -169,20 +196,19 @@ const loginUser = asyncHandler(async (req, res) => {
 })
 
 const getUserById = asyncHandler(async (req, res) => {
-    const { _id, name, email, role, is_active } = await User.findById(req.params.id)
+    const { _id, name, email, role } = await User.findById(req.params.id)
 
     res.status(200).json({
         id: _id,
         name,
         email,
-        role,
-        is_active
+        role
     })
 })
 
 const getAllUser = asyncHandler(async (req, res) => {
     try {
-        const user = await User.find({ is_active: req.body.active }, { _id: 1, email: 1, name: 1, role: 1 }).sort({ createdAt: -1 });
+        const user = await User.find({ is_active: req.body.active }, { _id: 1, email: 1, name: 1, role: 1,is_active:1 }).sort({ createdAt: -1 });
 
         res.status(200).json(user).end();
     } catch (err) {
@@ -257,5 +283,6 @@ module.exports = {
     updateUser,
     changePassword,
     getAllUser,
-    forgotPassword
+    forgotPassword,
+    removeUser
 }

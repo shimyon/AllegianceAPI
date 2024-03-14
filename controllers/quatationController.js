@@ -4,7 +4,6 @@ const User = require('../models/userModel')
 const notificationModel = require('../models/notificationModel')
 const Quatation = QuatationModal.QuatationModal
 const QuatationProduct = QuatationModal.QuatationProductModal
-const QuatationTermsandCondition = QuatationModal.QuatationTermsandCondition
 const OrderModal = require('../models/orderModel')
 const Order = OrderModal.OrderModal
 const OrderProduct = OrderModal.OrderProductModal
@@ -41,6 +40,7 @@ const addQuatation = asyncHandler(async (req, res) => {
             BeforeTaxPrice: req.body.BeforeTaxPrice,
             CGST: req.body.CGST,
             SGST: req.body.SGST,
+            TermsAndCondition:req.body.TermsAndCondition,
             OtherChargeName: req.body.OtherChargeName,
             OtherCharge: req.body.OtherCharge,
             Discount: req.body.discount,
@@ -76,22 +76,6 @@ const addQuatation = asyncHandler(async (req, res) => {
         const prQuatation = await QuatationProduct.create(products);
         for (var i = 0; i < prQuatation.length; i++) {
             newQuatation.Products.push(prQuatation[i]);
-        }
-
-        //adding terms and condition
-        var condition = [];
-        for (var i = 0; i < req.body.TermsAndCondition.length; i++) {
-            var tr = req.body.TermsAndCondition[i];
-            var newTr = {
-                QuatationId: newQuatation._id.toString(),
-                condition: tr
-            }
-            condition.push(newTr);
-        }
-        const trQuatation = await QuatationTermsandCondition.create(condition);
-
-        for (var i = 0; i < trQuatation.length; i++) {
-            newQuatation.TermsAndCondition.push(trQuatation[i]);
         }
 
         newQuatation.save((err) => {
@@ -152,6 +136,7 @@ const editQuatation = asyncHandler(async (req, res) => {
             CGST: req.body.CGST,
             SGST: req.body.SGST,
             OtherChargeName: req.body.OtherChargeName,
+            TermsAndCondition:req.body.TermsAndCondition,
             OtherCharge: req.body.OtherCharge,
             Discount: req.body.discount,
             TotalTax: req.body.totalTax,
@@ -163,15 +148,6 @@ const editQuatation = asyncHandler(async (req, res) => {
         });
 
         await QuatationProduct.deleteMany({ QuatationId: req.body.id }).lean().exec((err, doc) => {
-            if (err) {
-                return res.status(401).json({
-                    success: false,
-                    msg: err
-                }).end();
-            }
-        });
-
-        await QuatationTermsandCondition.deleteMany({ QuatationId: req.body.id }).lean().exec((err, doc) => {
             if (err) {
                 return res.status(401).json({
                     success: false,
@@ -206,21 +182,6 @@ const editQuatation = asyncHandler(async (req, res) => {
             oldQuatation.Products.push(prQuatation[i]);
         }
 
-        //adding terms and condition
-        var condition = [];
-        for (var i = 0; i < req.body.TermsAndCondition.length; i++) {
-            var tr = req.body.TermsAndCondition[i];
-            var newTr = {
-                QuatationId: oldQuatation._id.toString(),
-                condition: tr
-            }
-            condition.push(newTr);
-        }
-        const trQuatation = await QuatationTermsandCondition.create(condition);
-
-        for (var i = 0; i < trQuatation.length; i++) {
-            oldQuatation.TermsAndCondition.push(trQuatation[i]);
-        }
         oldQuatation.save((err) => {
             if (err) throw err;
         });
@@ -276,7 +237,6 @@ const getAllQuatation = asyncHandler(async (req, res) => {
                 }
             })
             .populate("ShippingAddress")
-            .populate("TermsAndCondition")
             .populate("BillingAddress")
             .populate("Sales", 'name email')
             .populate("addedBy", 'name email')
@@ -306,7 +266,6 @@ const getCustomerById = asyncHandler(async (req, res) => {
             })
             .populate("ShippingAddress")
             .populate("BillingAddress")
-            .populate("TermsAndCondition")
             .populate("Sales", 'name email')
             .populate("addedBy", 'name email')
 
@@ -358,7 +317,6 @@ const moveToOrder = asyncHandler(async (req, res) => {
                 }
             })
             .populate("ShippingAddress")
-            .populate("TermsAndCondition")
             .populate("BillingAddress")
             .populate("Sales", 'name email')
             .populate("addedBy", 'name email')
@@ -441,7 +399,6 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
         var filename = template.replace('template.html', `Print.pdf`)
         let applicationSetting = await ApplicationSetting.findOne();
         let customerList = await Quatation.find({ is_deleted: false, _id: req.body.id })
-            .populate("TermsAndCondition")
             .populate("Customer")
             .populate({
                 path: 'Products',
@@ -452,15 +409,7 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
             .populate("addedBy", 'name email')
         let cmname = customerList[0].Customer?.Title || ""+ customerList[0].Customer?.FirstName + ' ' + customerList[0].Customer?.LastName;
         let cmaddress = customerList[0].Customer?.Address || ""+'<br/>' + customerList[0].Customer?.City + ' ' + customerList[0].Customer?.State;
-        let termsandcondition = [];
-        if (customerList[0].TermsAndCondition.length != 0) {
-            let term = customerList[0].TermsAndCondition.map(x => { return '<br/>' + x.condition })
-            termsandcondition.push(term)
-        }
-        else {
-            termsandcondition = ''
-        }
-
+       
         templateHtml = templateHtml.replace('{{token.companytitle}}', applicationSetting.CompanyTitle || '')
         templateHtml = templateHtml.replace('{{token.companysubtitle}}', applicationSetting.CompanySubTitle || '')
         templateHtml = templateHtml.replace('{{token.company}}', `<table border="0" align="right" cellpadding="0" cellspacing="0" style="width:60%">
@@ -488,7 +437,7 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
         templateHtml = templateHtml.replace('{{token.cmaddress}}', cmaddress)
         templateHtml = templateHtml.replace('{{token.cmname}}', cmname)
         templateHtml = templateHtml.replace('{{token.note}}', customerList[0].Note || '')
-        templateHtml = templateHtml.replace('{{token.termsandcondition}}', termsandcondition)
+        templateHtml = templateHtml.replace('{{token.termsandcondition}}', customerList[0].TermsAndCondition || '0')
         templateHtml = templateHtml.replace('{{token.BeforeTaxPrice}}', customerList[0].BeforeTaxPrice || '0')
         templateHtml = templateHtml.replace('{{token.Price}}', customerList[0].BeforeTaxPrice + customerList[0].OtherCharge)
         templateHtml = templateHtml.replace('{{token.AfterTaxPrice}}', customerList[0].AfterTaxPrice || '0')

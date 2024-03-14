@@ -7,7 +7,8 @@ const quatationSchema = mongoose.Schema(
             unique: true,
         },
         QuatationCode: {
-            type: String
+            type: String,
+            unique: true,
         },
         Customer: {
             type: mongoose.Schema.Types.ObjectId,
@@ -76,10 +77,9 @@ const quatationSchema = mongoose.Schema(
             type: Boolean,
             default: false
         },
-        TermsAndCondition: [{
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'QuatationTermsandCondition'
-        }],
+        TermsAndCondition: {
+            type: String
+        },
         Note:
         {
             type: String
@@ -132,29 +132,13 @@ const quatationProductSchema = mongoose.Schema(
         timestamps: true,
     })
 
-const quatationTermsandCondition = mongoose.Schema(
-    {
-        QuatationId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Quatations'
-        },
-        condition: {
-            type: String
-        }
-    },
-    {
-        timestamps: true,
-    }
-)
 const QuatationModal = mongoose.model('Quatations', quatationSchema);
 const QuatationProductModal = mongoose.model('QuatationProduct', quatationProductSchema);
-const QuatationTermsandCondition = mongoose.model('QuatationTermsandCondition', quatationTermsandCondition);
 
 const syncIndex = async () => {
     await QuatationModal.syncIndexes();
     await QuatationProductModal.syncIndexes();
-    await QuatationTermsandCondition.syncIndexes();
 }
 syncIndex();
 
-module.exports = { QuatationModal, QuatationProductModal, QuatationTermsandCondition };
+module.exports = { QuatationModal, QuatationProductModal };

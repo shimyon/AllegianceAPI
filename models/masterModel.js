@@ -46,7 +46,6 @@ const productSchema = mongoose.Schema(
     {
         timestamps: true,
     });
-
 const stateSchema = mongoose.Schema(
     {
         Name: {
@@ -83,7 +82,6 @@ const unitSchema = mongoose.Schema(
     {
         timestamps: true,
     });
-
 const categorySchema = mongoose.Schema(
     {
         Name: {
@@ -100,7 +98,6 @@ const categorySchema = mongoose.Schema(
     {
         timestamps: true,
     });
-
 const subCategorySchema = mongoose.Schema(
     {
         Name: {
@@ -210,54 +207,73 @@ const MailAddressSchema = mongoose.Schema(
     {
         timestamps: true,
     });
-    const ApplicationSettingSchema = mongoose.Schema(
-        {
-            CompanyTitle: {
-                type: String
-            },
-            CompanySubTitle:{
-                type: String
-            },
-            QuotationPrefix:{
-                type: String
-            },
-            QuotationSuffix:{
-                type: String
-            },
-            InvoicePrefix:{
-                type: String
-            },
-            InvoiceSuffix:{
-                type: String
-            },
-            CustomerPrefix:{
-                type: String
-            },
-            CustomerSuffix:{
-                type: String
-            },
-            OrderPrefix:{
-                type: String
-            },
-            OrderSuffix:{
-                type: String
-            },
-            OfficeAddress:{
-                type: String
-            },
-            OfficeEmail:{
-                type: String
-            },
-            OfficePhone1:{
-                type: String
-            },
-            OfficePhone2:{
-                type: String
-            }
+const ApplicationSettingSchema = mongoose.Schema(
+    {
+        CompanyTitle: {
+            type: String
         },
-        {
-            timestamps: true,
-        });
+        CompanySubTitle: {
+            type: String
+        },
+        CompanyLogo: {
+            type: String
+        },
+        Quotation: {
+            type: Boolean,
+            default: false
+        },
+        QuotationPrefix: {
+            type: String
+        },
+        QuotationSuffix: {
+            type: String
+        },
+        Invoice: {
+            type: Boolean,
+            default: false
+        },
+        InvoicePrefix: {
+            type: String
+        },
+        InvoiceSuffix: {
+            type: String
+        },
+        Customer: {
+            type: Boolean,
+            default: false
+        },
+        CustomerPrefix: {
+            type: String
+        },
+        CustomerSuffix: {
+            type: String
+        },
+        Order: {
+            type: Boolean,
+            default: false
+        },
+        OrderPrefix: {
+            type: String
+        },
+        OrderSuffix: {
+            type: String
+        },
+        OfficeAddress: {
+            type: String
+        },
+        OfficeEmail: {
+            type: String
+        },
+        OfficePhone1: {
+            type: String
+        },
+        OfficePhone2: {
+            type: String
+        }
+    },
+    {
+        timestamps: true,
+    });
 const ProductModal = mongoose.model('Products', productSchema);
 const TypeModal = mongoose.model('Types', typeSchema);
 const SourceModal = mongoose.model('Sources', sourceSchema);
@@ -287,4 +303,4 @@ const syncIndex = async () => {
 }
 syncIndex();
 
-module.exports = { ProductModal, TypeModal, StateModal, SourceModal, UnitModal, CategoryModal, SubCategoryModal, ModuleModal, RoleModal, StatusModal, MailAddressModal,ApplicationSettingModal };
+module.exports = { ProductModal, TypeModal, StateModal, SourceModal, UnitModal, CategoryModal, SubCategoryModal, ModuleModal, RoleModal, StatusModal, MailAddressModal, ApplicationSettingModal };
