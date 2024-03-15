@@ -26,7 +26,13 @@ const addQuatation = asyncHandler(async (req, res) => {
             maxQuatation = quatationNo[0].QuatationNo + 1;
         }
         let applicationSetting = await ApplicationSetting.findOne();
-        let code = applicationSetting.QuotationPrefix+maxQuatation+applicationSetting.QuotationSuffix;
+        let code = "";
+        if (applicationSetting.Quotation == true) {
+            code = req.body.QuatationCode;
+        }
+        else {
+            code = applicationSetting.QuotationPrefix + maxQuatation + applicationSetting.QuotationSuffix;
+        }
         const newQuatation = await Quatation.create({
             QuatationNo: maxQuatation,
             QuatationCode: code,
@@ -40,7 +46,7 @@ const addQuatation = asyncHandler(async (req, res) => {
             BeforeTaxPrice: req.body.BeforeTaxPrice,
             CGST: req.body.CGST,
             SGST: req.body.SGST,
-            TermsAndCondition:req.body.TermsAndCondition,
+            TermsAndCondition: req.body.TermsAndCondition,
             OtherChargeName: req.body.OtherChargeName,
             OtherCharge: req.body.OtherCharge,
             Discount: req.body.discount,
@@ -128,6 +134,7 @@ const editQuatation = asyncHandler(async (req, res) => {
 
         await Quatation.findByIdAndUpdate(req.body.id, {
             Customer: req.body.customer,
+            QuatationCode: req.body.QuatationCode,
             ShippingAddress: req.body.shippingAddress,
             BillingAddress: req.body.billingAddress,
             Sales: req.body.sales,
@@ -136,7 +143,7 @@ const editQuatation = asyncHandler(async (req, res) => {
             CGST: req.body.CGST,
             SGST: req.body.SGST,
             OtherChargeName: req.body.OtherChargeName,
-            TermsAndCondition:req.body.TermsAndCondition,
+            TermsAndCondition: req.body.TermsAndCondition,
             OtherCharge: req.body.OtherCharge,
             Discount: req.body.discount,
             TotalTax: req.body.totalTax,
@@ -407,27 +414,14 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
                 }
             })
             .populate("addedBy", 'name email')
-        let cmname = customerList[0].Customer?.Title || ""+ customerList[0].Customer?.FirstName + ' ' + customerList[0].Customer?.LastName;
-        let cmaddress = customerList[0].Customer?.Address || ""+'<br/>' + customerList[0].Customer?.City + ' ' + customerList[0].Customer?.State;
-       
+        let cmname = customerList[0].Customer?.Title || "" + customerList[0].Customer?.FirstName + ' ' + customerList[0].Customer?.LastName;
+        let cmaddress = customerList[0].Customer?.Address || "" + '<br/>' + customerList[0].Customer?.City + ' ' + customerList[0].Customer?.State;
         templateHtml = templateHtml.replace('{{token.companytitle}}', applicationSetting.CompanyTitle || '')
         templateHtml = templateHtml.replace('{{token.companysubtitle}}', applicationSetting.CompanySubTitle || '')
-        templateHtml = templateHtml.replace('{{token.company}}', `<table border="0" align="right" cellpadding="0" cellspacing="0" style="width:60%">
-        <tbody>
-            <tr>
-            <td style="text-align:right">Email: </td>
-            <td style="text-align:right">${applicationSetting.OfficeEmail}</td>
-            </tr>
-            <tr>
-            <td style="text-align:right">Contact: </td>
-            <td style="text-align:right">${applicationSetting.OfficePhone1},${applicationSetting.OfficePhone2}</td>
-            </tr>
-            <tr>
-            <td style="text-align:right;vertical-align: top;">Address: </td>
-            <td style="text-align:right">${applicationSetting.OfficeAddress}</td>
-            </tr>
-        </tbody>
-        </table>`)
+        templateHtml = templateHtml.replace('{{token.OfficeEmail}}', applicationSetting.OfficeEmail || '')
+        templateHtml = templateHtml.replace('{{token.OfficePhone1}}', applicationSetting.OfficePhone1 || '')
+        templateHtml = templateHtml.replace('{{token.OfficePhone2}}', applicationSetting.OfficePhone2 || '')
+        templateHtml = templateHtml.replace('{{token.OfficeAddress}}', applicationSetting.OfficeAddress || '')
         templateHtml = templateHtml.replace('{{token.QuatationNo}}', customerList[0].QuatationCode || '')
         templateHtml = templateHtml.replace('{{token.CustomerNo}}', customerList[0].Customer?.CustomerCode || '')
         templateHtml = templateHtml.replace('{{token.date}}', format('dd-MM-yyyy', customerList[0].QuatationDate))
@@ -437,7 +431,7 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
         templateHtml = templateHtml.replace('{{token.cmaddress}}', cmaddress)
         templateHtml = templateHtml.replace('{{token.cmname}}', cmname)
         templateHtml = templateHtml.replace('{{token.note}}', customerList[0].Note || '')
-        templateHtml = templateHtml.replace('{{token.termsandcondition}}', customerList[0].TermsAndCondition || '0')
+        templateHtml = templateHtml.replace('{{token.termsandcondition}}', customerList[0].TermsAndCondition.replaceAll("\n", "<br>") || '')
         templateHtml = templateHtml.replace('{{token.BeforeTaxPrice}}', customerList[0].BeforeTaxPrice || '0')
         templateHtml = templateHtml.replace('{{token.Price}}', customerList[0].BeforeTaxPrice + customerList[0].OtherCharge)
         templateHtml = templateHtml.replace('{{token.AfterTaxPrice}}', customerList[0].AfterTaxPrice || '0')
@@ -446,37 +440,39 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
         templateHtml = templateHtml.replace('{{token.discount}}', (customerList[0].AfterTaxPrice * customerList[0].Discount) / 100)
         templateHtml = templateHtml.replace('{{token.finalamount}}', customerList[0].FinalPrice || '0')
         templateHtml = templateHtml.replace('{{token.finalamountword}}', converter.toWords(customerList[0].FinalPrice).toUpperCase())
-        templateHtml = templateHtml.replace('{{token.table}}', `<table border="1" cellpadding="10" cellspacing="0" style="width:100%;border-collapse: collapse;">
+        templateHtml = templateHtml.replace('{{token.table}}', `<table border="1" bordercolor="#ccc" cellpadding="3" cellspacing="3"
+        style="border-collapse:collapse;border-left:revert-layer;border-right:revert-layer;width:100%">
         <tbody>
-            <tr>
-            <th>S No.</th>
-            <th>Description</th>
-            <th>QTY</th>
-            <th>Unit Price</th>
-            <th>Unit</th>
-            <th>Amount</th>
+        <tr style="background-color: #ffd700;">
+            <th style="font-size: 11px;">S No.</th>
+            <th style="font-size: 11px;">Description</th>
+            <th style="font-size: 11px;">QTY</th>
+            <th style="font-size: 11px;">Unit Price</th>
+            <th style="font-size: 11px;">Unit</th>
+            <th style="font-size: 11px;">Amount</th>
             </tr>
             ${customerList[0].Products.map((x, i) => (
-            `<tr>
-            <td style="text-align:center">${i + 1}</td>
-            <td style="text-align:left"><b>${x.Product?.Name}</b><br/>${x.Product?.Description}</td>
-            <td style="text-align:center">${x.Quantity}</td>
-            <td style="text-align:center">${x.Price}</td>
-            <td style="text-align:center">${x.Unit}</td>
-            <td style="text-align:center">${x.TotalAmount}</td>
-            </tr>`
+                `<tr>
+                <td style="font-size: 11px;text-align:center">${i + 1}</td>
+                <td style="font-size: 11px;text-align:left"><b>${x.Product?.Name}</b><br/>${x.Product?.Description}</td>
+                <td style="font-size: 11px;text-align:center">${x.Quantity}</td>
+                <td style="font-size: 11px;text-align:center">${x.Price}</td>
+                <td style="font-size: 11px;text-align:center">${x.Unit}</td>
+                <td style="font-size: 11px;text-align:center">${x.TotalAmount}</td>
+                </tr>`
         ))}
         <tr>
-            <td style="text-align:center"></td>
-            <td style="text-align:left">${customerList[0].OtherChargeName}</td>
-            <td style="text-align:center"></td>
-            <td style="text-align:center"></td>
-            <td style="text-align:center"></td>
-            <td style="text-align:center">${customerList[0].OtherCharge}</td>
+            <td style="font-size: 11px;text-align:center"></td>
+            <td style="font-size: 11px;text-align:left" colspan="4">Extra Charge:${customerList[0].OtherChargeName}</td>
+            <td style="font-size: 11px;text-align:center">${customerList[0].OtherCharge}</td>
+            </tr>
+        <tr style="background-color: #ffd700;">
+            <td style="font-size: 11px;text-align:left" colspan="5"><strong>${customerList[0].Note}<strong></td>
+            <td style="font-size: 11px;text-align:center"><strong>₹&nbsp;&nbsp;${(customerList[0].BeforeTaxPrice + customerList[0].OtherCharge)}<strong></td>
             </tr>
         </tbody>
         </table>`)
-        templateHtml = templateHtml.replace('{{token.gsttable}}', `<table border="1" cellpadding="10" cellspacing="0" style="width:100%">
+        templateHtml = templateHtml.replace('{{token.gsttable}}', `<table border="1" cellpadding="10" cellspacing="0" style="width:100%;border-collapse: collapse;border-left:revert-layer"">
         <tbody>
             <tr>
             <th>S No.</th>

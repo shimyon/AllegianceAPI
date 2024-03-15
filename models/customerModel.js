@@ -32,7 +32,6 @@ const customerSchema = mongoose.Schema(
         },
         Mobile: {
             type: Number,
-            required: [true, 'Please add Mobile'],
         },
         Email: {
             type: String,

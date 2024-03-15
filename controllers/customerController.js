@@ -22,7 +22,13 @@ const addCustomer = asyncHandler(async (req, res) => {
             maxCustomer = customerNo[0].CustomerNo + 1;
         }
         let applicationSetting = await ApplicationSetting.findOne();
-        let code = applicationSetting.CustomerPrefix+maxCustomer+applicationSetting.CustomerSuffix;
+        let code = "";
+        if(applicationSetting.Customer==true){
+            code = req.body.CustomerCode;
+        }
+        else{
+           code = applicationSetting.CustomerPrefix+maxCustomer+applicationSetting.CustomerSuffix;
+        }
         const newCustomer = await Customer.create({
             CustomerNo: maxCustomer||1,
             CustomerCode: code,
@@ -67,6 +73,7 @@ const editCustomer = asyncHandler(async (req, res) => {
 
         const newCustomer = await Customer.findByIdAndUpdate(req.body.id, {
             Company: req.body.company,
+            CustomerCode: req.body.CustomerCode,
             Title: req.body.title,
             GSTNo: req.body.gstno,
             FirstName: req.body.firstname,
