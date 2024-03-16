@@ -2,9 +2,11 @@ const asyncHandler = require('express-async-handler')
 const Task = require('../models/taskModel')
 const Master = require('../models/masterModel')
 const Status = Master.StatusModal;
+const { sendMail } = require('../middleware/sendMail')
+const moment = require('moment')
 const addtask = asyncHandler(async (req, res) => {
     try {
-        await Task.create({
+        let taskadd = await Task.create({
             Name: req.body.Name,
             Description: req.body.Description,
             Status: req.body.Status,
@@ -15,6 +17,12 @@ const addtask = asyncHandler(async (req, res) => {
             is_active: true,
             addedBy: req.user._id
         });
+        if (taskadd) {
+            let TaskList = await Task.findOne({ _id: taskadd._id }).populate("Assign")
+            let html =
+                `<html>Hello,<br/><br/>Please take up the following task (${req.body.Name})<br/>${req.body.Description}<br/><br/>Please finish it by ${moment(req.body.EndDate).format("DD-MMM-YY")}<br/><br/>Best regards,<br/><b>Team Emoiss</b></html>`;
+            sendMail(TaskList?.Assign.email, "New Task", html);
+        }
         return res.status(200).json({
             success: true,
             msg: "Task Added.",
@@ -84,11 +92,13 @@ const removetask = asyncHandler(async (req, res) => {
 
 const getAlltask = asyncHandler(async (req, res) => {
     try {
-        let taskList = await Task.find({ is_active: req.body.active, Assign: req.body.user }).populate("Status").populate("Assign")
+        let inboxList = await Task.find({ is_active: true, Assign: req.body.user }).populate("Status").populate("Assign")
+            .sort({ createdAt: -1 })
+            let outboxList = await Task.find({ is_active: true, addedBy: req.body.user,Assign: { $ne: req.body.user } }).populate("Status").populate("Assign")
             .sort({ createdAt: -1 })
         return res.status(200).json({
             success: true,
-            data: taskList
+            data: {'Inbox':inboxList,'Outbox':outboxList}
         }).end();
     } catch (err) {
         return res.status(400).json({
@@ -118,47 +128,47 @@ const gettaskById = asyncHandler(async (req, res) => {
 
 const gettaskboardCount = asyncHandler(async (req, res) => {
     try {
-        
+
         const Lookup = await Status.aggregate([
             {
-              '$match': {
-                'GroupName': 'Tasks'
-              }
+                '$match': {
+                    'GroupName': 'Tasks'
+                }
             }, {
-              '$lookup': {
-                'from': 'tasks', 
-                'localField': '_id', 
-                'foreignField': 'Status', 
-                'as': 'tasks'
-              }
+                '$lookup': {
+                    'from': 'tasks',
+                    'localField': '_id',
+                    'foreignField': 'Status',
+                    'as': 'tasks'
+                }
             }, {
-              '$addFields': {
-                'tasksid': '$tasks.Assign'
-              }
+                '$addFields': {
+                    'tasksid': '$tasks.Assign'
+                }
             }, {
-              '$project': {
-                'Name': 1, 
-                'tasksid': 1, 
-                'tasksnewid': {
-                  '$filter': {
-                    'input': '$tasksid', 
-                    'as': 'item', 
-                    'cond': {
-                      '$eq': [
-                        '$$item', req.user._id
-                      ]
+                '$project': {
+                    'Name': 1,
+                    'tasksid': 1,
+                    'tasksnewid': {
+                        '$filter': {
+                            'input': '$tasksid',
+                            'as': 'item',
+                            'cond': {
+                                '$eq': [
+                                    '$$item', req.user._id
+                                ]
+                            }
+                        }
                     }
-                  }
                 }
-              }
             }, {
-              '$addFields': {
-                'count': {
-                  '$size': '$tasksnewid'
+                '$addFields': {
+                    'count': {
+                        '$size': '$tasksnewid'
+                    }
                 }
-              }
             }
-          ]);
+        ]);
         return res.status(200).json({
             success: true,
             data: Lookup

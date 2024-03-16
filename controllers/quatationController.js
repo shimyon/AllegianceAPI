@@ -37,6 +37,8 @@ const addQuatation = asyncHandler(async (req, res) => {
             QuatationNo: maxQuatation,
             QuatationCode: code,
             Customer: req.body.customer,
+            QuatationName: req.body.QuatationName,
+            Descriptionofwork: req.body.Descriptionofwork,
             ShippingAddress: req.body.shippingAddress || null,
             BillingAddress: req.body.billingAddress || null,
             Status: "New",
@@ -135,6 +137,8 @@ const editQuatation = asyncHandler(async (req, res) => {
         await Quatation.findByIdAndUpdate(req.body.id, {
             Customer: req.body.customer,
             QuatationCode: req.body.QuatationCode,
+            QuatationName: req.body.QuatationName,
+            Descriptionofwork: req.body.Descriptionofwork,
             ShippingAddress: req.body.shippingAddress,
             BillingAddress: req.body.billingAddress,
             Sales: req.body.sales,
@@ -421,7 +425,8 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
         templateHtml = templateHtml.replace('{{token.OfficeEmail}}', applicationSetting.OfficeEmail || '')
         templateHtml = templateHtml.replace('{{token.OfficePhone1}}', applicationSetting.OfficePhone1 || '')
         templateHtml = templateHtml.replace('{{token.OfficePhone2}}', applicationSetting.OfficePhone2 || '')
-        templateHtml = templateHtml.replace('{{token.OfficeAddress}}', applicationSetting.OfficeAddress || '')
+        templateHtml = templateHtml.replace('{{token.OfficeAddress}}', applicationSetting.OfficeAddress.replace(/(\r\n|\n|\r)/gm,"<br>") || '')
+        templateHtml = templateHtml.replace('{{token.QuatationName}}', customerList[0].QuatationName || '')
         templateHtml = templateHtml.replace('{{token.QuatationNo}}', customerList[0].QuatationCode || '')
         templateHtml = templateHtml.replace('{{token.CustomerNo}}', customerList[0].Customer?.CustomerCode || '')
         templateHtml = templateHtml.replace('{{token.date}}', format('dd-MM-yyyy', customerList[0].QuatationDate))
@@ -430,8 +435,7 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
         templateHtml = templateHtml.replace('{{token.mobile}}', customerList[0].Customer?.Mobile || '')
         templateHtml = templateHtml.replace('{{token.cmaddress}}', cmaddress)
         templateHtml = templateHtml.replace('{{token.cmname}}', cmname)
-        templateHtml = templateHtml.replace('{{token.note}}', customerList[0].Note || '')
-        templateHtml = templateHtml.replace('{{token.termsandcondition}}', customerList[0].TermsAndCondition.replaceAll("\n", "<br>") || '')
+        templateHtml = templateHtml.replace('{{token.termsandcondition}}', customerList[0].TermsAndCondition.replace(/(\r\n|\n|\r)/gm,"<br>") || '')
         templateHtml = templateHtml.replace('{{token.BeforeTaxPrice}}', customerList[0].BeforeTaxPrice || '0')
         templateHtml = templateHtml.replace('{{token.Price}}', customerList[0].BeforeTaxPrice + customerList[0].OtherCharge)
         templateHtml = templateHtml.replace('{{token.AfterTaxPrice}}', customerList[0].AfterTaxPrice || '0')
@@ -443,6 +447,12 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
         templateHtml = templateHtml.replace('{{token.table}}', `<table border="1" bordercolor="#ccc" cellpadding="3" cellspacing="3"
         style="border-collapse:collapse;border-left:revert-layer;border-right:revert-layer;width:100%">
         <tbody>
+        <tr style="background-color: #ffd700;">
+        <th style="font-size: 11px;text-align:left" colspan="7"><strong>DESCRIPTION OF WORK<strong></td>
+            </tr>
+            <tr>
+            <td style="font-size: 11px;text-align:left" colspan="7">${customerList[0].Descriptionofwork.replace(/(\r\n|\n|\r)/gm,"<br>")}</td>
+            </tr>
         <tr style="background-color: #ffd700;">
             <th style="font-size: 11px;">S No.</th>
             <th style="font-size: 11px;">Description</th>
@@ -467,7 +477,7 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
             <td style="font-size: 11px;text-align:center">${customerList[0].OtherCharge}</td>
             </tr>
         <tr style="background-color: #ffd700;">
-            <td style="font-size: 11px;text-align:left" colspan="5"><strong>${customerList[0].Note}<strong></td>
+            <td style="font-size: 11px;text-align:left" colspan="5"><strong>${customerList[0].Note.replace(/(\r\n|\n|\r)/gm,"<br>")}<strong></td>
             <td style="font-size: 11px;text-align:center"><strong>₹&nbsp;&nbsp;${(customerList[0].BeforeTaxPrice + customerList[0].OtherCharge)}<strong></td>
             </tr>
         </tbody>
