@@ -17,6 +17,7 @@ var test = require('tape')
 var path = require('path')
 const Template = require('../models/templateModel')
 const { generatePDF } = require('../services/pdfService')
+const { sendpdfMail } = require('../middleware/sendMail')
 
 const addQuatation = asyncHandler(async (req, res) => {
     try {
@@ -433,7 +434,7 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
         templateHtml = templateHtml.replace('{{token.OfficeEmail}}', applicationSetting.OfficeEmail || '')
         templateHtml = templateHtml.replace('{{token.OfficePhone1}}', applicationSetting.OfficePhone1 || '')
         templateHtml = templateHtml.replace('{{token.OfficePhone2}}', applicationSetting.OfficePhone2 || '')
-        templateHtml = templateHtml.replace('{{token.OfficeAddress}}', applicationSetting.OfficeAddress.replace(/(\r\n|\n|\r)/gm,"<br>") || '')
+        templateHtml = templateHtml.replace('{{token.OfficeAddress}}', applicationSetting.OfficeAddress.replace(/(\r\n|\n|\r)/gm, "<br>") || '')
         templateHtml = templateHtml.replace('{{token.QuatationName}}', customerList[0].QuatationName || '')
         templateHtml = templateHtml.replace('{{token.QuatationNo}}', customerList[0].QuatationCode || '')
         templateHtml = templateHtml.replace('{{token.CustomerNo}}', customerList[0].Customer?.CustomerCode || '')
@@ -443,7 +444,7 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
         templateHtml = templateHtml.replace('{{token.mobile}}', customerList[0].Customer?.Mobile || '')
         templateHtml = templateHtml.replace('{{token.cmaddress}}', cmaddress)
         templateHtml = templateHtml.replace('{{token.cmname}}', cmname)
-        templateHtml = templateHtml.replace('{{token.termsandcondition}}', customerList[0].TermsAndCondition.replace(/(\r\n|\n|\r)/gm,"<br>") || '')
+        templateHtml = templateHtml.replace('{{token.termsandcondition}}', customerList[0].TermsAndCondition.replace(/(\r\n|\n|\r)/gm, "<br>") || '')
         templateHtml = templateHtml.replace('{{token.BeforeTaxPrice}}', customerList[0].BeforeTaxPrice || '0')
         templateHtml = templateHtml.replace('{{token.Price}}', customerList[0].BeforeTaxPrice + customerList[0].OtherCharge)
         templateHtml = templateHtml.replace('{{token.AfterTaxPrice}}', customerList[0].AfterTaxPrice || '0')
@@ -459,7 +460,7 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
         <th style="font-size: 11px;text-align:left" colspan="7"><strong>DESCRIPTION OF WORK<strong></td>
             </tr>
             <tr>
-            <td style="font-size: 11px;text-align:left" colspan="7">${customerList[0].Descriptionofwork.replace(/(\r\n|\n|\r)/gm,"<br>")}</td>
+            <td style="font-size: 11px;text-align:left" colspan="7">${customerList[0].Descriptionofwork.replace(/(\r\n|\n|\r)/gm, "<br>")}</td>
             </tr>
         <tr style="background-color: #ffd700;">
             <th style="font-size: 11px;">S No.</th>
@@ -470,7 +471,7 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
             <th style="font-size: 11px;">Amount</th>
             </tr>
             ${customerList[0].Products.map((x, i) => (
-                `<tr>
+            `<tr>
                 <td style="font-size: 11px;text-align:center">${i + 1}</td>
                 <td style="font-size: 11px;text-align:left"><b>${x.Product?.Name}</b><br/>${x.Product?.Description}</td>
                 <td style="font-size: 11px;text-align:center">${x.Quantity}</td>
@@ -485,7 +486,7 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
             <td style="font-size: 11px;text-align:center">${customerList[0].OtherCharge}</td>
             </tr>
         <tr style="background-color: #ffd700;">
-            <td style="font-size: 11px;text-align:left" colspan="5"><strong>${customerList[0].Note.replace(/(\r\n|\n|\r)/gm,"<br>")}<strong></td>
+            <td style="font-size: 11px;text-align:left" colspan="5"><strong>${customerList[0].Note.replace(/(\r\n|\n|\r)/gm, "<br>")}<strong></td>
             <td style="font-size: 11px;text-align:center"><strong>₹&nbsp;&nbsp;${(customerList[0].BeforeTaxPrice + customerList[0].OtherCharge)}<strong></td>
             </tr>
         </tbody>
@@ -532,6 +533,11 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
     }
 
 })
+const SendQuotationmail = asyncHandler(async (req, res) => {
+    let html =`<html>Hello,<br/><br/>I hope this email finds you well. Attached, please find the quotation for [Service/Product] that we discussed.<br/>If you have any questions or need further clarification regarding the quotation, please don't hesitate to reach out to us. We are committed to providing you with exceptional service and look forward to the opportunity to work with you.
+            <br/><br/>Best regards,<br/><b>Team Emoiss</b></html>`;
+            sendpdfMail(req.body.Email, "Quotation for Services", html);
+})
 
 module.exports = {
     addQuatation,
@@ -541,5 +547,6 @@ module.exports = {
     getCustomerById,
     changeQuatationStatus,
     moveToOrder,
-    Quatationpdfcreate
+    Quatationpdfcreate,
+    SendQuotationmail
 }
