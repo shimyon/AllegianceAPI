@@ -16,6 +16,14 @@ const addCustomer = asyncHandler(async (req, res) => {
                 data: null,
             });
         }
+        const existCustomerCode = await Customer.findOne({ $or: [{ CustomerCode: req.body.CustomerCode }] });
+        if (existCustomerCode) {
+            return res.status(200).json({
+                success: false,
+                msg: "Customer already exist with same Customer code.",
+                data: null,
+            });
+        }
         let customerNo = await Customer.find({}, { CustomerNo: 1, _id: 0 }).sort({ CustomerNo: -1 }).limit(1);
         let maxCustomer = 1;
         if (customerNo.length > 0) {

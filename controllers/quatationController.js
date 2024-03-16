@@ -20,6 +20,14 @@ const { generatePDF } = require('../services/pdfService')
 
 const addQuatation = asyncHandler(async (req, res) => {
     try {
+        const existQuatationCode = await Quatation.findOne({ $or: [{ QuatationCode: req.body.QuatationCode }] });
+        if (existQuatationCode) {
+            return res.status(200).json({
+                success: false,
+                msg: "Quatation already exist with same Quatation code.",
+                data: null,
+            });
+        }
         let quatationNo = await Quatation.find({}, { QuatationNo: 1, _id: 0 }).sort({ QuatationNo: -1 }).limit(1);
         let maxQuatation = 1;
         if (quatationNo.length > 0) {
