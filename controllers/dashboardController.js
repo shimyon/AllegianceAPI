@@ -138,7 +138,7 @@ const getNewsById = asyncHandler(async (req, res) => {
 })
 const removeNewsFeed = asyncHandler(async (req, res) => {
     try {
-        const existNews = await NewsFeed.findById(req.body.id);
+        const existNews = await NewsFeed.findById(req.params.id);
         if (!existNews) {
             return res.status(200).json({
                 success: false,
@@ -147,7 +147,7 @@ const removeNewsFeed = asyncHandler(async (req, res) => {
             });
         }
 
-        const news = await NewsFeed.findByIdAndUpdate(req.body.id, {
+        const news = await NewsFeed.findByIdAndUpdate(req.params.id, {
             is_active: req.body.active
         });
 

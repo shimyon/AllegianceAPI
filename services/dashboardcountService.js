@@ -41,7 +41,7 @@ const setDashboardCount = async () => {
     for (const elements in newDashboardcount) {
         if (Object.hasOwnProperty.call(newDashboardcount, elements)) {
             const element = newDashboardcount[elements];
-            if (element.UserId.role == "Admin") {
+            if (element.UserId.role == "SuperAdmin") {
                 dashboardCount.leadCount = await Lead.find({ is_active: true, Stage: "New" }).count({});
                 dashboardCount.prospectCount = await Prospect.find({ is_active: true }).count({});
                 dashboardCount.processCount = await Contract.find({ is_active: true }).count({});
