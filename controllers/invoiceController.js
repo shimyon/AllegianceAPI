@@ -233,6 +233,7 @@ const editInvoice = asyncHandler(async (req, res) => {
             ShippingAddress: req.body.shippingAddress,
             BillingAddress: req.body.billingAddress,
             Order: req.body.orderId,
+            Amount: req.body.amount,
             BeforeTaxPrice: req.body.BeforeTaxPrice,
             CGST: req.body.CGST,
             SGST: req.body.SGST,

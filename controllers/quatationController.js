@@ -167,6 +167,7 @@ const editQuatation = asyncHandler(async (req, res) => {
             QuatationDate: req.body.quatattionDate,
             ValidDate: req.body.vaidDate,
             Note: req.body.note,
+
         });
 
         await QuatationProduct.deleteMany({ QuatationId: req.body.id }).lean().exec((err, doc) => {
