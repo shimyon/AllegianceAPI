@@ -116,8 +116,10 @@ const addQuatation = asyncHandler(async (req, res) => {
             if (insertdata.length > 0) {
                 const savedNotification = await notificationModel.insertMany(insertdata);
             }
-
-            return res.status(200).json(newQuatation).end();
+            return res.status(200).json({
+                success: true,
+                msg: "Quatation Added",
+            }).end();
         }
         else {
             res.status(400)
@@ -433,6 +435,11 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
         templateHtml = templateHtml.replace('{{token.companysubtitle}}', applicationSetting.CompanySubTitle || '')
         templateHtml = templateHtml.replace('{{token.OfficeEmail}}', applicationSetting.OfficeEmail || '')
         templateHtml = templateHtml.replace('{{token.OfficePhone1}}', applicationSetting.OfficePhone1 || '')
+        templateHtml = templateHtml.replace('{{token.PanNo}}', applicationSetting.PanNo || '')
+        templateHtml = templateHtml.replace('{{token.GSTNo}}', applicationSetting.GSTNo || '')
+        templateHtml = templateHtml.replace('{{token.bankname}}', applicationSetting.BankName || '')
+        templateHtml = templateHtml.replace('{{token.ifsc}}', applicationSetting.IFSCNo || '')
+        templateHtml = templateHtml.replace('{{token.accno}}', applicationSetting.AccNo || '')
         templateHtml = templateHtml.replace('{{token.OfficePhone2}}', applicationSetting.OfficePhone2 || '')
         templateHtml = templateHtml.replace('{{token.OfficeAddress}}', applicationSetting.OfficeAddress.replace(/(\r\n|\n|\r)/gm, "<br>") || '')
         templateHtml = templateHtml.replace('{{token.QuatationName}}', customerList[0].QuatationName || '')
@@ -441,9 +448,12 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
         templateHtml = templateHtml.replace('{{token.date}}', format('dd-MM-yyyy', customerList[0].QuatationDate))
         templateHtml = templateHtml.replace('{{token.validdate}}', format('dd-MM-yyyy', customerList[0].ValidDate))
         templateHtml = templateHtml.replace('{{token.email}}', customerList[0].Customer?.Email || '')
+        templateHtml = templateHtml.replace('{{token.cmgst}}', customerList[0].Customer?.GSTNo || '')
         templateHtml = templateHtml.replace('{{token.mobile}}', customerList[0].Customer?.Mobile || '')
         templateHtml = templateHtml.replace('{{token.cmaddress}}', cmaddress)
+        templateHtml = templateHtml.replace('{{token.cmcompany}}', customerList[0].Customer?.Company)
         templateHtml = templateHtml.replace('{{token.cmname}}', cmname)
+        templateHtml = templateHtml.replace('{{token.cmfirstname}}', customerList[0].Customer?.FirstName)
         templateHtml = templateHtml.replace('{{token.termsandcondition}}', customerList[0].TermsAndCondition.replace(/(\r\n|\n|\r)/gm, "<br>") || '')
         templateHtml = templateHtml.replace('{{token.BeforeTaxPrice}}', customerList[0].BeforeTaxPrice || '0')
         templateHtml = templateHtml.replace('{{token.Price}}', customerList[0].BeforeTaxPrice + customerList[0].OtherCharge)
@@ -491,7 +501,7 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
             </tr>
         </tbody>
         </table>`)
-        templateHtml = templateHtml.replace('{{token.gsttable}}', `<table border="1" cellpadding="10" cellspacing="0" style="width:100%;border-collapse: collapse;border-left:revert-layer"">
+        templateHtml = templateHtml.replace('{{token.gsttable}}', `<table border="1" cellpadding="10" cellspacing="0" style="width:100%;border-collapse: collapse;border-left:revert-layer">
         <tbody>
             <tr>
             <th>S No.</th>
@@ -519,7 +529,32 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
         ))}
         </tbody>
         </table>`)
-
+        templateHtml = templateHtml.replace('{{token.igsttable}}', `<table border="1" cellpadding="10" cellspacing="0" style="width:100%;border-collapse: collapse;border-left:revert-layer">
+        <tbody>
+            <tr>
+            <th>S No.</th>
+            <th>Description</th>
+            <th>QTY</th>
+            <th>Unit Price</th>
+            <th>Unit</th>
+            <th>Amount</th>
+            <th>IGST</th>
+            <th>Total (₹)</th>
+            </tr>
+            ${customerList[0].Products.map((x, i) => (
+            `<tr>
+            <td style="text-align:center">${i + 1}</td>
+            <td style="text-align:left"><b>${x.Product?.Name}</b><br/>${x.Product?.Description}</td>
+            <td style="text-align:center">${x.Quantity}</td>
+            <td style="text-align:center">${x.Price}</td>
+            <td style="text-align:center">${x.Unit}</td>
+            <td style="text-align:center">${x.TotalAmount}</td>
+            <td style="text-align:center">${(x.TotalAmount * x.CGST) / 100 + (x.TotalAmount * x.SGST) / 100} (${(x.CGST * 2)}%)</td>
+            <td style="text-align:center">${x.FinalAmount}</td>
+            </tr>`
+        ))}
+        </tbody>
+        </table>`)
         const pdfBufferHtml = await generatePDF(templateHtml);
         res.contentType('application/pdf');
         res.send(pdfBufferHtml);
@@ -534,9 +569,9 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
 
 })
 const SendQuotationmail = asyncHandler(async (req, res) => {
-    let html =`<html>Hello,<br/><br/>I hope this email finds you well. Attached, please find the quotation for [Service/Product] that we discussed.<br/>If you have any questions or need further clarification regarding the quotation, please don't hesitate to reach out to us. We are committed to providing you with exceptional service and look forward to the opportunity to work with you.
+    let html = `<html>Hello,<br/><br/>I hope this email finds you well. Attached, please find the quotation for [Service/Product] that we discussed.<br/>If you have any questions or need further clarification regarding the quotation, please don't hesitate to reach out to us. We are committed to providing you with exceptional service and look forward to the opportunity to work with you.
             <br/><br/>Best regards,<br/><b>Team Emoiss</b></html>`;
-            sendpdfMail(req.body.Email, "Quotation for Services", html);
+    sendpdfMail(req.body.Email, "Quotation for Services", html);
 })
 
 module.exports = {
