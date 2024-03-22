@@ -52,8 +52,8 @@ const addApplicationSetting = asyncHandler(async (req, res) => {
 })
 const editSave = asyncHandler(async (req, res, fileName) => {
     try {
-        const { Id, CompanyTitle, CompanySubTitle, CompanyLogo, Quotation, QuotationPrefix, QuotationSuffix, Invoice, InvoicePrefix, InvoiceSuffix, Customer, CustomerPrefix, CustomerSuffix, Order, OrderPrefix, OrderSuffix, OfficeAddress, OfficeEmail, OfficePhone1, OfficePhone2 } = req.body
-    
+        const { Id, CompanyTitle, CompanySubTitle, BankName, AccNo, IFSCNo, CompanyLogo, Quotation, QuotationPrefix, RegisterNo, PanNo, GSTNo, QuotationSuffix, Invoice, InvoicePrefix, InvoiceSuffix, Customer, CustomerPrefix, CustomerSuffix, Order, OrderPrefix, OrderSuffix, OfficeAddress, OfficeEmail, OfficePhone1, OfficePhone2 } = req.body
+
         let existNews = await ApplicationSetting.findById(Id);
         if (!existNews) {
             return res.status(400).json({
@@ -67,6 +67,9 @@ const editSave = asyncHandler(async (req, res, fileName) => {
         let newApplicationSetting = await ApplicationSetting.findByIdAndUpdate(Id, {
             CompanyTitle,
             CompanySubTitle,
+            BankName,
+            AccNo,
+            IFSCNo,
             CompanyLogo: fileName,
             Quotation,
             QuotationPrefix,
@@ -80,6 +83,9 @@ const editSave = asyncHandler(async (req, res, fileName) => {
             Order,
             OrderPrefix,
             OrderSuffix,
+            RegisterNo,
+            PanNo,
+            GSTNo,
             OfficeAddress,
             OfficeEmail,
             OfficePhone1,
@@ -87,7 +93,7 @@ const editSave = asyncHandler(async (req, res, fileName) => {
         });
         return res.status(200).json({
             success: true,
-            data:newApplicationSetting,
+            data: newApplicationSetting,
             msg: "Application Setting updated successfully"
         });
     } catch (err) {

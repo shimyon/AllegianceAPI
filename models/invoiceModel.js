@@ -6,6 +6,10 @@ const invoiceSchema = mongoose.Schema(
             type: Number,
             unique: true,
         },
+        InvoiceCode: {
+            type: String,
+            unique: true,
+        },
         Customer: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Customers'
@@ -26,9 +30,6 @@ const invoiceSchema = mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'BillingAddress'
         },
-        Amount: {
-            type: Number
-        },
         CGST: {
             type: Number
         },
@@ -41,7 +42,13 @@ const invoiceSchema = mongoose.Schema(
         TotalTax: {
             type: Number
         },
-        TotalPrice: {
+        BeforeTaxPrice: {
+            type: Number
+        },
+        AfterTaxPrice: {
+            type: Number
+        },
+        FinalPrice: {
             type: Number
         },
         InvoiceDate: {
@@ -98,6 +105,9 @@ const invoiceProductSchema = mongoose.Schema(
             type: String
         },
         TotalAmount: {
+            type: String
+        },
+        FinalAmount: {
             type: String
         },
         Note: {

@@ -8,7 +8,7 @@ const {
     getAllOrder,
     getOrderById,
     changeOrderStatus,
-    pdfcreate,
+    Orderpdfcreate,
     moveToInvoice
 } = require('../controllers/orderController')
 const { protect } = require('../middleware/authMiddleware')
@@ -20,6 +20,6 @@ router.post('/changeOrderStatus', protect, changeOrderStatus)
 router.get('/getAll', protect, getAllOrder)
 router.get('/getById/:id', protect, getOrderById)
 router.post('/moveToInvoice/:id', protect, moveToInvoice)
-router.post('/pdfcreate', pdfcreate)
+router.post('/Orderpdfcreate', Orderpdfcreate)
 
 module.exports = router

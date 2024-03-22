@@ -6,6 +6,10 @@ const orderSchema = mongoose.Schema(
             type: Number,
             unique: true,
         },
+        OrderCode: {
+            type: String,
+            unique: true,
+        },
         Customer: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Customers'
@@ -25,9 +29,6 @@ const orderSchema = mongoose.Schema(
         Status: {
             type: String
         },
-        Amount: {
-            type: Number
-        },
         CGST: {
             type: Number
         },
@@ -40,7 +41,13 @@ const orderSchema = mongoose.Schema(
         TotalTax: {
             type: Number
         },
-        TotalPrice: {
+        BeforeTaxPrice: {
+            type: Number
+        },
+        AfterTaxPrice: {
+            type: Number
+        },
+        FinalPrice: {
             type: Number
         },
         OrderDate: {
@@ -104,6 +111,9 @@ const orderProductSchema = mongoose.Schema(
             type: String
         },
         TotalAmount: {
+            type: String
+        },
+        FinalAmount: {
             type: String
         },
         Note: {

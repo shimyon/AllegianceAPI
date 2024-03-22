@@ -258,6 +258,24 @@ const ApplicationSettingSchema = mongoose.Schema(
         OrderSuffix: {
             type: String
         },
+        PanNo: {
+            type: String
+        },
+        GSTNo: {
+            type: String
+        },
+        RegisterNo: {
+            type: String
+        },
+        BankName: {
+            type: String
+        },
+        AccNo: {
+            type: String
+        },
+        IFSCNo: {
+            type: String
+        },
         OfficeAddress: {
             type: String
         },
