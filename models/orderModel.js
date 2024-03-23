@@ -10,6 +10,12 @@ const orderSchema = mongoose.Schema(
             type: String,
             unique: true,
         },
+        OrderName: {
+            type: String
+        },
+        Descriptionofwork: {
+            type: String
+        },
         Customer: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Customers'
@@ -26,8 +32,13 @@ const orderSchema = mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'BillingAddress'
         },
-        Status: {
-            type: String
+        Sales: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        },
+        addedBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
         },
         CGST: {
             type: Number
@@ -50,34 +61,31 @@ const orderSchema = mongoose.Schema(
         FinalPrice: {
             type: Number
         },
-        OrderDate: {
-            type: Date
+        OtherChargeName: {
+            type: String
+        },
+        OtherCharge: {
+            type: Number
+        },
+        Note: {
+            type: String
+        },
+        TermsAndCondition: {
+            type: String
         },
         DeliveryDate: {
             type: Date
         },
-        Sales: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User'
-        },
         Stage: {
             type: String
         },
-        addedBy: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User'
-        },
-        Note: {
+        Status: {
             type: String
         },
         is_deleted: {
             type: Boolean,
             default: false
         },
-        Invoice_Created: {
-            type: Boolean,
-            default: false
-        }
     },
     {
         timestamps: true,
@@ -101,9 +109,6 @@ const orderProductSchema = mongoose.Schema(
         Price: {
             type: String
         },
-        Discount: {
-            type: String
-        },
         CGST: {
             type: String
         },
@@ -118,14 +123,6 @@ const orderProductSchema = mongoose.Schema(
         },
         Note: {
             type: String
-        },
-        addedBy: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User'
-        },
-        is_deleted: {
-            type: Boolean,
-            default: false
         }
     },
     {

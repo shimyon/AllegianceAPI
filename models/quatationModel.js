@@ -76,9 +76,6 @@ const quatationSchema = mongoose.Schema(
         Stage: {
             type: String
         },
-        Status: {
-            type: String
-        },
         is_deleted: {
             type: Boolean,
             default: false
@@ -113,9 +110,6 @@ const quatationProductSchema = mongoose.Schema(
             type: String
         },
         Price: {
-            type: String
-        },
-        Discount: {
             type: String
         },
         CGST: {

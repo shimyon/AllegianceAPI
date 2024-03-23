@@ -4,8 +4,6 @@ const User = require('../models/userModel')
 const notificationModel = require('../models/notificationModel')
 const Invoice = InvoiceModal.InvoiceModal
 const InvoiceProduct = InvoiceModal.InvoiceProductModal
-const OrderModal = require('../models/orderModel')
-const OrderObject = OrderModal.OrderModal
 const Master = require('../models/masterModel')
 const ApplicationSetting = Master.ApplicationSettingModal;
 var pdf = require('html-pdf')
@@ -44,28 +42,28 @@ const addInvoice = asyncHandler(async (req, res) => {
             InvoiceNo: maxInvoice,
             InvoiceCode: code,
             Customer: req.body.customer,
+            InvoiceName: req.body.InvoiceName,
+            Descriptionofwork: req.body.Descriptionofwork,
             ShippingAddress: req.body.shippingAddress || null,
             BillingAddress: req.body.billingAddress || null,
-            Order: req.body.orderId,
-            Amount: req.body.amount,
+            Sales: req.body.sales,
+            addedBy: req.user._id,
             BeforeTaxPrice: req.body.BeforeTaxPrice,
             CGST: req.body.CGST,
             SGST: req.body.SGST,
             TermsAndCondition: req.body.TermsAndCondition,
+            OtherChargeName: req.body.OtherChargeName,
+            OtherCharge: req.body.OtherCharge,
             Discount: req.body.discount,
             TotalTax: req.body.totalTax,
             AfterTaxPrice: req.body.AfterTaxPrice,
             FinalPrice: req.body.finalPrice,
-            TermsAndCondition: req.body.TermsAndCondition,
-            InvoiceDate: new Date(),
-            DeliveryDate: req.body.deliveryDate,
-            Sales: req.body.sales,
+            InvoiceDate: req.body.invoiceDate,
+            ValidDate: req.body.vaidDate,
             Note: req.body.note,
-            addedBy: req.user._id,
             is_deleted: false
         });
 
-        //adding product
         var products = [];
 
         for (var i = 0; i < req.body.products.length; i++) {
@@ -98,13 +96,13 @@ const addInvoice = asyncHandler(async (req, res) => {
             let resuser = await User.find({ is_active: true, role: 'Admin' });
             let date = new Date();
             const savedNotification = await notificationModel.create({
-                description: `Invoice(${newInvoice.InvoiceNo}) entry has been created`,
+                description: `Invoice(${newInvoice.InvoiceCode}) entry has been created`,
                 date: date,
                 userId: newInvoice.Sales,
                 Isread: false
             });
             let insertdata = resuser.map(f => ({
-                description: `Invoice(${newInvoice.InvoiceNo}) entry has been created`,
+                description: `Invoice(${newInvoice.InvoiceCode}) entry has been created`,
                 date: date,
                 userId: f._id,
                 Isread: false
@@ -131,92 +129,6 @@ const addInvoice = asyncHandler(async (req, res) => {
 
 });
 
-const createOrderInvoice = asyncHandler(async (req, res) => {
-    const orderDetail = await OrderObject.findOne({ is_deleted: false, _id: req.params.id })
-        .populate({
-            path: 'Products',
-            populate: {
-                path: 'Product',
-            }
-        });
-
-    if (orderDetail.Invoice_Created) {
-        return res.status(400).json({
-            success: false,
-            msg: "Invoice already created",
-        });
-    }
-
-    let invoiceNo = await Invoice.find({}, { InvoiceNo: 1, _id: 0 }).sort({ InvoiceNo: -1 }).limit(1);
-    let maxInvoice = 1;
-    if (invoiceNo) {
-        maxInvoice = invoiceNo[0].InvoiceNo + 1;
-    }
-
-    const orderProduct = orderDetail.Products;
-
-    try {
-
-        const newInvoice = await Invoice.create({
-            InvoiceNo: maxInvoice,
-            Customer: orderDetail.Customer,
-            ShippingAddress: orderDetail.ShippingAddress,
-            BillingAddress: orderDetail.BillingAddress,
-            Order: req.param.id,
-            Amount: orderDetail.Amount,
-            CGST: orderDetail.CGST,
-            SGST: orderDetail.SGST,
-            Discount: orderDetail.Discount,
-            TotalTax: orderDetail.TotalTax,
-            TotalPrice: orderDetail.TotalPrice,
-            TermsAndCondition: req.body.TermsAndCondition,
-            InvoiceDate: new Date(),
-            Sales: orderDetail.Sales,
-            Note: orderDetail.Note,
-            addedBy: req.user._id,
-            is_deleted: false
-        });
-        var products = [];
-
-        for (var i = 0; i < orderProduct.length; i++) {
-            var pr = orderProduct[i];
-            var newPr = {
-                InvoiceId: newInvoice._id.toString(),
-                Product: (pr.Product),
-                Quantity: pr.Quantity,
-                Unit: pr.Unit,
-                Price: pr.Price,
-                CGST: pr.CGST,
-                SGST: pr.SGST,
-                Discount: pr.Discount,
-                TotalAmount: pr.TotalAmount,
-                Note: pr.Note
-            }
-            products.push(newPr);
-        }
-
-        const prInvoice = await InvoiceProduct.create(products);
-        for (var i = 0; i < prInvoice.length; i++) {
-            newInvoice.Products.push(prInvoice[i]);
-        }
-        newInvoice.save((err) => {
-            if (err) throw err;
-        });
-
-        const newOrder = await OrderObject.findByIdAndUpdate(req.params.id, {
-            Invoice_Created: true
-        });
-
-        return res.status(200).json(newInvoice).end();
-    } catch (err) {
-        return res.status(400).json({
-            success: false,
-            msg: "Error in creating Invoice. " + err.message,
-        });
-    }
-
-});
-
 const editInvoice = asyncHandler(async (req, res) => {
     try {
         const oldInvoice = await Invoice.findById(req.body.id);
@@ -228,25 +140,28 @@ const editInvoice = asyncHandler(async (req, res) => {
         }
 
         await Invoice.findByIdAndUpdate(req.body.id, {
-            Customer: req.body.customer,
             InvoiceCode: req.body.InvoiceCode,
-            ShippingAddress: req.body.shippingAddress,
-            BillingAddress: req.body.billingAddress,
-            Order: req.body.orderId,
-            Amount: req.body.amount,
+            Customer: req.body.customer,
+            InvoiceName: req.body.InvoiceName,
+            Products:req.body.products,
+            Descriptionofwork: req.body.Descriptionofwork,
+            ShippingAddress: req.body.shippingAddress || null,
+            BillingAddress: req.body.billingAddress || null,
+            Sales: req.body.sales,
+            addedBy: req.user._id,
             BeforeTaxPrice: req.body.BeforeTaxPrice,
             CGST: req.body.CGST,
             SGST: req.body.SGST,
             TermsAndCondition: req.body.TermsAndCondition,
+            OtherChargeName: req.body.OtherChargeName,
+            OtherCharge: req.body.OtherCharge,
             Discount: req.body.discount,
             TotalTax: req.body.totalTax,
             AfterTaxPrice: req.body.AfterTaxPrice,
             FinalPrice: req.body.finalPrice,
-            DeliveryDate: req.body.deliveryDate,
-            Sales: req.body.sales,
-            TermsAndCondition: req.body.TermsAndCondition,
             InvoiceDate: req.body.invoiceDate,
-            Note: req.body.note
+            ValidDate: req.body.vaidDate,
+            Note: req.body.note,
         });
 
         await InvoiceProduct.deleteMany({ InvoiceId: req.body.id }).lean().exec((err, doc) => {
@@ -533,6 +448,5 @@ module.exports = {
     removeInvoice,
     getAllInvoice,
     getInvoiceById,
-    createOrderInvoice,
     Invoicepdfcreate
 }
