@@ -101,25 +101,25 @@ const orderProductSchema = mongoose.Schema(
             ref: 'Products'
         },
         Quantity: {
-            type: String
+            type: Number
         },
         Unit: {
             type: String
         },
         Price: {
-            type: String
+            type: Number
         },
         CGST: {
-            type: String
+            type: Number
         },
         SGST: {
-            type: String
+            type: Number
         },
         TotalAmount: {
-            type: String
+            type: Number
         },
         FinalAmount: {
-            type: String
+            type: Number
         },
         Note: {
             type: String
