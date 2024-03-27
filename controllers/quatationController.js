@@ -423,8 +423,8 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
                 }
             })
             .populate("addedBy", 'name email')
-        let cmname = customerList[0].Customer?.Title || "" + customerList[0].Customer?.FirstName + ' ' + customerList[0].Customer?.LastName;
-        let cmaddress = customerList[0].Customer?.Address || "" + '<br/>' + customerList[0].Customer?.City + ' ' + customerList[0].Customer?.State;
+        let cmname = customerList[0].Customer?.Title  + ' '+ customerList[0].Customer?.FirstName + ' ' + customerList[0].Customer?.LastName;
+        let cmaddress = customerList[0].Customer?.Address  + ' '+ '<br/>' + customerList[0].Customer?.City + ' ' + customerList[0].Customer?.State;
         templateHtml = templateHtml.replace('{{token.companytitle}}', applicationSetting.CompanyTitle || '')
         templateHtml = templateHtml.replace('{{token.companysubtitle}}', applicationSetting.CompanySubTitle || '')
         templateHtml = templateHtml.replace('{{token.OfficeEmail}}', applicationSetting.OfficeEmail || '')
@@ -477,7 +477,7 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
             ${customerList[0].Products.map((x, i) => (
             `<tr>
                 <td style="font-size: 11px;text-align:center">${i + 1}</td>
-                <td style="font-size: 11px;text-align:left"><b>${x.Product?.Name}</b><br/>${x.Product?.Description}</td>
+                <td style="font-size: 11px;text-align:left"><b>${x.Product?.Name}</b><br/>${x.Product?.Description.replace(/(\r\n|\n|\r)/gm, "<br>")}</td>
                 <td style="font-size: 11px;text-align:center">${x.Quantity}</td>
                 <td style="font-size: 11px;text-align:center">${x.Price}</td>
                 <td style="font-size: 11px;text-align:center">${x.Unit}</td>

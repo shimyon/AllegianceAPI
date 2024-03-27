@@ -8,7 +8,6 @@ const quatationSchema = mongoose.Schema(
         },
         QuatationCode: {
             type: String,
-            unique: true,
         },
         QuatationName: {
             type: String

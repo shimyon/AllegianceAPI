@@ -8,7 +8,6 @@ const invoiceSchema = mongoose.Schema(
         },
         InvoiceCode: {
             type: String,
-            unique: true,
         },
         InvoiceName: {
             type: String

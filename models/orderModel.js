@@ -8,7 +8,6 @@ const orderSchema = mongoose.Schema(
         },
         OrderCode: {
             type: String,
-            unique: true,
         },
         OrderName: {
             type: String

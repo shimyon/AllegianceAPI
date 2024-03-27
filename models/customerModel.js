@@ -12,7 +12,6 @@ const customerSchema = mongoose.Schema(
         },
         CustomerCode: {
             type: String,
-            unique: true,
         },
         GSTNo: {
             type: String,
@@ -35,7 +34,6 @@ const customerSchema = mongoose.Schema(
         },
         Email: {
             type: String,
-            required: [true, 'Please add email'],
         },
         Address: {
             type: String
