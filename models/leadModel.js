@@ -19,18 +19,15 @@ const leadSchema = mongoose.Schema(
         },
         LastName: {
             type: String,
-            required: [true, 'Please add Last Name']
         },
         Designation: {
             type: String
         },
         Mobile: {
             type: Number,
-            required: [true, 'Please add Mobile'],
         },
         Email: {
             type: String,
-            required: [true, 'Please add email'],
         },
         City: {
             type: String

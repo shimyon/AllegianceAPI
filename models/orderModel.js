@@ -8,7 +8,12 @@ const orderSchema = mongoose.Schema(
         },
         OrderCode: {
             type: String,
-            unique: true,
+        },
+        OrderName: {
+            type: String
+        },
+        Descriptionofwork: {
+            type: String
         },
         Customer: {
             type: mongoose.Schema.Types.ObjectId,
@@ -26,8 +31,13 @@ const orderSchema = mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'BillingAddress'
         },
-        Status: {
-            type: String
+        Sales: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        },
+        addedBy: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
         },
         CGST: {
             type: Number
@@ -50,34 +60,31 @@ const orderSchema = mongoose.Schema(
         FinalPrice: {
             type: Number
         },
-        OrderDate: {
-            type: Date
+        OtherChargeName: {
+            type: String
+        },
+        OtherCharge: {
+            type: Number
+        },
+        Note: {
+            type: String
+        },
+        TermsAndCondition: {
+            type: String
         },
         DeliveryDate: {
             type: Date
         },
-        Sales: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User'
-        },
         Stage: {
             type: String
         },
-        addedBy: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User'
-        },
-        Note: {
+        Status: {
             type: String
         },
         is_deleted: {
             type: Boolean,
             default: false
         },
-        Invoice_Created: {
-            type: Boolean,
-            default: false
-        }
     },
     {
         timestamps: true,
@@ -93,39 +100,28 @@ const orderProductSchema = mongoose.Schema(
             ref: 'Products'
         },
         Quantity: {
-            type: String
+            type: Number
         },
         Unit: {
             type: String
         },
         Price: {
-            type: String
-        },
-        Discount: {
-            type: String
+            type: Number
         },
         CGST: {
-            type: String
+            type: Number
         },
         SGST: {
-            type: String
+            type: Number
         },
         TotalAmount: {
-            type: String
+            type: Number
         },
         FinalAmount: {
-            type: String
+            type: Number
         },
         Note: {
             type: String
-        },
-        addedBy: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User'
-        },
-        is_deleted: {
-            type: Boolean,
-            default: false
         }
     },
     {

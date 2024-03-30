@@ -21,7 +21,6 @@ const prospectSchema = mongoose.Schema(
         },
         LastName: {
             type: String,
-            required: [true, 'Please add Last Name']
         },
         Industry: {
             type: String
@@ -31,11 +30,9 @@ const prospectSchema = mongoose.Schema(
         },
         Mobile: {
             type: Number,
-            required: [true, 'Please add Mobile'],
         },
         Email: {
             type: String,
-            required: [true, 'Please add email'],
         },
         Website: {
             type: String,

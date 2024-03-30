@@ -4,9 +4,6 @@ const User = require('../models/userModel')
 const notificationModel = require('../models/notificationModel')
 const Order = OrderModal.OrderModal
 const OrderProduct = OrderModal.OrderProductModal
-const QuatationModal = require('../models/quatationModel')
-const Quatation = QuatationModal.QuatationModal
-const QuatationProduct = QuatationModal.QuatationProductModal
 const InvoiceModal = require('../models/invoiceModel')
 const Invoice = InvoiceModal.InvoiceModal
 const InvoiceProduct = InvoiceModal.InvoiceProductModal
@@ -48,25 +45,29 @@ const addOrder = asyncHandler(async (req, res) => {
             OrderNo: maxOrder,
             OrderCode: code,
             Customer: req.body.customer,
-            ShippingAddress: req.body.shippingAddress||null,
-            BillingAddress: req.body.billingAddress||null,
+            OrderName: req.body.OrderName,
+            Descriptionofwork: req.body.Descriptionofwork,
+            ShippingAddress: req.body.shippingAddress || null,
+            BillingAddress: req.body.billingAddress || null,
             Status: "New",
             Stage: "New",
-            Amount: req.body.amount,
+            Sales: req.body.sales,
+            addedBy: req.user._id,
             BeforeTaxPrice: req.body.BeforeTaxPrice,
             CGST: req.body.CGST,
             SGST: req.body.SGST,
+            TermsAndCondition: req.body.TermsAndCondition,
+            OtherChargeName: req.body.OtherChargeName,
+            OtherCharge: req.body.OtherCharge,
             Discount: req.body.discount,
             TotalTax: req.body.totalTax,
             AfterTaxPrice: req.body.AfterTaxPrice,
             FinalPrice: req.body.finalPrice,
-            OrderDate: new Date(),
             DeliveryDate: req.body.deliveryDate,
-            Sales: req.body.sales,
             Note: req.body.note,
-            addedBy: req.user._id,
             is_deleted: false
         });
+
         var products = [];
 
         for (var i = 0; i < req.body.products.length; i++) {
@@ -97,13 +98,13 @@ const addOrder = asyncHandler(async (req, res) => {
             let resuser = await User.find({ is_active: true, role: 'Admin' });
             let date = new Date();
             const savedNotification = await notificationModel.create({
-                description: `Order(${newOrder.OrderNo}) entry has been created`,
+                description: `Order(${newOrder.OrderCode}) entry has been created`,
                 date: date,
                 userId: newOrder.Sales,
                 Isread: false
             });
             let insertdata = resuser.map(f => ({
-                description: `Order(${newOrder.OrderNo}) entry has been created`,
+                description: `Order(${newOrder.OrderCode}) entry has been created`,
                 date: date,
                 userId: f._id,
                 Isread: false
@@ -138,22 +139,26 @@ const editOrder = asyncHandler(async (req, res) => {
         }
 
         await Order.findByIdAndUpdate(req.body.id, {
+            OrderCode: req.body.OrderCode,
             Customer: req.body.customer,
-            ShippingAddress: req.body.shippingAddress,
-            BillingAddress: req.body.billingAddress,
+            OrderName: req.body.OrderName,
+            Descriptionofwork: req.body.Descriptionofwork,
+            ShippingAddress: req.body.shippingAddress || null,
+            BillingAddress: req.body.billingAddress || null,
+            Sales: req.body.sales,
+            addedBy: req.user._id,
             BeforeTaxPrice: req.body.BeforeTaxPrice,
             CGST: req.body.CGST,
             SGST: req.body.SGST,
             TermsAndCondition: req.body.TermsAndCondition,
+            OtherChargeName: req.body.OtherChargeName,
+            OtherCharge: req.body.OtherCharge,
             Discount: req.body.discount,
             TotalTax: req.body.totalTax,
             AfterTaxPrice: req.body.AfterTaxPrice,
             FinalPrice: req.body.finalPrice,
             DeliveryDate: req.body.deliveryDate,
-            Sales: req.body.sales,
             Note: req.body.note,
-            OrderCode: req.body.OrderCode,
-            Amount: req.body.amount,
         });
 
         await OrderProduct.deleteMany({ OrderId: req.body.id }).lean().exec((err, doc) => {
@@ -393,47 +398,6 @@ const Orderpdfcreate = asyncHandler(async (req, res) => {
         res.contentType('application/pdf');
         res.send(pdfBufferHtml);
 
-
-
-
-            templateHtml = templateHtml.replace('{{token.company}}', customerList[0].Customer?.Company  || '')
-            templateHtml = templateHtml.replace('{{token.OrderNo}}', customerList[0].OrderNo || '')
-            templateHtml = templateHtml.replace('{{token.firstname}}', customerList[0].Customer?.FirstName || '')
-            templateHtml = templateHtml.replace('{{token.lastname}}', customerList[0].Customer?.LastName || '')
-            templateHtml = templateHtml.replace('{{token.email}}', customerList[0].Customer?.Email || '')
-            templateHtml = templateHtml.replace('{{token.mobile}}', customerList[0].Customer?.Mobile || '')
-            templateHtml = templateHtml.replace('{{token.orderdate}}', format('dd-MM-yyyy', customerList[0].OrderDate))
-            templateHtml = templateHtml.replace('{{token.amount}}', customerList[0].Amount - customerList[0].TotalTax)
-            templateHtml = templateHtml.replace('{{token.cgst}}', customerList[0].CGST || '')
-            templateHtml = templateHtml.replace('{{token.sgst}}', customerList[0].SGST || '')
-            templateHtml = templateHtml.replace('{{token.discount}}', (customerList[0].Amount * customerList[0].Discount) / 100)
-            templateHtml = templateHtml.replace('{{token.finalamount}}', customerList[0].TotalPrice || '')
-            templateHtml = templateHtml.replace('{{token.finalamountword}}', converter.toWords(customerList[0].TotalPrice).toUpperCase())
-            templateHtml = templateHtml.replace('{{token.table}}', `<table border="1" cellpadding="10" cellspacing="0" style="width:100%">
-            <tbody>
-                <tr>
-                <th>Item</th>
-                <th>Qty</th>
-                <th>Unit</th>
-                <th>Rate (₹)</th>
-                <th>CGST</th>
-                <th>SGST</th>
-                <th>Total (₹)</th>
-                </tr>
-                ${customerList[0].Products.map((x, i) => (
-                `<tr>
-                <td style="text-align:center">${x.Product?.Name}</td>
-                <td style="text-align:center">${x.Quantity}</td>
-                <td style="text-align:center">${x.Unit}</td>
-                <td style="text-align:center">${x.Price}</td>
-                <td style="text-align:center">${(x.Price * x.Quantity * x.CGST) / 100} (${x.CGST}%)</td>
-                <td style="text-align:center">${(x.Price * x.Quantity * x.SGST) / 100} (${x.SGST}%)</td>
-                <td style="text-align:center">${x.TotalAmount}</td>
-                </tr>`
-            ))}
-            </tbody>
-            </table>`)
-
     } catch (err) {
         return res.status(400).json({
             success: false,
@@ -528,30 +492,43 @@ const moveToInvoice = asyncHandler(async (req, res) => {
         if (invoiceNo.length > 0) {
             maxInvoice = invoiceNo[0].InvoiceNo + 1;
         }
+        let applicationSetting = await ApplicationSetting.findOne();
+        let code = "";
+        if (applicationSetting.Invoice == true) {
+            code = invoiceExisting.OrderCode;
+        }
+        else {
+            code = applicationSetting.InvoicePrefix + maxInvoice + applicationSetting.InvoiceSuffix;
+        }
         const newInvoice = await Invoice.create({
             InvoiceNo: maxInvoice,
+            InvoiceCode: code,
             Customer: invoiceExisting.Customer,
+            InvoiceName: invoiceExisting.OrderName,
+            Descriptionofwork: invoiceExisting.Descriptionofwork,
             ShippingAddress: invoiceExisting.ShippingAddress,
             BillingAddress: invoiceExisting.BillingAddress,
-            Stage: "New",
-            Amount: invoiceExisting.Amount,
+            Sales: invoiceExisting.Sales,
+            addedBy: req.user._id,
+            BeforeTaxPrice: invoiceExisting.BeforeTaxPrice,
             CGST: invoiceExisting.CGST,
             SGST: invoiceExisting.SGST,
+            TermsAndCondition: invoiceExisting.TermsAndCondition,
+            OtherChargeName: invoiceExisting.OtherChargeName,
+            OtherCharge: invoiceExisting.OtherCharge,
             Discount: invoiceExisting.Discount,
             TotalTax: invoiceExisting.TotalTax,
-            TotalPrice: invoiceExisting.TotalPrice,
-            DeliveryDate: invoiceExisting.DeliveryDate,
-            InvoiceDate: new Date(),
-            Sales: invoiceExisting.Sales,
+            AfterTaxPrice: invoiceExisting.AfterTaxPrice,
+            FinalPrice: invoiceExisting.FinalPrice,
+            InvoiceDate: invoiceExisting.DeliveryDate,
             Note: invoiceExisting.Note,
-            addedBy: req.user._id,
             is_deleted: false
         });
         var products = [];
         for (var i = 0; i < invoiceExisting.Products.length; i++) {
             var pr = invoiceExisting.Products[i];
             var newPr = {
-                OrderId: newInvoice._id.toString(),
+                InvoiceId: newInvoice._id.toString(),
                 Product: pr.Product._id,
                 Quantity: pr.Quantity,
                 Unit: pr.Unit,
@@ -559,6 +536,7 @@ const moveToInvoice = asyncHandler(async (req, res) => {
                 CGST: pr.CGST,
                 SGST: pr.SGST,
                 TotalAmount: pr.TotalAmount,
+                FinalAmount: pr.FinalAmount,
                 Note: pr.Note
             }
             products.push(newPr);

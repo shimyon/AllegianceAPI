@@ -17,7 +17,6 @@ var test = require('tape')
 var path = require('path')
 const Template = require('../models/templateModel')
 const { generatePDF } = require('../services/pdfService')
-const { sendpdfMail } = require('../middleware/sendMail')
 
 const addQuatation = asyncHandler(async (req, res) => {
     try {
@@ -70,7 +69,6 @@ const addQuatation = asyncHandler(async (req, res) => {
             is_deleted: false
         });
 
-        //adding product
         var products = [];
 
         for (var i = 0; i < req.body.products.length; i++) {
@@ -102,13 +100,13 @@ const addQuatation = asyncHandler(async (req, res) => {
             let resuser = await User.find({ is_active: true, role: 'Admin' });
             let date = new Date();
             const savedNotification = await notificationModel.create({
-                description: `Quatation(${newQuatation.QuatationNo}) entry has been created`,
+                description: `Quatation(${newQuatation.QuatationCode}) entry has been created`,
                 date: date,
                 userId: newQuatation.Sales,
                 Isread: false
             });
             let insertdata = resuser.map(f => ({
-                description: `Quatation(${newQuatation.QuatationNo}) entry has been created`,
+                description: `Quatation(${newQuatation.QuatationCode}) entry has been created`,
                 date: date,
                 userId: f._id,
                 Isread: false
@@ -167,7 +165,6 @@ const editQuatation = asyncHandler(async (req, res) => {
             QuatationDate: req.body.quatattionDate,
             ValidDate: req.body.vaidDate,
             Note: req.body.note,
-
         });
 
         await QuatationProduct.deleteMany({ QuatationId: req.body.id }).lean().exec((err, doc) => {
@@ -224,8 +221,8 @@ const editQuatation = asyncHandler(async (req, res) => {
 
 const removeQuatation = asyncHandler(async (req, res) => {
     try {
-        const existCustomer = await Quatation.findById(req.params.id);
-        if (!existCustomer) {
+        const existQuatation = await Quatation.findById(req.params.id);
+        if (!existQuatation) {
             return res.status(200).json({
                 success: false,
                 msg: "Quatation not found."
@@ -251,7 +248,7 @@ const removeQuatation = asyncHandler(async (req, res) => {
 
 const getAllQuatation = asyncHandler(async (req, res) => {
     try {
-        let customerList = await Quatation.find({ is_deleted: false })
+        let QuatationList = await Quatation.find({ is_deleted: false })
             .populate("Customer")
             .populate({
                 path: 'Products',
@@ -266,7 +263,7 @@ const getAllQuatation = asyncHandler(async (req, res) => {
             .sort({ createdAt: -1 })
         return res.status(200).json({
             success: true,
-            data: customerList
+            data: QuatationList
         }).end();
     } catch (err) {
         return res.status(400).json({
@@ -277,9 +274,9 @@ const getAllQuatation = asyncHandler(async (req, res) => {
     }
 })
 
-const getCustomerById = asyncHandler(async (req, res) => {
+const getQuatationById = asyncHandler(async (req, res) => {
     try {
-        let customerList = await Quatation.find({ _id: req.params.id })
+        let QuatationList = await Quatation.find({ _id: req.params.id })
             .populate("Customer")
             .populate({
                 path: 'Products',
@@ -294,7 +291,7 @@ const getCustomerById = asyncHandler(async (req, res) => {
 
         return res.status(200).json({
             success: true,
-            data: customerList
+            data: QuatationList
         }).end();
     } catch (err) {
         return res.status(400).json({
@@ -305,31 +302,6 @@ const getCustomerById = asyncHandler(async (req, res) => {
     }
 })
 
-const changeQuatationStatus = asyncHandler(async (req, res) => {
-    try {
-        const existCustomer = await Quatation.findById(req.body.id);
-        if (!existCustomer) {
-            return res.status(200).json({
-                success: false,
-                msg: "Quatation not found."
-            });
-        }
-
-        const newQuatation = await Quatation.findByIdAndUpdate(req.body.id, {
-            Status: req.body.status
-        });
-
-        return res.status(200).json({
-            success: true,
-            msg: "Status updated successfully. "
-        }).end();
-    } catch (err) {
-        return res.status(400).json({
-            success: false,
-            msg: "Error in changing status. " + err.message
-        });
-    }
-})
 const moveToOrder = asyncHandler(async (req, res) => {
     try {
         let quatationExisting = await Quatation.findById(req.params.id).populate("Customer")
@@ -354,23 +326,44 @@ const moveToOrder = asyncHandler(async (req, res) => {
         await Quatation.findByIdAndUpdate(req.params.id, {
             Stage: "Order",
         });
+
+        let orderNo = await Order.find({}, { OrderNo: 1, _id: 0 }).sort({ OrderNo: -1 }).limit(1);
+        let maxOrder = 1;
+        if (orderNo.length > 0) {
+            maxOrder = orderNo[0].OrderNo + 1;
+        }
+        let applicationSetting = await ApplicationSetting.findOne();
+        let code = "";
+        if (applicationSetting.Order == true) {
+            code = quatationExisting.QuatationCode;
+        }
+        else {
+            code = applicationSetting.OrderPrefix + maxOrder + applicationSetting.OrderSuffix;
+        }
         const newOrder = await Order.create({
+            OrderNo: maxOrder,
+            OrderCode: code,
             Customer: quatationExisting.Customer,
+            OrderName: quatationExisting.QuatationName,
+            Descriptionofwork: quatationExisting.Descriptionofwork,
             ShippingAddress: quatationExisting.ShippingAddress,
             BillingAddress: quatationExisting.BillingAddress,
             Status: "New",
             Stage: "New",
-            Amount: quatationExisting.Amount,
+            Sales: quatationExisting.Sales,
+            addedBy: req.user._id,
+            BeforeTaxPrice: quatationExisting.BeforeTaxPrice,
             CGST: quatationExisting.CGST,
             SGST: quatationExisting.SGST,
+            TermsAndCondition: quatationExisting.TermsAndCondition,
+            OtherChargeName: quatationExisting.OtherChargeName,
+            OtherCharge: quatationExisting.OtherCharge,
             Discount: quatationExisting.Discount,
             TotalTax: quatationExisting.TotalTax,
-            TotalPrice: quatationExisting.TotalPrice,
-            OrderDate: new Date(),
-            // DeliveryDate: quatationExisting.DeliveryDate,
-            Sales: quatationExisting.Sales,
+            AfterTaxPrice: quatationExisting.AfterTaxPrice,
+            FinalPrice: quatationExisting.FinalPrice,
+            DeliveryDate: quatationExisting.QuatationDate,
             Note: quatationExisting.Note,
-            addedBy: req.user._id,
             is_deleted: false
         });
         var products = [];
@@ -384,8 +377,8 @@ const moveToOrder = asyncHandler(async (req, res) => {
                 Price: pr.Price,
                 CGST: pr.CGST,
                 SGST: pr.SGST,
-                Amount: pr.Amount,
                 TotalAmount: pr.TotalAmount,
+                FinalAmount: pr.FinalAmount,
                 Note: pr.Note
             }
             products.push(newPr);
@@ -430,8 +423,8 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
                 }
             })
             .populate("addedBy", 'name email')
-        let cmname = customerList[0].Customer?.Title || "" + customerList[0].Customer?.FirstName + ' ' + customerList[0].Customer?.LastName;
-        let cmaddress = customerList[0].Customer?.Address || "" + '<br/>' + customerList[0].Customer?.City + ' ' + customerList[0].Customer?.State;
+        let cmname = customerList[0].Customer?.Title  + ' '+ customerList[0].Customer?.FirstName + ' ' + customerList[0].Customer?.LastName;
+        let cmaddress = customerList[0].Customer?.Address  + ' '+ '<br/>' + customerList[0].Customer?.City + ' ' + customerList[0].Customer?.State;
         templateHtml = templateHtml.replace('{{token.companytitle}}', applicationSetting.CompanyTitle || '')
         templateHtml = templateHtml.replace('{{token.companysubtitle}}', applicationSetting.CompanySubTitle || '')
         templateHtml = templateHtml.replace('{{token.OfficeEmail}}', applicationSetting.OfficeEmail || '')
@@ -484,7 +477,7 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
             ${customerList[0].Products.map((x, i) => (
             `<tr>
                 <td style="font-size: 11px;text-align:center">${i + 1}</td>
-                <td style="font-size: 11px;text-align:left"><b>${x.Product?.Name}</b><br/>${x.Product?.Description}</td>
+                <td style="font-size: 11px;text-align:left"><b>${x.Product?.Name}</b><br/>${x.Product?.Description.replace(/(\r\n|\n|\r)/gm, "<br>")}</td>
                 <td style="font-size: 11px;text-align:center">${x.Quantity}</td>
                 <td style="font-size: 11px;text-align:center">${x.Price}</td>
                 <td style="font-size: 11px;text-align:center">${x.Unit}</td>
@@ -569,20 +562,13 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
     }
 
 })
-const SendQuotationmail = asyncHandler(async (req, res) => {
-    let html = `<html>Hello,<br/><br/>I hope this email finds you well. Attached, please find the quotation for [Service/Product] that we discussed.<br/>If you have any questions or need further clarification regarding the quotation, please don't hesitate to reach out to us. We are committed to providing you with exceptional service and look forward to the opportunity to work with you.
-            <br/><br/>Best regards,<br/><b>Team Emoiss</b></html>`;
-    sendpdfMail(req.body.Email, "Quotation for Services", html);
-})
 
 module.exports = {
     addQuatation,
     editQuatation,
     removeQuatation,
     getAllQuatation,
-    getCustomerById,
-    changeQuatationStatus,
+    getQuatationById,
     moveToOrder,
-    Quatationpdfcreate,
-    SendQuotationmail
+    Quatationpdfcreate
 }

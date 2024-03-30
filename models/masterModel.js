@@ -4,7 +4,6 @@ const productSchema = mongoose.Schema(
     {
         Name: {
             type: String,
-            required: [true, 'Please add name']
         },
         Type: {
             type: String
@@ -120,7 +119,6 @@ const typeSchema = mongoose.Schema(
     {
         Name: {
             type: String,
-            required: [true, 'Please add name']
         },
         is_active: {
             type: Boolean
