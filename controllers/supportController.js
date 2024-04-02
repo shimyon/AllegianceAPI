@@ -161,12 +161,12 @@ const updateSupport = asyncHandler(async (req, res) => {
         }
         return res.status(200).json({
             success: true,
-            msg: "Status Updated. "
+            msg: "Support Updated. "
         }).end();
     } catch (err) {
         return res.status(400).json({
             success: false,
-            msg: "Error in updating status. " + err.message,
+            msg: "Error in updating Support. " + err.message,
             data: null,
         });
     }
@@ -180,16 +180,17 @@ const updateStatus = asyncHandler(async (req, res) => {
         })
         return res.status(200).json({
             success: true,
-            msg: "Status updated",
+            msg: "Support Status updated",
         }).end();
     } catch (err) {
         return res.status(400).json({
             success: false,
-            msg: "Error in updating status. " + err.message
+            msg: "Error in updating Support. " + err.message
         });
     }
 
 });
+
 const removeSupport = asyncHandler(async (req, res) => {
     try {
         const existSupport = await Support.findById(req.body.id);
@@ -220,6 +221,32 @@ const removeSupport = asyncHandler(async (req, res) => {
 
 });
 
+const deleteSupport = asyncHandler(async (req, res) => {
+    try {
+        await Support.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {
+            if (err) {
+                return res.status(401).json({
+                    success: false,
+                    msg: err
+                }).end();
+            } else {
+                return res.status(200).json({
+                    success: true,
+                    msg: "Support removed. ",
+                }).end();
+            }
+        });
+
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in removing Support. " + err.message,
+            data: null,
+        });
+    }
+
+});
+
 module.exports = {
     addSupport,
     getAllSupport,
@@ -227,5 +254,6 @@ module.exports = {
     updateSupport,
     editSupport,
     updateStatus,
-    removeSupport
+    removeSupport,
+    deleteSupport
 }

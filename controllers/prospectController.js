@@ -392,6 +392,23 @@ const getNext = asyncHandler(async (req, res) => {
         });
     }
 });
+const getbyNext = asyncHandler(async (req, res) => {
+    try {
+        const next = await NextOn.find({ _id: req.params.id }).populate("user");
+
+        res.status(200).json({
+            success: true,
+            msg: "",
+            data: next,
+        }).end();
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in getting status. " + err.message,
+            data: null,
+        });
+    }
+});
 const addOtherContact = asyncHandler(async (req, res) => {
     try {
         let prospectExist = await Prospect.findById(req.body.id);
@@ -605,6 +622,7 @@ module.exports = {
     getProspectById,
     addNext,
     getNext,
+    getbyNext,
     removeProspect,
     changeProspectStage,
     addOtherContact,

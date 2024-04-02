@@ -10,6 +10,7 @@ const {
     getProspectById,
     addNext,
     getNext,
+    getbyNext,
     addOtherContact,
     getOtherContact,
     importExcel,
@@ -31,5 +32,7 @@ router.get('/otherContact/:id', protect, getOtherContact)
 router.post('/importExcel', protect, importExcel)
 router.get('/markAsRead/:id', protect, markAsRead)
 router.get('/getNext/:id', protect, getNext)
+router.get('/getbyNext/:id', protect, getbyNext)
+
 
 module.exports = router

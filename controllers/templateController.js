@@ -113,7 +113,7 @@ const remove = asyncHandler(async (req, res) => {
     } catch (err) {
         return res.status(400).json({
             success: false,
-            msg: "Error in process. " + err.message,
+            msg: "Error in Template. " + err.message,
             data: null,
         });
     }
@@ -156,7 +156,7 @@ const setDefault = asyncHandler(async (req, res) => {
         }
         return res.status(200).json({
             success: true,
-            msg: "Default address set"
+            msg: "Default Template set"
         });
     } catch (err) {
         return res.status(400).json({
@@ -167,11 +167,39 @@ const setDefault = asyncHandler(async (req, res) => {
     }
 
 });
+
+const deleteTemplate = asyncHandler(async (req, res) => {
+    try {
+        await Template.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {
+            if (err) {
+                return res.status(401).json({
+                    success: false,
+                    msg: err
+                }).end();
+            } else {
+                return res.status(200).json({
+                    success: true,
+                    msg: "Template removed. ",
+                }).end();
+            }
+        });
+
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in removing Template. " + err.message,
+            data: null,
+        });
+    }
+
+});
+
 module.exports = {
     add,
     getById,
     update,
     getAll,
     remove,
-    setDefault
+    setDefault,
+    deleteTemplate
 }

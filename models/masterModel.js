@@ -86,10 +86,6 @@ const categorySchema = mongoose.Schema(
         Name: {
             type: String
         },
-        subCategory: [{
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'SubCategory'
-        }],
         is_active: {
             type: Boolean
         }

@@ -305,7 +305,6 @@ const getLeadById = asyncHandler(async (req, res) => {
 
 });
 
-
 const addNext = asyncHandler(async (req, res) => {
     try {
         let nextOn = await NextOn.create({

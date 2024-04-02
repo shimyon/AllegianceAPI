@@ -18,9 +18,9 @@ const addtask = asyncHandler(async (req, res) => {
             addedBy: req.user._id
         });
         if (taskadd) {
-            let TaskList = await Task.findOne({ _id: taskadd._id }).populate("Assign")
+            let TaskList = await Task.findOne({ _id: taskadd._id }).populate("Assign").populate("addedBy")
             let html =
-                `<html>Hello,<br/><br/>Please take up the following task (${req.body.Name})<br/>${req.body.Description}<br/><br/>Please finish it by ${moment(req.body.EndDate).format("DD-MMM-YY")}<br/><br/>Best regards,<br/><b>Team Emoiss</b></html>`;
+                `<html>Hello,<br/><br/>Please take up the following task (${req.body.Name})<br/>${req.body.Description}<br/><br/>Please finish it by ${moment(req.body.EndDate).format("DD-MMM-YY")}<br/><br/>Thank you,<br/><b>${TaskList.addedBy?.name}</b></html>`;
             sendMail(TaskList?.Assign.email, "New Task", html);
         }
         return res.status(200).json({

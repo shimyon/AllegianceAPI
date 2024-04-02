@@ -15,94 +15,7 @@ const ApplicationSetting = Master.ApplicationSettingModal;
 const uploadFile = require("../middleware/uploadFileMiddleware");
 
 const Response = require('../models/responseModel')
-const getApplicationSetting = asyncHandler(async (req, res) => {
-    let response = new Response();
 
-    try {
-        let applicationSetting = await ApplicationSetting.findOne();
-
-        response.success = true;
-        response.data = applicationSetting;
-        return res.status(200).json(response);
-    }
-    catch (err) {
-        response.message = "Error in getting Application Setting. " + err.message;
-        return res.status(400).json(response);
-    }
-})
-const addApplicationSetting = asyncHandler(async (req, res) => {
-    try {
-        process.env.UPLOADFILE = "";
-        await uploadFile(req, res, function (err) {
-            if (err) {
-                return ("Error uploading file.");
-            } else {
-                editSave(req, res, process.env.UPLOADFILE)
-            }
-        })
-
-    } catch (err) {
-        return res.status(400).json({
-            success: false,
-            msg: "Error in editing data. " + err.message,
-            data: null,
-        });
-
-    }
-})
-const editSave = asyncHandler(async (req, res, fileName) => {
-    try {
-        const { Id, CompanyTitle, CompanySubTitle, BankName, AccNo, IFSCNo, CompanyLogo, Quotation, QuotationPrefix, RegisterNo, PanNo, GSTNo, QuotationSuffix, Invoice, InvoicePrefix, InvoiceSuffix, Customer, CustomerPrefix, CustomerSuffix, Order, OrderPrefix, OrderSuffix, OfficeAddress, OfficeEmail, OfficePhone1, OfficePhone2 } = req.body
-
-        let existNews = await ApplicationSetting.findById(Id);
-        if (!existNews) {
-            return res.status(400).json({
-                success: false,
-                msg: "Application Setting not found"
-            });
-        }
-
-        fileName = fileName != "" ? fileName.replace(",", "") : existNews.CompanyLogo;
-
-        let newApplicationSetting = await ApplicationSetting.findByIdAndUpdate(Id, {
-            CompanyTitle,
-            CompanySubTitle,
-            BankName,
-            AccNo,
-            IFSCNo,
-            CompanyLogo: fileName,
-            Quotation,
-            QuotationPrefix,
-            QuotationSuffix,
-            Invoice,
-            InvoicePrefix,
-            InvoiceSuffix,
-            Customer,
-            CustomerPrefix,
-            CustomerSuffix,
-            Order,
-            OrderPrefix,
-            OrderSuffix,
-            RegisterNo,
-            PanNo,
-            GSTNo,
-            OfficeAddress,
-            OfficeEmail,
-            OfficePhone1,
-            OfficePhone2
-        });
-        return res.status(200).json({
-            success: true,
-            data: newApplicationSetting,
-            msg: "Application Setting updated successfully"
-        });
-    } catch (err) {
-        return res.status(400).json({
-            success: false,
-            msg: "Error in updating Application Setting. " + err.message
-        });
-    }
-})
 
 const addProduct = asyncHandler(async (req, res) => {
     let response = new Response();
@@ -140,7 +53,6 @@ const addProduct = asyncHandler(async (req, res) => {
     }
 
 });
-
 const editProduct = asyncHandler(async (req, res) => {
     let response = new Response();
 
@@ -177,7 +89,6 @@ const editProduct = asyncHandler(async (req, res) => {
     }
 
 });
-
 const changeProductStatus = asyncHandler(async (req, res) => {
     let response = new Response();
 
@@ -191,12 +102,11 @@ const changeProductStatus = asyncHandler(async (req, res) => {
         return res.status(200).json(response);
     }
     catch (err) {
-        response.message = "Error in updating status. " + err.message;
+        response.message = "Error in updating Product. " + err.message;
         return res.status(400).json(response);
     }
 
 })
-
 const getProduct = asyncHandler(async (req, res) => {
     let response = new Response();
 
@@ -212,7 +122,6 @@ const getProduct = asyncHandler(async (req, res) => {
         return res.status(400).json(response);
     }
 })
-
 const getProductById = asyncHandler(async (req, res) => {
     let response = new Response();
 
@@ -228,6 +137,33 @@ const getProductById = asyncHandler(async (req, res) => {
         return res.status(400).json(response);
     }
 })
+const deleteProduct = asyncHandler(async (req, res) => {
+    try {
+        await Product.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {
+            if (err) {
+                return res.status(401).json({
+                    success: false,
+                    msg: err
+                }).end();
+            } else {
+                return res.status(200).json({
+                    success: true,
+                    msg: "Product removed. ",
+                }).end();
+            }
+        });
+
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in removing Product. " + err.message,
+            data: null,
+        });
+    }
+
+});
+
+
 const addType = asyncHandler(async (req, res) => {
     let response = new Response();
 
@@ -253,7 +189,6 @@ const addType = asyncHandler(async (req, res) => {
     }
 
 });
-
 const editType = asyncHandler(async (req, res) => {
     let response = new Response();
 
@@ -279,7 +214,6 @@ const editType = asyncHandler(async (req, res) => {
     }
 
 });
-
 const changeTypeStatus = asyncHandler(async (req, res) => {
     let response = new Response();
 
@@ -293,12 +227,11 @@ const changeTypeStatus = asyncHandler(async (req, res) => {
         return res.status(200).json(response);
     }
     catch (err) {
-        response.message = "Error in updating status. " + err.message;
+        response.message = "Error in updating Type. " + err.message;
         return res.status(400).json(response);
     }
 
 })
-
 const getType = asyncHandler(async (req, res) => {
     let response = new Response();
 
@@ -314,7 +247,6 @@ const getType = asyncHandler(async (req, res) => {
         return res.status(400).json(response);
     }
 })
-
 const getTypeById = asyncHandler(async (req, res) => {
     let response = new Response();
 
@@ -330,6 +262,32 @@ const getTypeById = asyncHandler(async (req, res) => {
         return res.status(400).json(response);
     }
 })
+const deleteType = asyncHandler(async (req, res) => {
+    try {
+        await Type.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {
+            if (err) {
+                return res.status(401).json({
+                    success: false,
+                    msg: err
+                }).end();
+            } else {
+                return res.status(200).json({
+                    success: true,
+                    msg: "Type removed. ",
+                }).end();
+            }
+        });
+
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in removing Type. " + err.message,
+            data: null,
+        });
+    }
+
+});
+
 
 const addSource = asyncHandler(async (req, res) => {
     let response = new Response();
@@ -357,7 +315,6 @@ const addSource = asyncHandler(async (req, res) => {
     }
 
 });
-
 const editSource = asyncHandler(async (req, res) => {
     let response = new Response();
 
@@ -383,7 +340,6 @@ const editSource = asyncHandler(async (req, res) => {
     }
 
 });
-
 const changeSourceStatus = asyncHandler(async (req, res) => {
     let response = new Response();
 
@@ -397,12 +353,11 @@ const changeSourceStatus = asyncHandler(async (req, res) => {
         return res.status(200).json(response);
     }
     catch (err) {
-        response.message = "Error in updating status. " + err.message;
+        response.message = "Error in updating Source. " + err.message;
         return res.status(400).json(response);
     }
 
 })
-
 const getSources = asyncHandler(async (req, res) => {
     let response = new Response();
 
@@ -418,7 +373,6 @@ const getSources = asyncHandler(async (req, res) => {
         return res.status(400).json(response);
     }
 })
-
 const getSourceById = asyncHandler(async (req, res) => {
     let response = new Response();
 
@@ -434,6 +388,33 @@ const getSourceById = asyncHandler(async (req, res) => {
         return res.status(400).json(response);
     }
 })
+const deleteSource = asyncHandler(async (req, res) => {
+    try {
+        await Source.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {
+            if (err) {
+                return res.status(401).json({
+                    success: false,
+                    msg: err
+                }).end();
+            } else {
+                return res.status(200).json({
+                    success: true,
+                    msg: "Source removed. ",
+                }).end();
+            }
+        });
+
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in removing Source. " + err.message,
+            data: null,
+        });
+    }
+
+});
+
+
 const addState = asyncHandler(async (req, res) => {
     let response = new Response();
 
@@ -460,6 +441,7 @@ const addState = asyncHandler(async (req, res) => {
     }
 
 });
+
 const editState = asyncHandler(async (req, res) => {
     let response = new Response();
 
@@ -517,6 +499,8 @@ const getStateById = asyncHandler(async (req, res) => {
         return res.status(400).json(response);
     }
 })
+
+
 const addUnit = asyncHandler(async (req, res) => {
     let response = new Response();
 
@@ -538,12 +522,11 @@ const addUnit = asyncHandler(async (req, res) => {
         response.data = newUnit;
         return res.status(200).json(response);
     } catch (err) {
-        response.message = "Error in adding source. " + err.message;
+        response.message = "Error in adding Unit. " + err.message;
         return res.status(400).json(response);
     }
 
 });
-
 const editUnit = asyncHandler(async (req, res) => {
     let response = new Response();
 
@@ -564,12 +547,11 @@ const editUnit = asyncHandler(async (req, res) => {
         response.data = newUnit;
         return res.status(200).json(response);
     } catch (err) {
-        response.message = "Error in updating source. " + err.message;
+        response.message = "Error in updating Unit. " + err.message;
         return res.status(400).json(response);
     }
 
 });
-
 const changeUnitStatus = asyncHandler(async (req, res) => {
     let response = new Response();
 
@@ -583,43 +565,67 @@ const changeUnitStatus = asyncHandler(async (req, res) => {
         return res.status(200).json(response);
     }
     catch (err) {
-        response.message = "Error in updating status. " + err.message;
+        response.message = "Error in updating Unit. " + err.message;
         return res.status(400).json(response);
     }
 
 })
-
 const getUnits = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let sources = await Unit.find({ is_active: req.body.active });
+        let Units = await Unit.find({ is_active: req.body.active });
 
         response.success = true;
-        response.data = sources;
+        response.data = Units;
         return res.status(200).json(response);
     }
     catch (err) {
-        response.message = "Error in getting sources. " + err.message;
+        response.message = "Error in getting Unit. " + err.message;
         return res.status(400).json(response);
     }
 })
-
 const getUnitById = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let sources = await Unit.findOne({ is_active: true, _id: req.params.id });
+        let Units = await Unit.findOne({ is_active: true, _id: req.params.id });
 
         response.success = true;
-        response.data = sources;
+        response.data = Units;
         return res.status(200).json(response);
     }
     catch (err) {
-        response.message = "Error in getting source by id. " + err.message;
+        response.message = "Error in getting Unit by id. " + err.message;
         return res.status(400).json(response);
     }
 })
+const deleteUnit = asyncHandler(async (req, res) => {
+    try {
+        await Unit.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {
+            if (err) {
+                return res.status(401).json({
+                    success: false,
+                    msg: err
+                }).end();
+            } else {
+                return res.status(200).json({
+                    success: true,
+                    msg: "Unit removed. ",
+                }).end();
+            }
+        });
+
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in removing Unit. " + err.message,
+            data: null,
+        });
+    }
+
+});
+
 
 const addCategory = asyncHandler(async (req, res) => {
     let response = new Response();
@@ -642,12 +648,11 @@ const addCategory = asyncHandler(async (req, res) => {
         response.data = newCategory;
         return res.status(200).json(response);
     } catch (err) {
-        response.message = "Error in adding source. " + err.message;
+        response.message = "Error in adding Category. " + err.message;
         return res.status(400).json(response);
     }
 
 });
-
 const editCategory = asyncHandler(async (req, res) => {
     let response = new Response();
 
@@ -668,12 +673,11 @@ const editCategory = asyncHandler(async (req, res) => {
         response.data = newCategory;
         return res.status(200).json(response);
     } catch (err) {
-        response.message = "Error in updating source. " + err.message;
+        response.message = "Error in updating Category. " + err.message;
         return res.status(400).json(response);
     }
 
 });
-
 const changeCategoryStatus = asyncHandler(async (req, res) => {
     let response = new Response();
 
@@ -687,43 +691,68 @@ const changeCategoryStatus = asyncHandler(async (req, res) => {
         return res.status(200).json(response);
     }
     catch (err) {
-        response.message = "Error in updating status. " + err.message;
+        response.message = "Error in updating Category. " + err.message;
         return res.status(400).json(response);
     }
 
 })
-
 const getCategorys = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let sources = await Category.find({ is_active: req.body.active }).populate("subCategory");
+        let Categorys = await Category.find({ is_active: req.body.active });
 
         response.success = true;
-        response.data = sources;
+        response.data = Categorys;
         return res.status(200).json(response);
     }
     catch (err) {
-        response.message = "Error in getting sources. " + err.message;
+        response.message = "Error in getting Category. " + err.message;
         return res.status(400).json(response);
     }
 })
-
 const getCategoryById = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let sources = await Category.findOne({ is_active: true, _id: req.params.id }).populate("subCategory");
+        let Categorys = await Category.findOne({ is_active: true, _id: req.params.id });
 
         response.success = true;
-        response.data = sources;
+        response.data = Categorys;
         return res.status(200).json(response);
     }
     catch (err) {
-        response.message = "Error in getting source by id. " + err.message;
+        response.message = "Error in getting Category by id. " + err.message;
         return res.status(400).json(response);
     }
 })
+const deleteCategory = asyncHandler(async (req, res) => {
+    try {
+        await SubCategory.deleteMany({ Category: req.params.id }).lean();
+        await Category.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {
+            if (err) {
+                return res.status(401).json({
+                    success: false,
+                    msg: err
+                }).end();
+            } else {
+                return res.status(200).json({
+                    success: true,
+                    msg: "Category removed. ",
+                }).end();
+            }
+        });
+
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in removing Category. " + err.message,
+            data: null,
+        });
+    }
+
+});
+
 
 const addSubCategory = asyncHandler(async (req, res) => {
     let response = new Response();
@@ -741,22 +770,17 @@ const addSubCategory = asyncHandler(async (req, res) => {
             Category: req.body.category,
             is_active: true,
         });
-        let category = await Category.findById(req.body.category);
-        category.subCategory.push(newSubCategory);
-        category.save((err) => {
-            if (err) throw err;
-        });
+
         response.success = true;
         response.message = "SubCategory added successfully";
         response.data = newSubCategory;
         return res.status(200).json(response);
     } catch (err) {
-        response.message = "Error in adding source. " + err.message;
+        response.message = "Error in adding SubCategory. " + err.message;
         return res.status(400).json(response);
     }
 
 });
-
 const editSubCategory = asyncHandler(async (req, res) => {
     let response = new Response();
 
@@ -777,12 +801,11 @@ const editSubCategory = asyncHandler(async (req, res) => {
         response.data = newSubCategory;
         return res.status(200).json(response);
     } catch (err) {
-        response.message = "Error in updating source. " + err.message;
+        response.message = "Error in updating SubCategory. " + err.message;
         return res.status(400).json(response);
     }
 
 });
-
 const changeSubCategoryStatus = asyncHandler(async (req, res) => {
     let response = new Response();
 
@@ -796,43 +819,412 @@ const changeSubCategoryStatus = asyncHandler(async (req, res) => {
         return res.status(200).json(response);
     }
     catch (err) {
-        response.message = "Error in updating status. " + err.message;
+        response.message = "Error in updating SubCategory. " + err.message;
         return res.status(400).json(response);
     }
 
 })
-
 const getSubCategorys = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let sources = await SubCategory.find({ is_active: req.body.active });
+        let SubCategorys = await SubCategory.find({ is_active: req.body.active }).populate("Category");
 
         response.success = true;
-        response.data = sources;
+        response.data = SubCategorys;
         return res.status(200).json(response);
     }
     catch (err) {
-        response.message = "Error in getting sources. " + err.message;
+        response.message = "Error in getting SubCategory. " + err.message;
         return res.status(400).json(response);
     }
 })
-
 const getSubCategoryById = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let sources = await SubCategory.findOne({ is_active: true, _id: req.params.id });
+        let SubCategorys = await SubCategory.findOne({ is_active: true, _id: req.params.id });
 
         response.success = true;
-        response.data = sources;
+        response.data = SubCategorys;
         return res.status(200).json(response);
     }
     catch (err) {
-        response.message = "Error in getting source by id. " + err.message;
+        response.message = "Error in getting SubCategory by id. " + err.message;
         return res.status(400).json(response);
     }
 })
+const deleteSubCategory = asyncHandler(async (req, res) => {
+    try {
+        await SubCategory.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {
+            if (err) {
+                return res.status(401).json({
+                    success: false,
+                    msg: err
+                }).end();
+            } else {
+                return res.status(200).json({
+                    success: true,
+                    msg: "SubCategory removed. ",
+                }).end();
+            }
+        });
+
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in removing SubCategory. " + err.message,
+            data: null,
+        });
+    }
+
+});
+
+
+const addRole = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let oldRole = await Role.findOne({ Name: req.body.name });
+
+        if (oldRole) {
+            response.message = "Role with same name already exist.";
+            return res.status(400).json(response);
+        }
+
+        let newRole = await Role.create({
+            Name: req.body.name,
+            is_active: true,
+        });
+
+        response.success = true;
+        response.message = "Role added successfully";
+        response.data = newRole;
+        return res.status(200).json(response);
+    } catch (err) {
+        response.message = "Error in adding Role. " + err.message;
+        return res.status(400).json(response);
+    }
+
+});
+const editRole = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let oldRole = Role.findById(req.body.id);
+
+        if (!oldRole) {
+            response.message = "Role not found.";
+            return res.status(400).json(response);
+        }
+
+        let newRole = await Role.findByIdAndUpdate(req.body.id, {
+            Name: req.body.name
+        });
+
+        response.success = true;
+        response.message = "Role added successfully";
+        response.data = newRole;
+        return res.status(200).json(response);
+    } catch (err) {
+        response.message = "Error in updating Role. " + err.message;
+        return res.status(400).json(response);
+    }
+
+});
+const changeRoleStatus = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let newRole = await Role.findByIdAndUpdate(req.body.id, {
+            is_active: req.body.active
+        });
+
+        response.success = true;
+        response.message = "Role status updated successfully";
+        return res.status(200).json(response);
+    }
+    catch (err) {
+        response.message = "Error in updating Role. " + err.message;
+        return res.status(400).json(response);
+    }
+
+})
+const getRoles = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let Roles = await Role.find({ is_active: req.body.active });
+
+        response.success = true;
+        response.data = Roles;
+        return res.status(200).json(response);
+    }
+    catch (err) {
+        response.message = "Error in getting Role. " + err.message;
+        return res.status(400).json(response);
+    }
+})
+const getRoleById = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let Roles = await Role.findOne({ is_active: true, _id: req.params.id });
+
+        response.success = true;
+        response.data = Roles;
+        return res.status(200).json(response);
+    }
+    catch (err) {
+        response.message = "Error in getting Role by id. " + err.message;
+        return res.status(400).json(response);
+    }
+})
+const deleteRole = asyncHandler(async (req, res) => {
+    try {
+        await Role.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {
+            if (err) {
+                return res.status(401).json({
+                    success: false,
+                    msg: err
+                }).end();
+            } else {
+                return res.status(200).json({
+                    success: true,
+                    msg: "Role removed. ",
+                }).end();
+            }
+        });
+
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in removing Role. " + err.message,
+            data: null,
+        });
+    }
+
+});
+
+
+const addStatus = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let oldStatus = await Status.findOne({ Name: req.body.name, GroupName: req.body.groupname });
+
+        if (oldStatus) {
+            response.message = "Status with same name already exist.";
+            return res.status(400).json(response);
+        }
+
+        let newStatus = await Status.create({
+            Name: req.body.name,
+            GroupName: req.body.groupname,
+            is_active: true,
+        });
+
+        response.success = true;
+        response.message = "Status added successfully";
+        response.data = newStatus;
+        return res.status(200).json(response);
+    } catch (err) {
+        response.message = "Error in adding Status. " + err.message;
+        return res.status(400).json(response);
+    }
+
+});
+const editStatus = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let oldStatus = Status.findById(req.body.id);
+
+        if (!oldStatus) {
+            response.message = "Status not found.";
+            return res.status(400).json(response);
+        }
+
+        let newStatus = await Status.findByIdAndUpdate(req.body.id, {
+            Name: req.body.name
+        });
+
+        response.success = true;
+        response.message = "Status added successfully";
+        response.data = newStatus;
+        return res.status(200).json(response);
+    } catch (err) {
+        response.message = "Error in updating Status. " + err.message;
+        return res.status(400).json(response);
+    }
+
+});
+const changeStatus = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let newStatus = await Status.findByIdAndUpdate(req.body.id, {
+            is_active: req.body.active
+        });
+
+        response.success = true;
+        response.message = "Status updated successfully";
+        return res.status(200).json(response);
+    }
+    catch (err) {
+        response.message = "Error in updating Status. " + err.message;
+        return res.status(400).json(response);
+    }
+
+})
+const getStatus = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let Statuss = await Status.find({ is_active: req.body.active });
+
+        response.success = true;
+        response.data = Statuss;
+        return res.status(200).json(response);
+    }
+    catch (err) {
+        response.message = "Error in getting Status. " + err.message;
+        return res.status(400).json(response);
+    }
+})
+const getStatusById = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let Statuss = await Status.findOne({ is_active: true, _id: req.params.id });
+
+        response.success = true;
+        response.data = Statuss;
+        return res.status(200).json(response);
+    }
+    catch (err) {
+        response.message = "Error in getting Status by id. " + err.message;
+        return res.status(400).json(response);
+    }
+})
+const deleteStatus = asyncHandler(async (req, res) => {
+    try {
+        await Status.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {
+            if (err) {
+                return res.status(401).json({
+                    success: false,
+                    msg: err
+                }).end();
+            } else {
+                return res.status(200).json({
+                    success: true,
+                    msg: "Status removed. ",
+                }).end();
+            }
+        });
+
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in removing Status. " + err.message,
+            data: null,
+        });
+    }
+
+});
+
+
+const getApplicationSetting = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let applicationSetting = await ApplicationSetting.findOne();
+
+        response.success = true;
+        response.data = applicationSetting;
+        return res.status(200).json(response);
+    }
+    catch (err) {
+        response.message = "Error in getting Application Setting. " + err.message;
+        return res.status(400).json(response);
+    }
+})
+
+const addApplicationSetting = asyncHandler(async (req, res) => {
+    try {
+        process.env.UPLOADFILE = "";
+        await uploadFile(req, res, function (err) {
+            if (err) {
+                return ("Error uploading file.");
+            } else {
+                editSave(req, res, process.env.UPLOADFILE)
+            }
+        })
+
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in editing data. " + err.message,
+            data: null,
+        });
+
+    }
+})
+
+const editSave = asyncHandler(async (req, res, fileName) => {
+    try {
+        const { Id, CompanyTitle, CompanySubTitle, BankName, AccNo, IFSCNo, CompanyLogo, Quotation, QuotationPrefix, RegisterNo, PanNo, GSTNo, QuotationSuffix, Invoice, InvoicePrefix, InvoiceSuffix, Customer, CustomerPrefix, CustomerSuffix, Order, OrderPrefix, OrderSuffix, OfficeAddress, OfficeEmail, OfficePhone1, OfficePhone2 } = req.body
+
+        let existNews = await ApplicationSetting.findById(Id);
+        if (!existNews) {
+            return res.status(400).json({
+                success: false,
+                msg: "Application Setting not found"
+            });
+        }
+
+        fileName = fileName != "" ? fileName.replace(",", "") : existNews.CompanyLogo;
+
+        let newApplicationSetting = await ApplicationSetting.findByIdAndUpdate(Id, {
+            CompanyTitle,
+            CompanySubTitle,
+            BankName,
+            AccNo,
+            IFSCNo,
+            CompanyLogo: fileName,
+            Quotation,
+            QuotationPrefix,
+            QuotationSuffix,
+            Invoice,
+            InvoicePrefix,
+            InvoiceSuffix,
+            Customer,
+            CustomerPrefix,
+            CustomerSuffix,
+            Order,
+            OrderPrefix,
+            OrderSuffix,
+            RegisterNo,
+            PanNo,
+            GSTNo,
+            OfficeAddress,
+            OfficeEmail,
+            OfficePhone1,
+            OfficePhone2
+        });
+        return res.status(200).json({
+            success: true,
+            data: newApplicationSetting,
+            msg: "Application Setting updated successfully"
+        });
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in updating Application Setting. " + err.message
+        });
+    }
+})
+
 const addModule = asyncHandler(async (req, res) => {
     let response = new Response();
     try {
@@ -918,6 +1310,7 @@ const getModule = asyncHandler(async (req, res) => {
         return res.status(400).json(response);
     }
 })
+
 const getModulegroup = asyncHandler(async (req, res) => {
     let response = new Response();
     try {
@@ -944,6 +1337,7 @@ const getModulegroup = asyncHandler(async (req, res) => {
         return res.status(400).json(response);
     }
 })
+
 const getModuleById = asyncHandler(async (req, res) => {
     let response = new Response();
 
@@ -956,213 +1350,6 @@ const getModuleById = asyncHandler(async (req, res) => {
     }
     catch (err) {
         response.message = "Error in getting source by id. " + err.message;
-        return res.status(400).json(response);
-    }
-})
-const addRole = asyncHandler(async (req, res) => {
-    let response = new Response();
-
-    try {
-        let oldRole = await Role.findOne({ Name: req.body.name });
-
-        if (oldRole) {
-            response.message = "Role with same name already exist.";
-            return res.status(400).json(response);
-        }
-
-        let newRole = await Role.create({
-            Name: req.body.name,
-            is_active: true,
-        });
-
-        response.success = true;
-        response.message = "Role added successfully";
-        response.data = newRole;
-        return res.status(200).json(response);
-    } catch (err) {
-        response.message = "Error in adding Role. " + err.message;
-        return res.status(400).json(response);
-    }
-
-});
-
-const editRole = asyncHandler(async (req, res) => {
-    let response = new Response();
-
-    try {
-        let oldRole = Role.findById(req.body.id);
-
-        if (!oldRole) {
-            response.message = "Role not found.";
-            return res.status(400).json(response);
-        }
-
-        let newRole = await Role.findByIdAndUpdate(req.body.id, {
-            Name: req.body.name
-        });
-
-        response.success = true;
-        response.message = "Role added successfully";
-        response.data = newRole;
-        return res.status(200).json(response);
-    } catch (err) {
-        response.message = "Error in updating Role. " + err.message;
-        return res.status(400).json(response);
-    }
-
-});
-
-const changeRoleStatus = asyncHandler(async (req, res) => {
-    let response = new Response();
-
-    try {
-        let newRole = await Role.findByIdAndUpdate(req.body.id, {
-            is_active: req.body.active
-        });
-
-        response.success = true;
-        response.message = "Role status updated successfully";
-        return res.status(200).json(response);
-    }
-    catch (err) {
-        response.message = "Error in updating Role. " + err.message;
-        return res.status(400).json(response);
-    }
-
-})
-
-const getRoles = asyncHandler(async (req, res) => {
-    let response = new Response();
-
-    try {
-        let sources = await Role.find({ is_active: req.body.active });
-
-        response.success = true;
-        response.data = sources;
-        return res.status(200).json(response);
-    }
-    catch (err) {
-        response.message = "Error in getting Role. " + err.message;
-        return res.status(400).json(response);
-    }
-})
-
-const getRoleById = asyncHandler(async (req, res) => {
-    let response = new Response();
-
-    try {
-        let sources = await Role.findOne({ is_active: true, _id: req.params.id });
-
-        response.success = true;
-        response.data = sources;
-        return res.status(200).json(response);
-    }
-    catch (err) {
-        response.message = "Error in getting Role by id. " + err.message;
-        return res.status(400).json(response);
-    }
-})
-const addStatus = asyncHandler(async (req, res) => {
-    let response = new Response();
-
-    try {
-        let oldStatus = await Status.findOne({ Name: req.body.name, GroupName: req.body.groupname });
-
-        if (oldStatus) {
-            response.message = "Status with same name already exist.";
-            return res.status(400).json(response);
-        }
-
-        let newStatus = await Status.create({
-            Name: req.body.name,
-            GroupName: req.body.groupname,
-            is_active: true,
-        });
-
-        response.success = true;
-        response.message = "Status added successfully";
-        response.data = newStatus;
-        return res.status(200).json(response);
-    } catch (err) {
-        response.message = "Error in adding Status. " + err.message;
-        return res.status(400).json(response);
-    }
-
-});
-
-const editStatus = asyncHandler(async (req, res) => {
-    let response = new Response();
-
-    try {
-        let oldStatus = Status.findById(req.body.id);
-
-        if (!oldStatus) {
-            response.message = "Status not found.";
-            return res.status(400).json(response);
-        }
-
-        let newStatus = await Status.findByIdAndUpdate(req.body.id, {
-            Name: req.body.name
-        });
-
-        response.success = true;
-        response.message = "Status added successfully";
-        response.data = newStatus;
-        return res.status(200).json(response);
-    } catch (err) {
-        response.message = "Error in updating Status. " + err.message;
-        return res.status(400).json(response);
-    }
-
-});
-
-const changeStatus = asyncHandler(async (req, res) => {
-    let response = new Response();
-
-    try {
-        let newStatus = await Status.findByIdAndUpdate(req.body.id, {
-            is_active: req.body.active
-        });
-
-        response.success = true;
-        response.message = "Status updated successfully";
-        return res.status(200).json(response);
-    }
-    catch (err) {
-        response.message = "Error in updating Status. " + err.message;
-        return res.status(400).json(response);
-    }
-
-})
-
-const getStatus = asyncHandler(async (req, res) => {
-    let response = new Response();
-
-    try {
-        let sources = await Status.find({ is_active: req.body.active });
-
-        response.success = true;
-        response.data = sources;
-        return res.status(200).json(response);
-    }
-    catch (err) {
-        response.message = "Error in getting Status. " + err.message;
-        return res.status(400).json(response);
-    }
-})
-
-const getStatusById = asyncHandler(async (req, res) => {
-    let response = new Response();
-
-    try {
-        let sources = await Status.findOne({ is_active: true, _id: req.params.id });
-
-        response.success = true;
-        response.data = sources;
-        return res.status(200).json(response);
-    }
-    catch (err) {
-        response.message = "Error in getting Status by id. " + err.message;
         return res.status(400).json(response);
     }
 })
@@ -1299,6 +1486,7 @@ const setDefaultMailAddress = asyncHandler(async (req, res) => {
     }
 
 });
+
 module.exports = {
     getApplicationSetting,
     addApplicationSetting,
@@ -1307,31 +1495,37 @@ module.exports = {
     changeProductStatus,
     getProduct,
     getProductById,
+    deleteProduct,
     addType,
     editType,
     changeTypeStatus,
     getType,
     getTypeById,
+    deleteType,
     addSource,
     editSource,
     changeSourceStatus,
     getSources,
     getSourceById,
+    deleteSource,
     addUnit,
     editUnit,
     changeUnitStatus,
     getUnits,
     getUnitById,
+    deleteUnit,
     addCategory,
     editCategory,
     changeCategoryStatus,
     getCategorys,
     getCategoryById,
+    deleteCategory,
     addSubCategory,
     editSubCategory,
     changeSubCategoryStatus,
     getSubCategorys,
     getSubCategoryById,
+    deleteSubCategory,
     addState,
     editState,
     getStates,
@@ -1347,11 +1541,13 @@ module.exports = {
     changeRoleStatus,
     getRoles,
     getRoleById,
+    deleteRole,
     addStatus,
     editStatus,
     changeStatus,
     getStatus,
     getStatusById,
+    deleteStatus,
     addMailAddress,
     editMailAddress,
     changeMailAddressStatus,

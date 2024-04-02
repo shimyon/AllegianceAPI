@@ -245,7 +245,7 @@ const removeInvoice = asyncHandler(async (req, res) => {
 
 const getAllInvoice = asyncHandler(async (req, res) => {
     try {
-        let invoiceList = await Invoice.find({ is_deleted: false })
+        let invoiceList = await Invoice.find({ is_deleted: req.body.active })
             .populate("Customer")
             .populate({
                 path: 'Products',

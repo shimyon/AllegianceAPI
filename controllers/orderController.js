@@ -239,7 +239,7 @@ const removeOrder = asyncHandler(async (req, res) => {
 
 const getAllOrder = asyncHandler(async (req, res) => {
     try {
-        let customerList = await Order.find({ is_deleted: false })
+        let customerList = await Order.find({ is_deleted: req.body.active })
             .populate("Customer")
             .populate({
                 path: 'Products',

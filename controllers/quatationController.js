@@ -248,7 +248,7 @@ const removeQuatation = asyncHandler(async (req, res) => {
 
 const getAllQuatation = asyncHandler(async (req, res) => {
     try {
-        let QuatationList = await Quatation.find({ is_deleted: false })
+        let QuatationList = await Quatation.find({ is_deleted: req.body.active })
             .populate("Customer")
             .populate({
                 path: 'Products',
