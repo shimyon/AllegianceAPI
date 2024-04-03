@@ -9,13 +9,15 @@ const {
     getOrderById,
     changeOrderStatus,
     Orderpdfcreate,
-    moveToInvoice
+    moveToInvoice,
+    deleteOrder
 } = require('../controllers/orderController')
 const { protect } = require('../middleware/authMiddleware')
 
 router.post('/add', protect, addOrder)
 router.post('/edit', protect, editOrder)
 router.post('/remove/:id', protect, removeOrder)
+router.get('/deleteOrder/:id', protect, deleteOrder)
 router.post('/changeOrderStatus', protect, changeOrderStatus)
 router.post('/getAll', protect, getAllOrder)
 router.get('/getById/:id', protect, getOrderById)

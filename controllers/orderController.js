@@ -95,7 +95,7 @@ const addOrder = asyncHandler(async (req, res) => {
             if (err) throw err;
         });
         if (newOrder) {
-            let resuser = await User.find({ is_active: true, role: 'Admin' });
+            let resuser = await User.find({ is_active: true, role: 'SuperAdmin' });
             let date = new Date();
             const savedNotification = await notificationModel.create({
                 description: `Order(${newOrder.OrderCode}) entry has been created`,
@@ -563,6 +563,36 @@ const moveToInvoice = asyncHandler(async (req, res) => {
     }
 
 });
+
+const deleteOrder = asyncHandler(async (req, res) => {
+    try {
+        await OrderProduct.deleteMany({ OrderId: req.params.id }).lean()
+        
+        await Order.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {
+            if (err) {
+                return res.status(401).json({
+                    success: false,
+                    msg: err
+                }).end();
+            } else {
+                return res.status(200).json({
+                    success: true,
+                    msg: "Order removed. ",
+                }).end();
+            }
+        });
+
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in removing Order. " + err.message,
+            data: null,
+        });
+    }
+
+});
+
+
 module.exports = {
     addOrder,
     editOrder,
@@ -571,5 +601,6 @@ module.exports = {
     getOrderById,
     Orderpdfcreate,
     changeOrderStatus,
-    moveToInvoice
+    moveToInvoice,
+    deleteOrder
 }

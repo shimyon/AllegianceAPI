@@ -8,16 +8,16 @@ const {
     removeRecovery,
     editRecovery,
     complateRecovery,
-    onhold
+    deleteRecovery
  } = require('../controllers/recoveryController')
 const { protect } = require('../middleware/authMiddleware')
 
 router.post('/addRecovery', protect, addRecovery)
 router.post('/editRecovery', protect, editRecovery)
 router.post('/complateRecovery/:id', protect, complateRecovery)
-router.post('/onhold/:id', protect, onhold)
 router.post('/getAllRecovery', protect, getAllRecovery)
 router.get('/getRecoveryById/:id', protect, getRecoveryById)
+router.get('/deleteRecovery/:id', protect, deleteRecovery)
 router.post('/removeRecovery', protect, removeRecovery)
 
 module.exports = router

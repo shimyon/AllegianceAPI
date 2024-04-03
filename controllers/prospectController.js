@@ -42,7 +42,7 @@ const addProspect = asyncHandler(async (req, res) => {
             is_active: true
         });
         if (prospect) {
-            let resuser = await User.find({ is_active: true, role: 'Admin' });
+            let resuser = await User.find({ is_active: true, role: 'SuperAdmin' });
             let date = new Date();
             const savedNotification = await notificationModel.create({
                 description: `Prospect(${req.body.company}) entry has been created`,
@@ -292,7 +292,7 @@ const changeProspectStage = asyncHandler(async (req, res) => {
         });
         
         if (prospect) {
-            let resuser = await User.find({ is_active: true, role: 'Admin' });
+            let resuser = await User.find({ is_active: true, role: 'SuperAdmin' });
             let date = new Date();
             // const savedNotification = await notificationModel.create({
             //     description: `Prospect(${prospect.Stage}) entry has been created`,
@@ -339,7 +339,7 @@ const addNext = asyncHandler(async (req, res) => {
             NextTalk: nextOn._id
         });
         if (nextOn) {
-            let resuser = await User.find({ is_active: true, role: 'Admin' });
+            let resuser = await User.find({ is_active: true, role: 'SuperAdmin' });
             let date = new Date();
             const savedNotification = await notificationModel.create({
                 description: `Prospect(${leadExisting.Company}) Next Action Date ${req.body.date}`,

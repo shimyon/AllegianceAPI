@@ -93,7 +93,7 @@ const addInvoice = asyncHandler(async (req, res) => {
         });
 
         if (newInvoice) {
-            let resuser = await User.find({ is_active: true, role: 'Admin' });
+            let resuser = await User.find({ is_active: true, role: 'SuperAdmin' });
             let date = new Date();
             const savedNotification = await notificationModel.create({
                 description: `Invoice(${newInvoice.InvoiceCode}) entry has been created`,
@@ -441,6 +441,33 @@ const getInvoiceById = asyncHandler(async (req, res) => {
     }
 })
 
+const deleteInvoice = asyncHandler(async (req, res) => {
+    try {
+        await InvoiceProduct.deleteMany({ InvoiceId: req.params.id }).lean()
+        
+        await Invoice.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {
+            if (err) {
+                return res.status(401).json({
+                    success: false,
+                    msg: err
+                }).end();
+            } else {
+                return res.status(200).json({
+                    success: true,
+                    msg: "Invoice removed. ",
+                }).end();
+            }
+        });
+
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in removing Invoice. " + err.message,
+            data: null,
+        });
+    }
+
+});
 
 module.exports = {
     addInvoice,
@@ -448,5 +475,6 @@ module.exports = {
     removeInvoice,
     getAllInvoice,
     getInvoiceById,
-    Invoicepdfcreate
+    Invoicepdfcreate,
+    deleteInvoice
 }

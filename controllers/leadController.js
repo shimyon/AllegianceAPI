@@ -51,7 +51,7 @@ const addLead = asyncHandler(async (req, res) => {
             is_active: true
         });
         if (newLead) {
-            let resuser = await User.find({ is_active: true, role: 'Admin' });
+            let resuser = await User.find({ is_active: true, role: 'SuperAdmin' });
             let date = new Date();
             const savedNotification = await notificationModel.create({
                 description: `lead(${req.body.company}) entry has been created`,
@@ -318,7 +318,7 @@ const addNext = asyncHandler(async (req, res) => {
             NextTalk: nextOn._id
         });
         if (nextOn) {
-            let resuser = await User.find({ is_active: true, role: 'Admin' });
+            let resuser = await User.find({ is_active: true, role: 'SuperAdmin' });
             let date = new Date();
             const savedNotification = await notificationModel.create({
                 description: `lead(${leadExisting.Company}) Next Action Date ${req.body.date}`,
@@ -453,7 +453,7 @@ const moveToProspect = asyncHandler(async (req, res) => {
             is_active: true
         });
         if (interaction) {
-            let resuser = await User.find({ is_active: true, role: 'Admin' });
+            let resuser = await User.find({ is_active: true, role: 'SuperAdmin' });
             let date = new Date();
             const savedNotification = await notificationModel.create({
                 description: `lead(${interaction.Company}) Moved to prospect`,

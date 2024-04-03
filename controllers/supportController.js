@@ -26,7 +26,7 @@ const addSupport = asyncHandler(async (req, res) => {
             addedBy: req.user._id
         });
         if (newSupport) {
-            let resuser = await User.find({ is_active: true, role: 'Admin' });
+            let resuser = await User.find({ is_active: true, role: 'SuperAdmin' });
             let date = new Date();
             const savedNotification = await notificationModel.create({
                 description: `Support(${newSupport.TicketNo}) entry has been created`,

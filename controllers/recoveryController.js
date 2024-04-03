@@ -18,13 +18,12 @@ const addRecovery = asyncHandler(async (req, res) => {
             NextFollowup:req.body.nextfollowup,
             Note: req.body.note,
             Status: "In Complete",
-            OnHold:false,
             is_active: true,
             addedBy: req.user._id,
 
         });
         if (newRecovery) {
-            let resuser = await User.find({ is_active: true, role: 'Admin' });
+            let resuser = await User.find({ is_active: true, role: 'SuperAdmin' });
             let date = new Date();
             let insertdata = resuser.map(f => ({
                 description: `Recovery(${newRecovery.RecoveryNo}) entry has been created`,
@@ -92,30 +91,6 @@ const complateRecovery = asyncHandler(async (req, res) => {
         }
         await Recovery.findByIdAndUpdate(req.params.id, {
             Status: "Completed",
-        });
-        return res.status(200).json({
-            success: true,
-            msg: "Recovery updated successfully"
-        });
-    } catch (err) {
-        return res.status(400).json({
-            success: false,
-            msg: "Error in updating Recovery. " + err.message
-        });
-    }
-})
-const onhold = asyncHandler(async (req, res) => {
-    try {
-        var existing = await Recovery.findById(req.params.id);
-        if (!existing) {
-            return res.status(400).json({
-                success: false,
-                msg: "Recovery not found. " + err.message,
-            });
-
-        }
-        await Recovery.findByIdAndUpdate(req.params.id, {
-            OnHold: req.body.active,
         });
         return res.status(200).json({
             success: true,
@@ -197,6 +172,33 @@ const removeRecovery = asyncHandler(async (req, res) => {
     }
 
 });
+
+const deleteRecovery = asyncHandler(async (req, res) => {
+    try {
+        await Recovery.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {
+            if (err) {
+                return res.status(401).json({
+                    success: false,
+                    msg: err
+                }).end();
+            } else {
+                return res.status(200).json({
+                    success: true,
+                    msg: "Recovery removed. ",
+                }).end();
+            }
+        });
+
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in removing Recovery. " + err.message,
+            data: null,
+        });
+    }
+
+});
+
 module.exports = {
     addRecovery,
     getAllRecovery,
@@ -204,5 +206,5 @@ module.exports = {
     removeRecovery,
     editRecovery,
     complateRecovery,
-    onhold
+    deleteRecovery
 }
