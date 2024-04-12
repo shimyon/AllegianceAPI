@@ -8,14 +8,6 @@ const ApplicationSetting = Master.ApplicationSettingModal;
 
 const addCustomer = asyncHandler(async (req, res) => {
     try {
-        const existCustomer = await Customer.findOne({ $or: [{ Mobile: req.body.mobile, Email: req.body.email }] });
-        if (existCustomer) {
-            return res.status(200).json({
-                success: false,
-                msg: "Customer already exist with same mobile or email.",
-                data: null,
-            });
-        }
         const existCustomerCode = await Customer.findOne({ $or: [{ CustomerCode: req.body.CustomerCode }] });
         if (existCustomerCode) {
             return res.status(200).json({
@@ -24,6 +16,16 @@ const addCustomer = asyncHandler(async (req, res) => {
                 data: null,
             });
         }
+        if( req.body.mobile||req.body.email){
+        const existCustomer = await Customer.findOne({ $or: [{ Mobile: req.body.mobile, Email: req.body.email }] });
+        if (existCustomer) {
+            return res.status(200).json({
+                success: false,
+                msg: "Customer already exist with same mobile or email.",
+                data: null,
+            });
+        }
+    }
         let customerNo = await Customer.find({}, { CustomerNo: 1, _id: 0 }).sort({ CustomerNo: -1 }).limit(1);
         let maxCustomer = 1;
         if (customerNo.length > 0) {

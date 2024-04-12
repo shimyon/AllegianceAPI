@@ -329,13 +329,13 @@ const changeProspectStage = asyncHandler(async (req, res) => {
 const addNext = asyncHandler(async (req, res) => {
     try {
         let nextOn = await NextOn.create({
-            prospectId: req.body.id,
+            prospectId: req.body.prospectid,
             date: req.body.date,
             note: req.body.note,
             user: req.user._id
         });
 
-        let leadExisting = await Prospect.findByIdAndUpdate(req.body.id, {
+        let leadExisting = await Prospect.findByIdAndUpdate(req.body.prospectid, {
             NextTalk: nextOn._id
         });
         if (nextOn) {
@@ -360,6 +360,33 @@ const addNext = asyncHandler(async (req, res) => {
             return res.status(200).json({
                 success: true,
                 msg: "Data added successfully",
+            }).end();
+        }
+        else {
+            res.status(400)
+            throw new Error("Invalid data!")
+        }
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in adding data. " + err.message,
+            data: null,
+        });
+    }
+
+});
+const editNext = asyncHandler(async (req, res) => {
+    try {
+        let nextOn = await NextOn.findByIdAndUpdate(req.body.id, {
+            date: req.body.date,
+            note: req.body.note,
+            user: req.user._id
+        });
+
+        if (nextOn) {
+            return res.status(200).json({
+                success: true,
+                msg: "Next Action edited successfully",
             }).end();
         }
         else {
@@ -569,8 +596,14 @@ const convertToCustomer = asyncHandler(async (req, res) => {
                 data: null,
             });
         }
-
+        let customerNo = await Customer.find({}, { CustomerNo: 1, _id: 0 }).sort({ CustomerNo: -1 }).limit(1);
+        let maxCustomer = 1;
+        if (customerNo.length > 0) {
+            maxCustomer = customerNo[0].CustomerNo + 1;
+        }
         const newCustomer = await Customer.create({
+            CustomerNo: maxCustomer||1,
+            CustomerCode: maxCustomer,
             Company: pros.Company,
             Title: pros.Title,
             GSTNo: pros.GSTNo,
@@ -621,6 +654,7 @@ module.exports = {
     getAllProspect,
     getProspectById,
     addNext,
+    editNext,
     getNext,
     getbyNext,
     removeProspect,

@@ -92,13 +92,13 @@ const removetask = asyncHandler(async (req, res) => {
 
 const getAlltask = asyncHandler(async (req, res) => {
     try {
-        let inboxList = await Task.find({ is_active: true, Assign: req.body.user }).populate("Status").populate("Assign")
+        let inboxList = await Task.find({ is_active: req.body.active,Status:req.body.status,Assign: req.body.user,}).populate("Status").populate("Assign")
             .sort({ createdAt: -1 })
-            let outboxList = await Task.find({ is_active: true, addedBy: req.body.user,Assign: { $ne: req.body.user } }).populate("Status").populate("Assign")
+        let outboxList = await Task.find({is_active: req.body.active,Status:req.body.status,addedBy: req.body.user, Assign: { $ne: req.body.user } }).populate("Status").populate("Assign")
             .sort({ createdAt: -1 })
         return res.status(200).json({
             success: true,
-            data: {'Inbox':inboxList,'Outbox':outboxList}
+            data: { 'Inbox': inboxList, 'Outbox': outboxList }
         }).end();
     } catch (err) {
         return res.status(400).json({

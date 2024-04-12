@@ -8,6 +8,7 @@ const {
     getAllLead,
     getLeadById,
     addNext,
+    editNext,
     getNext,
     moveToProspect,
     importExcel,
@@ -20,6 +21,7 @@ const { protect } = require('../middleware/authMiddleware')
 router.post('/add', protect, addLead)
 router.post('/edit', protect, editLead)
 router.post('/addNext', protect, addNext)
+router.post('/editNext', protect, editNext)
 router.post('/importExcel', protect, importExcel)
 router.post('/getAll', protect, getAllLead)
 router.post('/moveToProspect/:id', protect, moveToProspect)

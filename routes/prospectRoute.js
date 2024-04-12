@@ -9,6 +9,7 @@ const {
     getAllProspect,
     getProspectById,
     addNext,
+    editNext,
     getNext,
     getbyNext,
     addOtherContact,
@@ -27,6 +28,7 @@ router.post('/remove', protect, removeProspect)
 router.get('/:id', protect, getProspectById)
 router.get('/convertToCustomer/:id', protect, convertToCustomer)
 router.post('/addNext', protect, addNext)
+router.post('/editNext', protect, editNext)
 router.post('/addOtherContact', protect, addOtherContact)
 router.get('/otherContact/:id', protect, getOtherContact)
 router.post('/importExcel', protect, importExcel)

@@ -308,13 +308,13 @@ const getLeadById = asyncHandler(async (req, res) => {
 const addNext = asyncHandler(async (req, res) => {
     try {
         let nextOn = await NextOn.create({
-            leadId: req.body.id,
+            leadId: req.body.leadid,
             date: req.body.date,
             note: req.body.note,
             user: req.user._id
         });
 
-        let leadExisting = await Lead.findByIdAndUpdate(req.body.id, {
+        let leadExisting = await Lead.findByIdAndUpdate(req.body.leadid, {
             NextTalk: nextOn._id
         });
         if (nextOn) {
@@ -354,7 +354,33 @@ const addNext = asyncHandler(async (req, res) => {
     }
 
 });
+const editNext = asyncHandler(async (req, res) => {
+    try {
+        let nextOn = await NextOn.findByIdAndUpdate(req.body.id, {
+            date: req.body.date,
+            note: req.body.note,
+            user: req.user._id
+        });
 
+        if (nextOn) {
+            return res.status(200).json({
+                success: true,
+                msg: "Next Action edited successfully",
+            }).end();
+        }
+        else {
+            res.status(400)
+            throw new Error("Invalid data!")
+        }
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in adding data. " + err.message,
+            data: null,
+        });
+    }
+
+});
 const getNext = asyncHandler(async (req, res) => {
     try {
         const next = await NextOn.find({ leadId: req.params.id }).sort({ date: -1 }).populate("user");
@@ -608,6 +634,7 @@ module.exports = {
     getAllLead,
     getLeadById,
     addNext,
+    editNext,
     getNext,
     moveToProspect,
     importExcel,
