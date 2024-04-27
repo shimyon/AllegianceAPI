@@ -33,11 +33,21 @@ const addCustomer = asyncHandler(async (req, res) => {
         }
         let applicationSetting = await ApplicationSetting.findOne();
         let code = "";
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
+        let financialYearStart, financialYearEnd;
+        if (currentDate.getMonth() >= 3) {
+            financialYearStart = currentYear;
+            financialYearEnd = currentYear + 1;
+        } else {
+            financialYearStart = currentYear - 1;
+            financialYearEnd = currentYear;
+        }
         if(applicationSetting.Customer==true){
             code = req.body.CustomerCode;
         }
         else{
-           code = applicationSetting.CustomerPrefix+maxCustomer+applicationSetting.CustomerSuffix;
+           code = applicationSetting.CustomerPrefix+maxCustomer+`/${financialYearStart}-${financialYearEnd}`+applicationSetting.CustomerSuffix;
         }
         const newCustomer = await Customer.create({
             CustomerNo: maxCustomer||1,

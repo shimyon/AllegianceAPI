@@ -75,6 +75,16 @@ const invoiceSchema = mongoose.Schema(
         InvoiceDate: {
             type: Date
         },
+        OrderId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Orders'
+        },
+        TermsofDelivery: {
+            type: String
+        },
+        PaymentofMode: {
+            type: String
+        },
         is_deleted: {
             type: Boolean,
             default: false

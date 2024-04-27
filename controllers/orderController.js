@@ -35,11 +35,21 @@ const addOrder = asyncHandler(async (req, res) => {
         }
         let applicationSetting = await ApplicationSetting.findOne();
         let code = "";
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
+        let financialYearStart, financialYearEnd;
+        if (currentDate.getMonth() >= 3) {
+            financialYearStart = currentYear;
+            financialYearEnd = currentYear + 1;
+        } else {
+            financialYearStart = currentYear - 1;
+            financialYearEnd = currentYear;
+        }
         if (applicationSetting.Order == true) {
             code = req.body.OrderCode;
         }
         else {
-            code = applicationSetting.OrderPrefix + maxOrder + applicationSetting.OrderSuffix;
+            code = applicationSetting.OrderPrefix + maxOrder+`/${financialYearStart}-${financialYearEnd}` + applicationSetting.OrderSuffix;
         }
         const newOrder = await Order.create({
             OrderNo: maxOrder,
@@ -161,14 +171,7 @@ const editOrder = asyncHandler(async (req, res) => {
             Note: req.body.note,
         });
 
-        await OrderProduct.deleteMany({ OrderId: req.body.id }).lean().exec((err, doc) => {
-            if (err) {
-                return res.status(401).json({
-                    success: false,
-                    msg: err
-                }).end();
-            }
-        });
+        await OrderProduct.deleteMany({ OrderId: req.body.id }).lean()
         var products = [];
 
         for (var i = 0; i < req.body.products.length; i++) {
@@ -494,16 +497,27 @@ const moveToInvoice = asyncHandler(async (req, res) => {
         }
         let applicationSetting = await ApplicationSetting.findOne();
         let code = "";
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
+        let financialYearStart, financialYearEnd;
+        if (currentDate.getMonth() >= 3) {
+            financialYearStart = currentYear;
+            financialYearEnd = currentYear + 1;
+        } else {
+            financialYearStart = currentYear - 1;
+            financialYearEnd = currentYear;
+        }
         if (applicationSetting.Invoice == true) {
             code = invoiceExisting.OrderCode;
         }
         else {
-            code = applicationSetting.InvoicePrefix + maxInvoice + applicationSetting.InvoiceSuffix;
+            code = applicationSetting.InvoicePrefix + maxInvoice+`/${financialYearStart}-${financialYearEnd}` + applicationSetting.InvoiceSuffix;
         }
         const newInvoice = await Invoice.create({
             InvoiceNo: maxInvoice,
             InvoiceCode: code,
             Customer: invoiceExisting.Customer,
+            OrderId: invoiceExisting._id,
             InvoiceName: invoiceExisting.OrderName,
             Descriptionofwork: invoiceExisting.Descriptionofwork,
             ShippingAddress: invoiceExisting.ShippingAddress,

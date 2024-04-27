@@ -35,11 +35,21 @@ const addQuatation = asyncHandler(async (req, res) => {
         }
         let applicationSetting = await ApplicationSetting.findOne();
         let code = "";
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
+        let financialYearStart, financialYearEnd;
+        if (currentDate.getMonth() >= 3) {
+            financialYearStart = currentYear;
+            financialYearEnd = currentYear + 1;
+        } else {
+            financialYearStart = currentYear - 1;
+            financialYearEnd = currentYear;
+        }
         if (applicationSetting.Quotation == true) {
             code = req.body.QuatationCode;
         }
         else {
-            code = applicationSetting.QuotationPrefix + maxQuatation + applicationSetting.QuotationSuffix;
+            code = applicationSetting.QuotationPrefix + maxQuatation+`/${financialYearStart}-${financialYearEnd}` + applicationSetting.QuotationSuffix;
         }
         const newQuatation = await Quatation.create({
             QuatationNo: maxQuatation,
@@ -167,14 +177,7 @@ const editQuatation = asyncHandler(async (req, res) => {
             Note: req.body.note,
         });
 
-        await QuatationProduct.deleteMany({ QuatationId: req.body.id }).lean().exec((err, doc) => {
-            if (err) {
-                return res.status(401).json({
-                    success: false,
-                    msg: err
-                }).end();
-            }
-        });
+        await QuatationProduct.deleteMany({ QuatationId: req.body.id }).lean()
 
         // adding product
         var products = [];
@@ -334,11 +337,21 @@ const moveToOrder = asyncHandler(async (req, res) => {
         }
         let applicationSetting = await ApplicationSetting.findOne();
         let code = "";
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
+        let financialYearStart, financialYearEnd;
+        if (currentDate.getMonth() >= 3) {
+            financialYearStart = currentYear;
+            financialYearEnd = currentYear + 1;
+        } else {
+            financialYearStart = currentYear - 1;
+            financialYearEnd = currentYear;
+        }
         if (applicationSetting.Order == true) {
             code = quatationExisting.QuatationCode;
         }
         else {
-            code = applicationSetting.OrderPrefix + maxOrder + applicationSetting.OrderSuffix;
+            code = applicationSetting.OrderPrefix + maxOrder+`/${financialYearStart}-${financialYearEnd}` + applicationSetting.OrderSuffix;
         }
         const newOrder = await Order.create({
             OrderNo: maxOrder,

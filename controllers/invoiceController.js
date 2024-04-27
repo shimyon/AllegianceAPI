@@ -32,17 +32,29 @@ const addInvoice = asyncHandler(async (req, res) => {
         }
         let applicationSetting = await ApplicationSetting.findOne();
         let code = "";
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
+        let financialYearStart, financialYearEnd;
+        if (currentDate.getMonth() >= 3) {
+            financialYearStart = currentYear;
+            financialYearEnd = currentYear + 1;
+        } else {
+            financialYearStart = currentYear - 1;
+            financialYearEnd = currentYear;
+        }
         if (applicationSetting.Invoice == true) {
             code = req.body.InvoiceCode;
         }
         else {
-            code = applicationSetting.InvoicePrefix + maxInvoice + applicationSetting.InvoiceSuffix;
+            code = applicationSetting.InvoicePrefix + maxInvoice+`/${financialYearStart}-${financialYearEnd}` + applicationSetting.InvoiceSuffix;
         }
         const newInvoice = await Invoice.create({
             InvoiceNo: maxInvoice,
             InvoiceCode: code,
             Customer: req.body.customer,
             InvoiceName: req.body.InvoiceName,
+            TermsofDelivery: req.body.TermsofDelivery,
+            PaymentofMode: req.body.PaymentofMode,
             Descriptionofwork: req.body.Descriptionofwork,
             ShippingAddress: req.body.shippingAddress || null,
             BillingAddress: req.body.billingAddress || null,
@@ -143,7 +155,9 @@ const editInvoice = asyncHandler(async (req, res) => {
             InvoiceCode: req.body.InvoiceCode,
             Customer: req.body.customer,
             InvoiceName: req.body.InvoiceName,
-            Products:req.body.products,
+            TermsofDelivery: req.body.TermsofDelivery,
+            PaymentofMode: req.body.PaymentofMode,
+            Products: req.body.products,
             Descriptionofwork: req.body.Descriptionofwork,
             ShippingAddress: req.body.shippingAddress || null,
             BillingAddress: req.body.billingAddress || null,
@@ -164,14 +178,7 @@ const editInvoice = asyncHandler(async (req, res) => {
             Note: req.body.note,
         });
 
-        await InvoiceProduct.deleteMany({ InvoiceId: req.body.id }).lean().exec((err, doc) => {
-            if (err) {
-                return res.status(401).json({
-                    success: false,
-                    msg: err
-                }).end();
-            }
-        });
+        await InvoiceProduct.deleteMany({ InvoiceId: req.body.id }).lean()
 
         // adding product
         var products = [];
@@ -425,6 +432,7 @@ const getInvoiceById = asyncHandler(async (req, res) => {
             })
             .populate("ShippingAddress")
             .populate("BillingAddress")
+            .populate("OrderId",'OrderCode')
             .populate("Sales", 'name email')
             .populate("addedBy", 'name email')
 
@@ -444,7 +452,7 @@ const getInvoiceById = asyncHandler(async (req, res) => {
 const deleteInvoice = asyncHandler(async (req, res) => {
     try {
         await InvoiceProduct.deleteMany({ InvoiceId: req.params.id }).lean()
-        
+
         await Invoice.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {
             if (err) {
                 return res.status(401).json({
