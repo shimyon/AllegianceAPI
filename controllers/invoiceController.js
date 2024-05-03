@@ -46,7 +46,7 @@ const addInvoice = asyncHandler(async (req, res) => {
             code = req.body.InvoiceCode;
         }
         else {
-            code = applicationSetting.InvoicePrefix + maxInvoice+`/${financialYearStart}-${financialYearEnd}` + applicationSetting.InvoiceSuffix;
+            code = applicationSetting.InvoicePrefix + maxInvoice + `/${financialYearStart}-${financialYearEnd}` + applicationSetting.InvoiceSuffix;
         }
         const newInvoice = await Invoice.create({
             InvoiceNo: maxInvoice,
@@ -73,6 +73,11 @@ const addInvoice = asyncHandler(async (req, res) => {
             InvoiceDate: req.body.invoiceDate,
             ValidDate: req.body.vaidDate,
             Note: req.body.note,
+            Deliverynote: req.body.Deliverynote,
+            Dispatchdocno: req.body.Dispatchdocno,
+            deliverydate: req.body.deliverydate,
+            Dispatchthr: req.body.Dispatchthr,
+            Destination: req.body.Destination,
             is_deleted: false
         });
 
@@ -176,6 +181,11 @@ const editInvoice = asyncHandler(async (req, res) => {
             InvoiceDate: req.body.invoiceDate,
             ValidDate: req.body.vaidDate,
             Note: req.body.note,
+            Deliverynote: req.body.Deliverynote,
+            Dispatchdocno: req.body.Dispatchdocno,
+            deliverydate: req.body.deliverydate,
+            Dispatchthr: req.body.Dispatchthr,
+            Destination: req.body.Destination,
         });
 
         await InvoiceProduct.deleteMany({ InvoiceId: req.body.id }).lean()
@@ -432,7 +442,6 @@ const getInvoiceById = asyncHandler(async (req, res) => {
             })
             .populate("ShippingAddress")
             .populate("BillingAddress")
-            .populate("OrderId",'OrderCode')
             .populate("Sales", 'name email')
             .populate("addedBy", 'name email')
 

@@ -39,6 +39,10 @@ const orderSchema = mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User'
         },
+        QuatationId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Quatations'
+        },
         CGST: {
             type: Number
         },

@@ -79,10 +79,29 @@ const invoiceSchema = mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Orders'
         },
+        QuatationId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Quatations'
+        },
         TermsofDelivery: {
             type: String
         },
         PaymentofMode: {
+            type: String
+        },
+        Deliverynote: {
+            type: String
+        },
+        Dispatchdocno: {
+            type: String
+        },
+        deliverydate: {
+            type: Date
+        },
+        Dispatchthr: {
+            type: String
+        },
+        Destination: {
             type: String
         },
         is_deleted: {

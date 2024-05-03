@@ -518,6 +518,7 @@ const moveToInvoice = asyncHandler(async (req, res) => {
             InvoiceCode: code,
             Customer: invoiceExisting.Customer,
             OrderId: invoiceExisting._id,
+            QuatationId:invoiceExisting.QuatationId,
             InvoiceName: invoiceExisting.OrderName,
             Descriptionofwork: invoiceExisting.Descriptionofwork,
             ShippingAddress: invoiceExisting.ShippingAddress,

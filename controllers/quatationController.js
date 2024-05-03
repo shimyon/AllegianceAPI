@@ -357,6 +357,7 @@ const moveToOrder = asyncHandler(async (req, res) => {
             OrderNo: maxOrder,
             OrderCode: code,
             Customer: quatationExisting.Customer,
+            QuatationId:quatationExisting._id,
             OrderName: quatationExisting.QuatationName,
             Descriptionofwork: quatationExisting.Descriptionofwork,
             ShippingAddress: quatationExisting.ShippingAddress,
