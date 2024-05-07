@@ -166,7 +166,7 @@ const editInvoice = asyncHandler(async (req, res) => {
             Descriptionofwork: req.body.Descriptionofwork,
             ShippingAddress: req.body.shippingAddress || null,
             BillingAddress: req.body.billingAddress || null,
-            Sales: req.body.sales,
+            Sales: req.body.sales || null,
             addedBy: req.user._id,
             BeforeTaxPrice: req.body.BeforeTaxPrice,
             CGST: req.body.CGST,
@@ -320,7 +320,13 @@ const Invoicepdfcreate = asyncHandler(async (req, res) => {
         templateHtml = templateHtml.replace('{{token.InvoiceNo}}', customerList[0].InvoiceCode || '')
         templateHtml = templateHtml.replace('{{token.CustomerNo}}', customerList[0].Customer?.CustomerCode || '')
         templateHtml = templateHtml.replace('{{token.date}}', format('dd-MM-yyyy', customerList[0].InvoiceDate))
-        templateHtml = templateHtml.replace('{{token.validdate}}', format('dd-MM-yyyy', customerList[0].ValidDate))
+        templateHtml = templateHtml.replace('{{token.DeliveryDate}}', format('dd-MM-yyyy', customerList[0].deliverydate))
+        templateHtml = templateHtml.replace('{{token.DeliveryNote}}', customerList[0].Deliverynote || '')
+        templateHtml = templateHtml.replace('{{token.DespathDocNo}}', customerList[0].Dispatchdocno || '')
+        templateHtml = templateHtml.replace('{{token.DespatchedThr}}', customerList[0].Dispatchthr || '')
+        templateHtml = templateHtml.replace('{{token.Destination}}', customerList[0].Destination || '')
+        templateHtml = templateHtml.replace('{{token.ModeOfPayment}}', customerList[0].PaymentofMode || '')
+        templateHtml = templateHtml.replace('{{token.TermsOfDelivery}}', customerList[0].TermsofDelivery || '')
         templateHtml = templateHtml.replace('{{token.email}}', customerList[0].Customer?.Email || '')
         templateHtml = templateHtml.replace('{{token.cmgst}}', customerList[0].Customer?.GSTNo || '')
         templateHtml = templateHtml.replace('{{token.mobile}}', customerList[0].Customer?.Mobile || '')
