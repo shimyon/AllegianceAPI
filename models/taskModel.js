@@ -17,6 +17,10 @@ const taskSchema = mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
     },
+    Reporter: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    }],
     Priority: {
       type: String
     },
