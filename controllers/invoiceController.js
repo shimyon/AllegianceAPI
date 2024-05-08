@@ -58,7 +58,7 @@ const addInvoice = asyncHandler(async (req, res) => {
             Descriptionofwork: req.body.Descriptionofwork,
             ShippingAddress: req.body.shippingAddress || null,
             BillingAddress: req.body.billingAddress || null,
-            Sales: req.body.sales,
+            Sales: req.body.sales|| null,
             addedBy: req.user._id,
             BeforeTaxPrice: req.body.BeforeTaxPrice,
             CGST: req.body.CGST,
@@ -162,11 +162,10 @@ const editInvoice = asyncHandler(async (req, res) => {
             InvoiceName: req.body.InvoiceName,
             TermsofDelivery: req.body.TermsofDelivery,
             PaymentofMode: req.body.PaymentofMode,
-            Products: req.body.products,
             Descriptionofwork: req.body.Descriptionofwork,
             ShippingAddress: req.body.shippingAddress || null,
             BillingAddress: req.body.billingAddress || null,
-            Sales: req.body.sales || null,
+            Sales: req.body.sales|| null,
             addedBy: req.user._id,
             BeforeTaxPrice: req.body.BeforeTaxPrice,
             CGST: req.body.CGST,
@@ -304,6 +303,8 @@ const Invoicepdfcreate = asyncHandler(async (req, res) => {
                 }
             })
             .populate("addedBy", 'name email')
+            let price =  Math.round(customerList[0].FinalPrice);
+            let round =  (price-customerList[0].FinalPrice).toFixed(2);
         let cmname = customerList[0].Customer?.Title || "" + customerList[0].Customer?.FirstName + ' ' + customerList[0].Customer?.LastName;
         let cmaddress = customerList[0].Customer?.Address || "" + '<br/>' + customerList[0].Customer?.City + ' ' + customerList[0].Customer?.State;
         templateHtml = templateHtml.replace('{{token.companytitle}}', applicationSetting.CompanyTitle || '')
@@ -340,7 +341,8 @@ const Invoicepdfcreate = asyncHandler(async (req, res) => {
         templateHtml = templateHtml.replace('{{token.cgst}}', customerList[0].CGST || '0')
         templateHtml = templateHtml.replace('{{token.sgst}}', customerList[0].SGST || '0')
         templateHtml = templateHtml.replace('{{token.discount}}', (customerList[0].AfterTaxPrice * customerList[0].Discount) / 100)
-        templateHtml = templateHtml.replace('{{token.finalamount}}', customerList[0].FinalPrice || '0')
+        templateHtml = templateHtml.replace('{{token.finalamount}}', price || '0')
+        templateHtml = templateHtml.replace('{{token.roundoff}}', round || '0')
         templateHtml = templateHtml.replace('{{token.finalamountword}}', converter.toWords(customerList[0].FinalPrice).toUpperCase())
         templateHtml = templateHtml.replace('{{token.table}}', `<table border="1" bordercolor="#ccc" cellpadding="3" cellspacing="3"
         style="border-collapse:collapse;border-left:revert-layer;border-right:revert-layer;width:100%">
