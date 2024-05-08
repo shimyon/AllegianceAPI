@@ -270,6 +270,9 @@ const ApplicationSettingSchema = mongoose.Schema(
         IFSCNo: {
             type: String
         },
+        TermsAndCondition: {
+            type: String
+        },
         OfficeAddress: {
             type: String
         },

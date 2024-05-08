@@ -1173,7 +1173,7 @@ const addApplicationSetting = asyncHandler(async (req, res) => {
 
 const editSave = asyncHandler(async (req, res, fileName) => {
     try {
-        const { Id, CompanyTitle, CompanySubTitle, BankName, AccNo, IFSCNo, CompanyLogo, Quotation, QuotationPrefix, RegisterNo, PanNo, GSTNo, QuotationSuffix, Invoice, InvoicePrefix, InvoiceSuffix, Customer, CustomerPrefix, CustomerSuffix, Order, OrderPrefix, OrderSuffix, OfficeAddress, OfficeEmail, OfficePhone1, OfficePhone2 } = req.body
+        const { Id, CompanyTitle, CompanySubTitle, BankName, AccNo, IFSCNo, CompanyLogo, Quotation, QuotationPrefix, RegisterNo, PanNo, GSTNo, QuotationSuffix, Invoice, InvoicePrefix, InvoiceSuffix, Customer, CustomerPrefix, CustomerSuffix, Order, OrderPrefix, OrderSuffix, TermsAndCondition, OfficeAddress, OfficeEmail, OfficePhone1, OfficePhone2 } = req.body
 
         let existNews = await ApplicationSetting.findById(Id);
         if (!existNews) {
@@ -1207,6 +1207,7 @@ const editSave = asyncHandler(async (req, res, fileName) => {
             RegisterNo,
             PanNo,
             GSTNo,
+            TermsAndCondition,
             OfficeAddress,
             OfficeEmail,
             OfficePhone1,

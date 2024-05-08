@@ -11,6 +11,7 @@ const addtask = asyncHandler(async (req, res) => {
             Description: req.body.Description,
             Status: req.body.Status,
             Assign: req.body.Assign,
+            Reporter:req.body.Reporter,
             Priority: req.body.Priority,
             StartDate: req.body.StartDate,
             EndDate: req.body.EndDate,
@@ -39,16 +40,27 @@ const addtask = asyncHandler(async (req, res) => {
 
 const edittask = asyncHandler(async (req, res) => {
     try {
+        const oldTask = await Task.findById(req.body.id);  
         await Task.findByIdAndUpdate(req.body.id, {
             Name: req.body.Name,
             Description: req.body.Description,
             Status: req.body.Status,
             Assign: req.body.Assign,
+            Reporter:req.body.Reporter,
             Priority: req.body.Priority,
             StartDate: req.body.StartDate,
             EndDate: req.body.EndDate,
         });
-
+        if (oldTask.Status !== req.body.Status) {
+            const task = await Task.findById(req.body.id).populate("Reporter").populate("Status").populate("addedBy");
+            const html = `<html>Hello,<br/><br/>The status of the task (${task.Name}) has been changed to (${task.Status?.Name}).<br/><br/>Thank you,<br/><b>(${task.addedBy?.name})</b></html>`;
+            task.Reporter.map((x,i) => {
+                if(x){
+                    sendMail(x.email, "Task Status is changed", html);
+                }
+            })
+        }
+        
         return res.status(200).json({
             success: true,
             msg: "Task Updated",
@@ -117,7 +129,7 @@ const getAlltask = asyncHandler(async (req, res) => {
 
 const gettaskById = asyncHandler(async (req, res) => {
     try {
-        let TaskList = await Task.findOne({ _id: req.params.id })
+        let TaskList = await Task.findOne({ _id: req.params.id }).populate("Reporter","_id name")
 
         return res.status(200).json({
             success: true,
