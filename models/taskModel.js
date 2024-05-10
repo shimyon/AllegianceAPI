@@ -42,6 +42,30 @@ const taskSchema = mongoose.Schema(
   {
     timestamps: true,
   }
+);
+const taskCommentadd = mongoose.Schema(
+  {
+    TaskComment: {
+      type: String,
+    },
+    taskId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Task'
+    },
+    addedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
+  },
+    {
+      timestamps: true,
+    }
 )
-
-module.exports = mongoose.model('Task', taskSchema)
+const TaskModal = mongoose.model('Task', taskSchema);
+const TaskCommentModal = mongoose.model('TaskComment', taskCommentadd);
+const syncIndex = async () => {
+  await TaskModal.syncIndexes();
+  await TaskCommentModal.syncIndexes();
+}
+syncIndex();
+module.exports = { TaskModal, TaskCommentModal } ;

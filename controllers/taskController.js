@@ -1,5 +1,7 @@
 const asyncHandler = require('express-async-handler')
-const Task = require('../models/taskModel')
+const TaskModal = require('../models/taskModel')
+const Task = TaskModal.TaskModal
+const TaskComment = TaskModal.TaskCommentModal
 const Master = require('../models/masterModel')
 const Status = Master.StatusModal;
 const { sendMail } = require('../middleware/sendMail')
@@ -37,7 +39,40 @@ const addtask = asyncHandler(async (req, res) => {
     }
 
 });
-
+const addtaskcomment = asyncHandler(async (req, res) => {
+    try {
+        let taskCommentadd = await TaskComment.create({
+            taskId:req.body.taskId,
+            TaskComment: req.body.Taskcomment,
+            addedBy: req.user._id
+        });
+        return res.status(200).json({
+            success: true,
+            msg: "Task Comment Added.",
+        }).end();
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in creating Task Comment. " + err.message,
+            data: null,
+        });
+    }
+});
+const getAlltaskcomment = asyncHandler(async (req, res) => {
+    try {
+        let CommentList = await TaskComment.find({ taskId: req.body.taskId }).populate("addedBy", "_id name").sort({ createdAt: -1 })
+        return res.status(200).json({
+            success: true,
+            data: CommentList
+        }).end();
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in getting Task Comment. " + err.message,
+            data: null,
+        });
+    }
+})
 const edittask = asyncHandler(async (req, res) => {
     try {
         const oldTask = await Task.findById(req.body.id);  
@@ -206,5 +241,7 @@ module.exports = {
     removetask,
     getAlltask,
     gettaskById,
-    gettaskboardCount
+    gettaskboardCount,
+    addtaskcomment,
+    getAlltaskcomment
 }
