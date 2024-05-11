@@ -58,7 +58,7 @@ const addInvoice = asyncHandler(async (req, res) => {
             Descriptionofwork: req.body.Descriptionofwork,
             ShippingAddress: req.body.shippingAddress || null,
             BillingAddress: req.body.billingAddress || null,
-            Sales: req.body.sales|| null,
+            Sales: req.body.sales || null,
             addedBy: req.user._id,
             BeforeTaxPrice: req.body.BeforeTaxPrice,
             CGST: req.body.CGST,
@@ -165,7 +165,7 @@ const editInvoice = asyncHandler(async (req, res) => {
             Descriptionofwork: req.body.Descriptionofwork,
             ShippingAddress: req.body.shippingAddress || null,
             BillingAddress: req.body.billingAddress || null,
-            Sales: req.body.sales|| null,
+            Sales: req.body.sales || null,
             addedBy: req.user._id,
             BeforeTaxPrice: req.body.BeforeTaxPrice,
             CGST: req.body.CGST,
@@ -261,23 +261,85 @@ const removeInvoice = asyncHandler(async (req, res) => {
 
 const getAllInvoice = asyncHandler(async (req, res) => {
     try {
-        let invoiceList = await Invoice.find({ is_deleted: req.body.active })
-            .populate("Customer")
-            .populate({
-                path: 'Products',
-                populate: {
-                    path: 'Product',
+        let { skip, per_page } = req.body;
+        let query = [];
+        query.push({
+            $match: { is_deleted: req.body.active }
+        });
+        query.push(
+            {
+                '$lookup': {
+                    'from': 'customers',
+                    'localField': 'Customer',
+                    'foreignField': '_id',
+                    'as': 'Customer'
                 }
-            })
-            .populate("ShippingAddress")
-            .populate("BillingAddress")
-            .populate("Sales", 'name email')
-            .populate("addedBy", 'name email')
-            .sort({ createdAt: -1 })
-        return res.status(200).json({
-            success: true,
-            data: invoiceList
-        }).end();
+            },
+            {
+                $unwind: {
+                    path: '$Customer'
+                },
+            },
+            {
+                $sort: { createdAt: -1 }
+            }
+        );
+
+        if (req.body.filter) {
+            query.push(
+                {
+                    $match: { "Customer.Company": { $regex: new RegExp(req.body.filter, "i") } },
+                });
+        }
+        query.push(
+            {
+                $facet: {
+                    stage1: [
+                        {
+                            $group: {
+                                _id: null,
+                                count: {
+                                    $sum: 1,
+                                },
+                            },
+                        },
+                    ],
+                    stage2: [
+                        {
+                            $skip: skip,
+                        },
+                        {
+                            $limit: per_page,
+                        },
+                    ],
+                },
+            },
+            {
+                $unwind: {
+                    path: '$stage1'
+                },
+            },
+            {
+                $project: {
+                    count: "$stage1.count",
+                    data: "$stage2",
+                },
+            }
+        )
+
+        const invoiceList = await Invoice.aggregate(query).exec();
+        if (invoiceList.length == 0) {
+            return res.status(200).json({
+                success: true,
+                data: { Count: 0, data: [] }
+            }).end();
+        }
+        else {
+            return res.status(200).json({
+                success: true,
+                data: invoiceList[0]
+            }).end();
+        }
     } catch (err) {
         return res.status(400).json({
             success: false,
@@ -303,8 +365,8 @@ const Invoicepdfcreate = asyncHandler(async (req, res) => {
                 }
             })
             .populate("addedBy", 'name email')
-            let price =  Math.round(customerList[0].FinalPrice);
-            let round =  (price-customerList[0].FinalPrice).toFixed(2);
+        let price = Math.round(customerList[0].FinalPrice);
+        let round = (price - customerList[0].FinalPrice).toFixed(2);
         let cmname = customerList[0].Customer?.Title || "" + customerList[0].Customer?.FirstName + ' ' + customerList[0].Customer?.LastName;
         let cmaddress = customerList[0].Customer?.Address || "" + '<br/>' + customerList[0].Customer?.City + ' ' + customerList[0].Customer?.State;
         templateHtml = templateHtml.replace('{{token.companytitle}}', applicationSetting.CompanyTitle || '')

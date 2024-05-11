@@ -49,7 +49,7 @@ const addQuatation = asyncHandler(async (req, res) => {
             code = req.body.QuatationCode;
         }
         else {
-            code = applicationSetting.QuotationPrefix + maxQuatation+`/${financialYearStart}-${financialYearEnd}` + applicationSetting.QuotationSuffix;
+            code = applicationSetting.QuotationPrefix + maxQuatation + `/${financialYearStart}-${financialYearEnd}` + applicationSetting.QuotationSuffix;
         }
         const newQuatation = await Quatation.create({
             QuatationNo: maxQuatation,
@@ -251,23 +251,84 @@ const removeQuatation = asyncHandler(async (req, res) => {
 
 const getAllQuatation = asyncHandler(async (req, res) => {
     try {
-        let QuatationList = await Quatation.find({ is_deleted: req.body.active })
-            .populate("Customer")
-            .populate({
-                path: 'Products',
-                populate: {
-                    path: 'Product',
+        let { skip, per_page } = req.body;
+        let query = [];
+        query.push({
+            $match: { is_deleted: req.body.active }
+        });
+        query.push(
+            {
+                '$lookup': {
+                    'from': 'customers',
+                    'localField': 'Customer',
+                    'foreignField': '_id',
+                    'as': 'Customer'
                 }
-            })
-            .populate("ShippingAddress")
-            .populate("BillingAddress")
-            .populate("Sales", 'name email')
-            .populate("addedBy", 'name email')
-            .sort({ createdAt: -1 })
-        return res.status(200).json({
-            success: true,
-            data: QuatationList
-        }).end();
+            },
+            {
+                $unwind: {
+                    path: '$Customer'
+                },
+            },
+            {
+                $sort: { createdAt: -1 }
+            }
+        );
+
+        if (req.body.filter) {
+            query.push(
+                {
+                    $match: { "Customer.Company": { $regex: new RegExp(req.body.filter, "i") } },
+                });
+        }
+        query.push(
+            {
+                $facet: {
+                    stage1: [
+                        {
+                            $group: {
+                                _id: null,
+                                count: {
+                                    $sum: 1,
+                                },
+                            },
+                        },
+                    ],
+                    stage2: [
+                        {
+                            $skip: skip,
+                        },
+                        {
+                            $limit: per_page,
+                        },
+                    ],
+                },
+            },
+            {
+                $unwind: {
+                    path: '$stage1'
+                },
+            },
+            {
+                $project: {
+                    count: "$stage1.count",
+                    data: "$stage2",
+                },
+            }
+        )
+        const quatationList = await Quatation.aggregate(query).exec();
+        if (quatationList.length == 0) {
+            return res.status(200).json({
+                success: true,
+                data: { Count: 0, data: [] }
+            }).end();
+        }
+        else {
+            return res.status(200).json({
+                success: true,
+                data: quatationList[0]
+            }).end();
+        }
     } catch (err) {
         return res.status(400).json({
             success: false,
@@ -351,13 +412,13 @@ const moveToOrder = asyncHandler(async (req, res) => {
             code = quatationExisting.QuatationCode;
         }
         else {
-            code = applicationSetting.OrderPrefix + maxOrder+`/${financialYearStart}-${financialYearEnd}` + applicationSetting.OrderSuffix;
+            code = applicationSetting.OrderPrefix + maxOrder + `/${financialYearStart}-${financialYearEnd}` + applicationSetting.OrderSuffix;
         }
         const newOrder = await Order.create({
             OrderNo: maxOrder,
             OrderCode: code,
             Customer: quatationExisting.Customer,
-            QuatationId:quatationExisting._id,
+            QuatationId: quatationExisting._id,
             OrderName: quatationExisting.QuatationName,
             Descriptionofwork: quatationExisting.Descriptionofwork,
             ShippingAddress: quatationExisting.ShippingAddress,
@@ -437,8 +498,8 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
                 }
             })
             .populate("addedBy", 'name email')
-        let cmname = customerList[0].Customer?.Title  + ' '+ customerList[0].Customer?.FirstName + ' ' + customerList[0].Customer?.LastName;
-        let cmaddress = customerList[0].Customer?.Address  + ' '+ '<br/>' + customerList[0].Customer?.City + ' ' + customerList[0].Customer?.State;
+        let cmname = customerList[0].Customer?.Title + ' ' + customerList[0].Customer?.FirstName + ' ' + customerList[0].Customer?.LastName;
+        let cmaddress = customerList[0].Customer?.Address + ' ' + '<br/>' + customerList[0].Customer?.City + ' ' + customerList[0].Customer?.State;
         templateHtml = templateHtml.replace('{{token.companytitle}}', applicationSetting.CompanyTitle || '')
         templateHtml = templateHtml.replace('{{token.companysubtitle}}', applicationSetting.CompanySubTitle || '')
         templateHtml = templateHtml.replace('{{token.OfficeEmail}}', applicationSetting.OfficeEmail || '')
@@ -580,7 +641,7 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
 const deleteQuatation = asyncHandler(async (req, res) => {
     try {
         await QuatationProduct.deleteMany({ QuatationId: req.params.id }).lean()
-        
+
         await Quatation.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {
             if (err) {
                 return res.status(401).json({

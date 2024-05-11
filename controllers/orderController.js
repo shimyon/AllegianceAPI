@@ -49,7 +49,7 @@ const addOrder = asyncHandler(async (req, res) => {
             code = req.body.OrderCode;
         }
         else {
-            code = applicationSetting.OrderPrefix + maxOrder+`/${financialYearStart}-${financialYearEnd}` + applicationSetting.OrderSuffix;
+            code = applicationSetting.OrderPrefix + maxOrder + `/${financialYearStart}-${financialYearEnd}` + applicationSetting.OrderSuffix;
         }
         const newOrder = await Order.create({
             OrderNo: maxOrder,
@@ -242,23 +242,84 @@ const removeOrder = asyncHandler(async (req, res) => {
 
 const getAllOrder = asyncHandler(async (req, res) => {
     try {
-        let customerList = await Order.find({ is_deleted: req.body.active })
-            .populate("Customer")
-            .populate({
-                path: 'Products',
-                populate: {
-                    path: 'Product',
+        let { skip, per_page } = req.body;
+        let query = [];
+        query.push({
+            $match: { is_deleted: req.body.active }
+        });
+        query.push(
+            {
+                '$lookup': {
+                    'from': 'customers',
+                    'localField': 'Customer',
+                    'foreignField': '_id',
+                    'as': 'Customer'
                 }
-            })
-            .populate("ShippingAddress")
-            .populate("BillingAddress")
-            .populate("Sales", 'name email')
-            .populate("addedBy", 'name email')
-            .sort({ createdAt: -1 })
-        return res.status(200).json({
-            success: true,
-            data: customerList
-        }).end();
+            },
+            {
+                $unwind: {
+                    path: '$Customer'
+                },
+            },
+            {
+                $sort: { createdAt: -1 }
+            }
+        );
+
+        if (req.body.filter) {
+            query.push(
+                {
+                    $match: { "Customer.Company": { $regex: new RegExp(req.body.filter, "i") } },
+                });
+        }
+        query.push(
+            {
+                $facet: {
+                    stage1: [
+                        {
+                            $group: {
+                                _id: null,
+                                count: {
+                                    $sum: 1,
+                                },
+                            },
+                        },
+                    ],
+                    stage2: [
+                        {
+                            $skip: skip,
+                        },
+                        {
+                            $limit: per_page,
+                        },
+                    ],
+                },
+            },
+            {
+                $unwind: {
+                    path: '$stage1'
+                },
+            },
+            {
+                $project: {
+                    count: "$stage1.count",
+                    data: "$stage2",
+                },
+            }
+        )
+        const orderList = await Order.aggregate(query).exec();
+        if (orderList.length == 0) {
+            return res.status(200).json({
+                success: true,
+                data: { Count: 0, data: [] }
+            }).end();
+        }
+        else {
+            return res.status(200).json({
+                success: true,
+                data: orderList[0]
+            }).end();
+        }
     } catch (err) {
         return res.status(400).json({
             success: false,
@@ -511,14 +572,14 @@ const moveToInvoice = asyncHandler(async (req, res) => {
             code = invoiceExisting.OrderCode;
         }
         else {
-            code = applicationSetting.InvoicePrefix + maxInvoice+`/${financialYearStart}-${financialYearEnd}` + applicationSetting.InvoiceSuffix;
+            code = applicationSetting.InvoicePrefix + maxInvoice + `/${financialYearStart}-${financialYearEnd}` + applicationSetting.InvoiceSuffix;
         }
         const newInvoice = await Invoice.create({
             InvoiceNo: maxInvoice,
             InvoiceCode: code,
             Customer: invoiceExisting.Customer,
             OrderId: invoiceExisting._id,
-            QuatationId:invoiceExisting.QuatationId,
+            QuatationId: invoiceExisting.QuatationId,
             InvoiceName: invoiceExisting.OrderName,
             Descriptionofwork: invoiceExisting.Descriptionofwork,
             ShippingAddress: invoiceExisting.ShippingAddress,
@@ -582,7 +643,7 @@ const moveToInvoice = asyncHandler(async (req, res) => {
 const deleteOrder = asyncHandler(async (req, res) => {
     try {
         await OrderProduct.deleteMany({ OrderId: req.params.id }).lean()
-        
+
         await Order.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {
             if (err) {
                 return res.status(401).json({
