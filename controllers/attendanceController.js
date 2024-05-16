@@ -57,11 +57,81 @@ const editAttendance = asyncHandler(async (req, res) => {
 
 const getAllAttendance = asyncHandler(async (req, res) => {
     try {
-        let AttendanceList = await Attendance.find().populate("UserId").populate("addedBy", "_id name email role").sort({ createdAt: -1 })
-        return res.status(200).json({
-            success: true,
-            data: AttendanceList
-        }).end();
+        let { skip, per_page } = req.body;
+        let query = [];
+        query.push(
+            {
+                '$lookup': {
+                    'from': 'users',
+                    'localField': 'UserId',
+                    'foreignField': '_id',
+                    'as': 'UserId'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$UserId'
+                },
+            },
+            {
+                $sort: { createdAt: -1 }
+            }
+        );
+
+        if (req.body.filter) {
+            query.push(
+                {
+                    $match: { "UserId.name": { $regex: new RegExp(req.body.filter, "i") } },
+                });
+        }
+        query.push(
+            {
+                $facet: {
+                    stage1: [
+                        {
+                            $group: {
+                                _id: null,
+                                count: {
+                                    $sum: 1,
+                                },
+                            },
+                        },
+                    ],
+                    stage2: [
+                        {
+                            $skip: skip,
+                        },
+                        {
+                            $limit: per_page,
+                        },
+                    ],
+                },
+            },
+            {
+                $unwind: {
+                    path: '$stage1'
+                },
+            },
+            {
+                $project: {
+                    count: "$stage1.count",
+                    data: "$stage2",
+                },
+            }
+        )
+        const AttendanceList = await Attendance.aggregate(query).exec();
+        if (AttendanceList.length == 0) {
+            return res.status(200).json({
+                success: true,
+                data: { Count: 0, data: [] }
+            }).end();
+        }
+        else {
+            return res.status(200).json({
+                success: true,
+                data: AttendanceList[0]
+            }).end();
+        }
     } catch (err) {
         return res.status(400).json({
             success: false,

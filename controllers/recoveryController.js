@@ -7,15 +7,15 @@ const addRecovery = asyncHandler(async (req, res) => {
     try {
         let recoveryNo = await Recovery.find({}, { RecoveryNo: 1, _id: 0 }).sort({ RecoveryNo: -1 }).limit(1);
         let maxRecovery = 1;
-        if (recoveryNo.length >0) {
+        if (recoveryNo.length > 0) {
             maxRecovery = recoveryNo[0].RecoveryNo + 1;
         }
         const newRecovery = await Recovery.create({
             Customer: req.body.customer,
-            RecoveryNo:maxRecovery,
+            RecoveryNo: maxRecovery,
             Amount: req.body.amount,
             Reminder: req.body.reminder,
-            NextFollowup:req.body.nextfollowup,
+            NextFollowup: req.body.nextfollowup,
             Note: req.body.note,
             Status: "In Complete",
             is_active: true,
@@ -62,7 +62,7 @@ const editRecovery = asyncHandler(async (req, res) => {
             Customer: req.body.customer,
             Amount: req.body.amount,
             Reminder: req.body.reminder,
-            NextFollowup:req.body.nextfollowup,
+            NextFollowup: req.body.nextfollowup,
             Note: req.body.note,
             is_active: true,
             addedBy: req.user._id,
@@ -105,17 +105,92 @@ const complateRecovery = asyncHandler(async (req, res) => {
 })
 
 const getAllRecovery = asyncHandler(async (req, res) => {
-    var condition = { is_active: req.body.active };
-    if(req.body.status)
-    {
-        condition.Status=req.body.status;
-    }
     try {
-        let RecoveryList = await Recovery.find(condition).populate("Customer").populate("addedBy", "_id name email role").sort({ createdAt: -1 })
-        return res.status(200).json({
-            success: true,
-            data: RecoveryList
-        }).end();
+        let { skip, per_page } = req.body;
+        let query = [];
+        query.push({
+            $match: { is_active: req.body.active }
+        });
+        query.push(
+            {
+                '$lookup': {
+                    'from': 'customers',
+                    'localField': 'Customer',
+                    'foreignField': '_id',
+                    'as': 'Customer'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$Customer'
+                },
+            },
+            {
+                $sort: { createdAt: -1 }
+            }
+        );
+
+        if (req.body.status) {
+            query.push(
+                {
+                    $match: { Status: req.body.status },
+                });
+        }
+
+        if (req.body.filter) {
+            query.push(
+                {
+                    $match: { "Customer.Company": { $regex: new RegExp(req.body.filter, "i") } },
+                });
+        }
+        query.push(
+            {
+                $facet: {
+                    stage1: [
+                        {
+                            $group: {
+                                _id: null,
+                                count: {
+                                    $sum: 1,
+                                },
+                            },
+                        },
+                    ],
+                    stage2: [
+                        {
+                            $skip: skip,
+                        },
+                        {
+                            $limit: per_page,
+                        },
+                    ],
+                },
+            },
+            {
+                $unwind: {
+                    path: '$stage1'
+                },
+            },
+            {
+                $project: {
+                    count: "$stage1.count",
+                    data: "$stage2",
+                },
+            }
+        )
+        const RecoveryList = await Recovery.aggregate(query).exec();
+        if (RecoveryList.length == 0) {
+            return res.status(200).json({
+                success: true,
+                data: { Count: 0, data: [] }
+            }).end();
+        }
+        else {
+            return res.status(200).json({
+                success: true,
+                data: RecoveryList[0]
+            }).end();
+        }
     } catch (err) {
         return res.status(400).json({
             success: false,

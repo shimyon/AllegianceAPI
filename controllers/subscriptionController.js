@@ -114,11 +114,83 @@ const insertEditSubscription = asyncHandler(async (req, res, fileName) => {
 
 const getAllSubscription = asyncHandler(async (req, res) => {
     try {
-        let SubscriptionList = await Subscription.find({ is_active: req.body.active }).populate("Type").populate("Customer").populate("addedBy", "_id name email role")
-        return res.status(200).json({
-            success: true,
-            data: SubscriptionList
-        }).end();
+        let { skip, per_page } = req.body;
+        let query = [];
+        query.push({
+            $match: { is_active: req.body.active }
+        });
+        query.push(
+            {
+                '$lookup': {
+                    'from': 'customers',
+                    'localField': 'Customer',
+                    'foreignField': '_id',
+                    'as': 'Customer'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$Customer'
+                },
+            },
+            {
+                $sort: { createdAt: -1 }
+            }
+        );
+        if (req.body.filter) {
+            query.push(
+                {
+                    $match: { "Customer.Company": { $regex: new RegExp(req.body.filter, "i") } },
+                });
+        }
+        query.push(
+            {
+                $facet: {
+                    stage1: [
+                        {
+                            $group: {
+                                _id: null,
+                                count: {
+                                    $sum: 1,
+                                },
+                            },
+                        },
+                    ],
+                    stage2: [
+                        {
+                            $skip: skip,
+                        },
+                        {
+                            $limit: per_page,
+                        },
+                    ],
+                },
+            },
+            {
+                $unwind: {
+                    path: '$stage1'
+                },
+            },
+            {
+                $project: {
+                    count: "$stage1.count",
+                    data: "$stage2",
+                },
+            }
+        )
+        const SubscriptionList = await Subscription.aggregate(query).exec();
+        if (SubscriptionList.length == 0) {
+            return res.status(200).json({
+                success: true,
+                data: { Count: 0, data: [] }
+            }).end();
+        }
+        else {
+            return res.status(200).json({
+                success: true,
+                data: SubscriptionList[0]
+            }).end();
+        }
     } catch (err) {
         return res.status(400).json({
             success: false,

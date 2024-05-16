@@ -290,7 +290,7 @@ const changeProspectStage = asyncHandler(async (req, res) => {
             Stage: req.body.stage,
             StageDate: new Date()
         });
-        
+
         if (prospect) {
             let resuser = await User.find({ is_active: true, role: 'SuperAdmin' });
             let date = new Date();
@@ -602,7 +602,7 @@ const convertToCustomer = asyncHandler(async (req, res) => {
             maxCustomer = customerNo[0].CustomerNo + 1;
         }
         const newCustomer = await Customer.create({
-            CustomerNo: maxCustomer||1,
+            CustomerNo: maxCustomer || 1,
             CustomerCode: maxCustomer,
             Company: pros.Company,
             Title: pros.Title,

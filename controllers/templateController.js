@@ -3,7 +3,7 @@ const Template = require('../models/templateModel')
 
 const add = asyncHandler(async (req, res) => {
     const { Name, TemplateFor, Detail } = req.body
-    const templateExists = await Template.findOne({ Name:req.body.Name ,TemplateFor:req.body.TemplateFor})
+    const templateExists = await Template.findOne({ Name: req.body.Name, TemplateFor: req.body.TemplateFor })
     if (templateExists) {
         res.status(400)
         throw new Error('Template Already Exists!')
@@ -146,7 +146,7 @@ const setDefault = asyncHandler(async (req, res) => {
                 is_default: req.body.default
             });
         }
-        else{
+        else {
             await Template.updateMany({ "TemplateFor": req.body.type }, {
                 is_default: false
             });

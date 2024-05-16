@@ -208,7 +208,7 @@ const getUserById = asyncHandler(async (req, res) => {
 
 const getAllUser = asyncHandler(async (req, res) => {
     try {
-        const user = await User.find({ is_active: req.body.active }, { _id: 1, email: 1, name: 1, role: 1,is_active:1 }).sort({ createdAt: -1 });
+        const user = await User.find({ is_active: req.body.active }, { _id: 1, email: 1, name: 1, role: 1, is_active: 1 }).sort({ createdAt: -1 });
 
         res.status(200).json(user).end();
     } catch (err) {

@@ -32,7 +32,7 @@ const insertContract = asyncHandler(async (req, res, fileName) => {
     try {
         let contractNo = await Contract.find({}, { ContractNo: 1, _id: 0 }).sort({ ContractNo: -1 }).limit(1);
         let maxcontractNo = 1;
-        if (contractNo.length >0) {
+        if (contractNo.length > 0) {
             maxcontractNo = contractNo[0].ContractNo + 1;
         }
         await Contract.create({
@@ -369,7 +369,7 @@ const addDailyStatus = asyncHandler(async (req, res) => {
                 progress: percent1
             })
         }
-        
+
         let contract = await Process.find({ contractId: oldProcess.contractId });
         let totalcontract = 100 * contract.length;
         for (var i = 0; i < contract.length; i++) {

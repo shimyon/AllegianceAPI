@@ -16,16 +16,16 @@ const addCustomer = asyncHandler(async (req, res) => {
                 data: null,
             });
         }
-        if( req.body.mobile||req.body.email){
-        const existCustomer = await Customer.findOne({ $or: [{ Mobile: req.body.mobile, Email: req.body.email }] });
-        if (existCustomer) {
-            return res.status(200).json({
-                success: false,
-                msg: "Customer already exist with same mobile or email.",
-                data: null,
-            });
+        if (req.body.mobile || req.body.email) {
+            const existCustomer = await Customer.findOne({ $or: [{ Mobile: req.body.mobile, Email: req.body.email }] });
+            if (existCustomer) {
+                return res.status(200).json({
+                    success: false,
+                    msg: "Customer already exist with same mobile or email.",
+                    data: null,
+                });
+            }
         }
-    }
         let customerNo = await Customer.find({}, { CustomerNo: 1, _id: 0 }).sort({ CustomerNo: -1 }).limit(1);
         let maxCustomer = 1;
         if (customerNo.length > 0) {
@@ -43,14 +43,14 @@ const addCustomer = asyncHandler(async (req, res) => {
             financialYearStart = currentYear - 1;
             financialYearEnd = currentYear;
         }
-        if(applicationSetting.Customer==true){
+        if (applicationSetting.Customer == true) {
             code = req.body.CustomerCode;
         }
-        else{
-           code = applicationSetting.CustomerPrefix+maxCustomer+`/${financialYearStart}-${financialYearEnd}`+applicationSetting.CustomerSuffix;
+        else {
+            code = applicationSetting.CustomerPrefix + maxCustomer + `/${financialYearStart}-${financialYearEnd}` + applicationSetting.CustomerSuffix;
         }
         const newCustomer = await Customer.create({
-            CustomerNo: maxCustomer||1,
+            CustomerNo: maxCustomer || 1,
             CustomerCode: code,
             Company: req.body.company,
             GSTNo: req.body.gstno,
@@ -65,7 +65,7 @@ const addCustomer = asyncHandler(async (req, res) => {
             State: req.body.state,
             Country: req.body.country,
             addedBy: req.user._id,
-            Notes:req.body.notes,
+            Notes: req.body.notes,
             is_active: true
         });
 
@@ -106,7 +106,7 @@ const editCustomer = asyncHandler(async (req, res) => {
             State: req.body.state,
             Country: req.body.country,
             addedBy: req.user._id,
-            Notes:req.body.notes,
+            Notes: req.body.notes,
             is_active: true
         });
 
@@ -126,7 +126,7 @@ const editCustomer = asyncHandler(async (req, res) => {
 });
 
 const removeCustomer = asyncHandler(async (req, res) => {
-    let active= req.body.active== true?"enabled":"disabled";
+    let active = req.body.active == true ? "enabled" : "disabled";
     try {
         const existCustomer = await Customer.findById(req.params.id);
         if (!existCustomer) {
@@ -140,10 +140,10 @@ const removeCustomer = asyncHandler(async (req, res) => {
         const newCustomer = await Customer.findByIdAndUpdate(req.params.id, {
             is_active: req.body.active
         });
-        
+
         return res.status(200).json({
             success: true,
-            msg: "Customer "+active,
+            msg: "Customer " + active,
             data: null
         }).end();
     } catch (err) {
@@ -362,14 +362,14 @@ const removeShippingAddress = asyncHandler(async (req, res) => {
 const setDefaultAddress = asyncHandler(async (req, res) => {
     try {
         if (req.body.type == "shipping") {
-            await ShippingAddress.updateMany({"Customer":req.body.customerId}, {
+            await ShippingAddress.updateMany({ "Customer": req.body.customerId }, {
                 is_default: false
             });
             await ShippingAddress.findByIdAndUpdate(req.body.addressId, {
                 is_default: req.body.default
             });
         } else {
-            await BillingAddress.updateMany({"Customer":req.body.customerId}, {
+            await BillingAddress.updateMany({ "Customer": req.body.customerId }, {
                 is_default: false
             });
             await BillingAddress.findByIdAndUpdate(req.body.addressId, {
