@@ -596,6 +596,9 @@ const convertToCustomer = asyncHandler(async (req, res) => {
                 data: null,
             });
         }
+        const newProspect = await Prospect.findByIdAndUpdate(req.params.id, {
+            is_customer: true
+        });
         let customerNo = await Customer.find({}, { CustomerNo: 1, _id: 0 }).sort({ CustomerNo: -1 }).limit(1);
         let maxCustomer = 1;
         if (customerNo.length > 0) {

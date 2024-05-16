@@ -100,6 +100,10 @@ const prospectSchema = mongoose.Schema(
             type: Boolean,
             default: true
         },
+        is_customer: {
+            type: Boolean,
+            default: false
+        },
         is_readed: {
             type: Boolean,
             default: false
