@@ -596,9 +596,6 @@ const convertToCustomer = asyncHandler(async (req, res) => {
                 data: null,
             });
         }
-        const newProspect = await Prospect.findByIdAndUpdate(req.params.id, {
-            is_customer: true
-        });
         let customerNo = await Customer.find({}, { CustomerNo: 1, _id: 0 }).sort({ CustomerNo: -1 }).limit(1);
         let maxCustomer = 1;
         if (customerNo.length > 0) {
@@ -621,7 +618,11 @@ const convertToCustomer = asyncHandler(async (req, res) => {
             Notes: pros.Notes,
             is_active: true
         });
-
+        if (newCustomer) {
+            const newProspect = await Prospect.findByIdAndUpdate(req.params.id, {
+                is_customer: true
+            });
+        }
         return res.status(200).json(newCustomer).end();
     } catch (err) {
         return res.status(400).json({
