@@ -129,7 +129,7 @@ const getAlltask = asyncHandler(async (req, res) => {
 
 const gettaskById = asyncHandler(async (req, res) => {
     try {
-        let TaskList = await Task.findOne({ _id: req.params.id }).populate("Reporter", "_id name")
+        let TaskList = await Task.findOne({ _id: req.params.id })
 
         return res.status(200).json({
             success: true,
