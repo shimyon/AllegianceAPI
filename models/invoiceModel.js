@@ -60,6 +60,12 @@ const invoiceSchema = mongoose.Schema(
         FinalPrice: {
             type: Number
         },
+        RoundOff: {
+            type: Number
+        },
+        Amount: {
+            type: Number
+        },
         OtherChargeName: {
             type: String
         },

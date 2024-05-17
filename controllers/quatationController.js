@@ -73,6 +73,8 @@ const addQuatation = asyncHandler(async (req, res) => {
             TotalTax: req.body.totalTax,
             AfterTaxPrice: req.body.AfterTaxPrice,
             FinalPrice: req.body.finalPrice,
+            RoundOff: req.body.RoundOff,
+            Amount: req.body.Amount,
             QuatationDate: req.body.quatattionDate,
             ValidDate: req.body.vaidDate,
             Note: req.body.note,
@@ -172,6 +174,8 @@ const editQuatation = asyncHandler(async (req, res) => {
             TotalTax: req.body.totalTax,
             AfterTaxPrice: req.body.AfterTaxPrice,
             FinalPrice: req.body.finalPrice,
+            RoundOff: req.body.RoundOff,
+            Amount: req.body.Amount,
             QuatationDate: req.body.quatattionDate,
             ValidDate: req.body.vaidDate,
             Note: req.body.note,
@@ -437,6 +441,8 @@ const moveToOrder = asyncHandler(async (req, res) => {
             TotalTax: quatationExisting.TotalTax,
             AfterTaxPrice: quatationExisting.AfterTaxPrice,
             FinalPrice: quatationExisting.FinalPrice,
+            RoundOff: quatationExisting.RoundOff,
+            Amount: quatationExisting.Amount,
             DeliveryDate: quatationExisting.QuatationDate,
             Note: quatationExisting.Note,
             is_deleted: false
@@ -531,6 +537,7 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
         templateHtml = templateHtml.replace('{{token.sgst}}', customerList[0].SGST || '0')
         templateHtml = templateHtml.replace('{{token.discount}}', (customerList[0].AfterTaxPrice * customerList[0].Discount) / 100)
         templateHtml = templateHtml.replace('{{token.finalamount}}', customerList[0].FinalPrice || '0')
+        templateHtml = templateHtml.replace('{{token.roundoff}}', customerList[0].RoundOff || '0')
         templateHtml = templateHtml.replace('{{token.finalamountword}}', converter.toWords(customerList[0].FinalPrice).toUpperCase())
         templateHtml = templateHtml.replace('{{token.table}}', `<table border="1" bordercolor="#ccc" cellpadding="3" cellspacing="3"
         style="border-collapse:collapse;border-left:revert-layer;border-right:revert-layer;width:100%">

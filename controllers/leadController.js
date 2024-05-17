@@ -165,281 +165,132 @@ const removeLead = asyncHandler(async (req, res) => {
 });
 
 const getAllLead = asyncHandler(async (req, res) => {
-    
-    var condition = { is_active: req.body.active, Stage: "New" };
-    if (req.body.favorite) {
-        condition.is_favorite = true;
-    }
-
-    if (req.body.source) {
-        condition.Source = req.body.source;
-    }
-
-    if (req.body.sales) {
-        condition.Sales = req.body.sales;
-    }
-
-    if (req.body.product) {
-        condition.Product = req.body.product;
-    }
-
-    if (req.body.appointment == "notset") {
-        condition.NextTalk = null;
-    }
-    else if (req.body.appointment != "all") {
-        condition.NextTalk = { $ne: null };
-    }
-
-    if (req.body.month) {
-        if (req.body.month == "this") {
-            const currentMonth = new Date().getMonth() + 1;
-            condition.$expr = {
-                $eq: [{ $month: "$LeadSince" }, currentMonth]
-            };
-        }
-        if (req.body.month == "last") {
-            let currentMonth = new Date().getMonth();
-            if (currentMonth == 0) {
-                currentMonth = currentMonth + 12
-            }
-            condition.$expr = {
-                $eq: [{ $month: "$LeadSince" }, currentMonth]
-            };
-        }
-    }
-
-    if (req.body.monthyear) {
-        var my = req.body.monthyear.split("-");
-        condition.$expr = {
-            $and: [{
-                $eq: [{ $year: "$LeadSince" }, my[1]],
-                $eq: [{ $month: "$LeadSince" }, my[0]]
-            }]
-        };
-
-    }
-
-    if (req.body.financeyear) {
-        var my = req.body.financeyear.split("-");
-        var fDate = new Date(my[0] + "-04-" + "01");
-        var tDate = new Date(my[1] + "-03-" + "31");;
-
-        condition.LeadSince = { $gte: fDate, $lt: tDate };
-
-    }
-
     try {
-        let leadList = await Lead
-            .find(condition, "Company GSTNo Title FirstName LastName Designation Mobile Email City State Country Notes Requirements is_favorite is_active")
-            .populate("Source")
-            .populate("OtherContact")
-            .populate("Product", "Name")
-            .populate("Sales", "name")
-            .populate("NextTalk")
-            .populate("addedBy", "name")
-            .sort({ createdAt: -1 })
-            .exec((err, result) => {
-                var newResult = [];
-                result.forEach((val, idx) => {
-                    var addData = true;
-                    if (req.body.appointment != "notset" && req.body.appointment != "all") {
-                        if (val.NextTalk) {
-                            let dt = new Date();
-                            let nDate = new Date();
-                            nDate.setDate(nDate.getDate() + 1);
-                            let apptDate = new Date(val.NextTalk.date);
-                            let cDt = new Date(dt.toDateString());
-                            let aDate = new Date(apptDate.toDateString());
-                            let nDt = new Date(nDate.toDateString());
-                            addData = false;
-                            if (req.body.appointment == "overdue" && cDt > aDate) {
-                                addData = true;
-                            }
+        let { skip, per_page } = req.body;
+        let query = [];
+        query.push({
+            $match: { is_active: req.body.active, Stage: "New" }
+        });
+        if (req.body.filter) {
+            query.push(
+                {
+                    $match: { Company: { $regex: new RegExp(req.body.filter, "i") } },
+                });
+        }
+        if (req.body.favorite) {
+            query.push({
+                $match: { is_favorite: true }
+            });
+        }
 
-                            if (req.body.appointment == "today" && dt.toDateString() == apptDate.toDateString()) {
-                                addData = true;
-                            }
+        if (req.body.source) {
+            query.push({
+                $match: { Source: ObjectId(req.body.source) }
+            });
+        }
 
-                            if (req.body.appointment == "tomorrow" && nDate.toDateString() == apptDate.toDateString()) {
-                                addData = true;
-                            }
+        if (req.body.sales) {
+            query.push({
+                $match: { Sales: ObjectId(req.body.sales) }
+            });
+        }
 
-                            if (req.body.appointment == "future" && aDate > nDate) {
-                                addData = true;
-                            }
+        if (req.body.product) {
+            query.push({
+                $match: { Product: ObjectId(req.body.product) }
+            });
+        }
+        query.push(
+            {
+                '$lookup': {
+                    'from': 'products',
+                    'localField': 'Product',
+                    'foreignField': '_id',
+                    'as': 'Product'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$Product'
+                },
+            },
+            {
+                $sort: { createdAt: -1 }
+            }
+        );
+        if (req.body.month) {
+            if (req.body.month == "this") {
+                const currentMonth = new Date().getMonth() + 1;
+                query.push({
+                    $match: {
+                        $expr: {
+                            $eq: [{ $month: "$LeadSince" }, currentMonth]
                         }
                     }
-                    if (addData) {
-                        newResult.push(val);
-
+                });
+            }
+            if (req.body.month == "last") {
+                let currentMonth = new Date().getMonth();
+                if (currentMonth == 0) {
+                    currentMonth = currentMonth + 12;
+                }
+                query.push({
+                    $match: {
+                        $expr: {
+                            $eq: [{ $month: "$LeadSince" }, currentMonth]
+                        }
                     }
-                })
-                return res.status(200).json({
-                    success: true,
-                    data: newResult
-                }).end();
-
-            })
-    // try {
-    //     let { skip, per_page } = req.body;
-    //     let query = [];
-    //     query.push({
-    //         $match: { is_active: req.body.active, Stage: "New" }
-    //     });
-    //     if (req.body.filter) {
-    //         query.push(
-    //             {
-    //                 $match: { Company: { $regex: new RegExp(req.body.filter, "i") } },
-    //             });
-    //     }
-    //     if (req.body.favorite) {
-    //         query.push({
-    //             $match: { is_favorite : true }
-    //         });
-    //     }
-
-    //     if (req.body.source) {
-    //         query.push({
-    //             $match: { Source : ObjectId(req.body.source) }
-    //         });
-    //     }
-
-    //     if (req.body.sales) {
-    //         query.push({
-    //             $match: { Sales : ObjectId(req.body.sales) }
-    //         });
-    //     }
-
-    //     if (req.body.product) {
-    //         query.push({
-    //             $match: { Product : ObjectId(req.body.product) }
-    //         });
-    //     }
-    //     query.push(
-    //         {
-    //             '$lookup': {
-    //                 'from': 'products',
-    //                 'localField': 'Product',
-    //                 'foreignField': '_id',
-    //                 'as': 'Product'
-    //             }
-    //         },
-    //         {
-    //             $unwind: {
-    //                 path: '$Product'
-    //             },
-    //         },
-    //         {
-    //             $sort: { createdAt: -1 }
-    //         }
-    //     );
-    //     if (req.body.appointment == "notset") {
-    //         query.push({
-    //             $match: { NextTalk : null }
-    //         });
-    //     }
-    //     else if (req.body.appointment != "all") {
-    //         query.push({
-    //             $match: {
-    //                 $expr: { NextTalk : { $ne: null } }
-    //             }
-    //         });
-    //      }
-    //     if (req.body.month) {
-    //         if (req.body.month == "this") {
-    //             const currentMonth = new Date().getMonth() + 1;
-    //             query.push({
-    //                 $match: {
-    //                     $expr: {
-    //                         $eq: [{ $month: "$LeadSince" }, currentMonth]
-    //                     }
-    //                 }
-    //             });
-    //         }
-    //         if (req.body.month == "last") {
-    //             let currentMonth = new Date().getMonth();
-    //             if (currentMonth == 0) {
-    //                 currentMonth = currentMonth + 12;
-    //             }
-    //             query.push({
-    //                 $match: {
-    //                     $expr: {
-    //                         $eq: [{ $month: "$LeadSince" }, currentMonth]
-    //                     }
-    //                 }
-    //             });
-    //         }
-    //     }
-    //     if (req.body.monthyear) {
-    //         var my = req.body.monthyear.split("-");
-    //         query.push({
-    //             $match: {
-    //                 $expr: {
-    //             $and: [{
-    //                 $eq: [{ $year: "$LeadSince" }, my[1]],
-    //                 $eq: [{ $month: "$LeadSince" }, my[0]]
-    //             }]
-    //         }}
-    //         });
-
-    //     }
-
-    //     if (req.body.financeyear) {
-    //         var my = req.body.financeyear.split("-");
-    //         var fDate = new Date(my[0] + "-04-" + "01");
-    //         var tDate = new Date(my[1] + "-03-" + "31");;
-
-    //         query.push({LeadSince : { $gte: fDate, $lt: tDate } });
-
-    //     }
-    //     query.push(
-    //         {
-    //             $facet: {
-    //                 stage1: [
-    //                     {
-    //                         $group: {
-    //                             _id: null,
-    //                             count: {
-    //                                 $sum: 1,
-    //                             },
-    //                         },
-    //                     },
-    //                 ],
-    //                 stage2: [
-    //                     {
-    //                         $skip: skip,
-    //                     },
-    //                     {
-    //                         $limit: per_page,
-    //                     },
-    //                 ],
-    //             },
-    //         },
-    //         {
-    //             $unwind: {
-    //                 path: '$stage1'
-    //             },
-    //         },
-    //         {
-    //             $project: {
-    //                 count: "$stage1.count",
-    //                 data: "$stage2",
-    //             },
-    //         }
-    //     )
-    //     const leadList = await Lead.aggregate(query).exec();
-    //     if (leadList.length == 0) {
-    //         return res.status(200).json({
-    //             success: true,
-    //             data: { Count: 0, data: [] }
-    //         }).end();
-    //     }
-    //     else {
-    //         return res.status(200).json({
-    //             success: true,
-    //             data: leadList[0]
-    //         }).end();
-    //     }
+                });
+            }
+        }
+        query.push(
+            {
+                $facet: {
+                    stage1: [
+                        {
+                            $group: {
+                                _id: null,
+                                count: {
+                                    $sum: 1,
+                                },
+                            },
+                        },
+                    ],
+                    stage2: [
+                        {
+                            $skip: skip,
+                        },
+                        {
+                            $limit: per_page,
+                        },
+                    ],
+                },
+            },
+            {
+                $unwind: {
+                    path: '$stage1'
+                },
+            },
+            {
+                $project: {
+                    count: "$stage1.count",
+                    data: "$stage2",
+                },
+            }
+        )
+        const leadList = await Lead.aggregate(query).exec();
+        if (leadList.length == 0) {
+            return res.status(200).json({
+                success: true,
+                data: { Count: 0, data: [] }
+            }).end();
+        }
+        else {
+            return res.status(200).json({
+                success: true,
+                data: leadList[0]
+            }).end();
+        }
     } catch (err) {
         return res.status(400).json({
             success: false,
