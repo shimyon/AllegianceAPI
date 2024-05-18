@@ -163,6 +163,14 @@ const statusSchema = mongoose.Schema(
         {
             type: String
         },
+        Role:
+        {
+            type: String
+        },
+        Assign: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        },
         is_active: {
             type: Boolean
         }

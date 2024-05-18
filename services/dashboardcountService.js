@@ -41,7 +41,6 @@ const setDashboardCount = async () => {
     for (const elements in newDashboardcount) {
         if (Object.hasOwnProperty.call(newDashboardcount, elements)) {
             const element = newDashboardcount[elements];
-            if (element.UserId.role == "SuperAdmin") {
                 dashboardCount.leadCount = await Lead.find({ is_active: true, Stage: "New" }).count({});
                 dashboardCount.prospectCount = await Prospect.find({ is_active: true }).count({});
                 dashboardCount.processCount = await Contract.find({ is_active: true }).count({});
@@ -50,17 +49,6 @@ const setDashboardCount = async () => {
                 dashboardCount.orderCount = await Order.find({ is_active: true }).count({});
                 dashboardCount.productCount = await Product.find({ is_active: true}).count({});
                 dashboardCount.customerCount = await Customer.find({ is_active: true }).count({});
-            }
-            else {
-                dashboardCount.leadCount = await Lead.find({ is_active: true, addedBy: element.UserId._id, Stage: "New" }).count({});
-                dashboardCount.prospectCount = await Prospect.find({ is_active: true, addedBy: element.UserId._id }).count({});
-                dashboardCount.processCount = await Contract.find({ is_active: true, "Process.sales": element.UserId._id }).count({});
-                dashboardCount.supportCount = await Support.find({ is_active: true, $or: [{ addedBy: element.UserId._id }, { Sales: element.UserId._id }] }).count({});
-                dashboardCount.recoveryCount = await Recovery.find({ is_active: true, addedBy: element.UserId._id }).count({});
-                dashboardCount.orderCount = await Order.find({ is_active: true, $or: [{ addedBy: element.UserId._id }, { Sales: element.UserId._id }] }).count({});
-                dashboardCount.productCount = 0;
-                dashboardCount.customerCount = 0;
-            }
             let user = await Dashboard.findByIdAndUpdate(element._id, {
                 Lead: dashboardCount.leadCount,
                 Prospect: dashboardCount.prospectCount,
