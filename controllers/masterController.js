@@ -1022,7 +1022,7 @@ const addStatus = asyncHandler(async (req, res) => {
             Name: req.body.name,
             GroupName: req.body.groupname,
             Role: req.body.role,
-            Assign: req.body.assign,
+            Assign: req.body.assign||null,
             is_active: true,
         });
 
@@ -1050,7 +1050,7 @@ const editStatus = asyncHandler(async (req, res) => {
         let newStatus = await Status.findByIdAndUpdate(req.body.id, {
             Name: req.body.name,
             Role: req.body.role,
-            Assign: req.body.assign,
+            Assign: req.body.assign||null,
         });
 
         response.success = true;

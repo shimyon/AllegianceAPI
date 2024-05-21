@@ -17,14 +17,6 @@ const path = require("path");
 
 const addLead = asyncHandler(async (req, res) => {
     try {
-        const existLead = await Lead.findOne({ $or: [{ Mobile: req.body.mobile, Email: req.body.email }] });
-        if (existLead) {
-            return res.status(200).json({
-                success: false,
-                msg: "Lead already exist with same mobile or email.",
-                data: null,
-            });
-        }
         const newLead = await Lead.create({
             Company: req.body.company,
             Title: req.body.title,
@@ -37,14 +29,14 @@ const addLead = asyncHandler(async (req, res) => {
             City: req.body.city,
             State: req.body.state,
             Country: req.body.country,
-            Source: req.body.source,
-            Product: req.body.product,
+            Source: req.body.source||null,
+            Product: req.body.product||null,
             Requirements: req.body.requirements,
             Notes: req.body.notes,
             InCharge: req.body.incharge,
             NextTalkon: req.body.nextTalkOn,
             NextTalkNotes: req.body.nextTalkNotes,
-            Sales: req.body.sales,
+            Sales: req.body.sales||null,
             addedBy: req.user._id,
             Stage: "New",
             LeadSince: new Date(),
@@ -109,10 +101,10 @@ const editLead = asyncHandler(async (req, res) => {
             City: req.body.city,
             State: req.body.state,
             Country: req.body.country,
-            Source: req.body.source,
-            Product: req.body.product,
+            Source: req.body.source||null,
+            Product: req.body.product||null,
             Requirements: req.body.requirements,
-            Sales: req.body.sales,
+            Sales: req.body.sales||null,
             Notes: req.body.notes,
             InCharge: req.body.incharge,
             is_active: true
