@@ -27,7 +27,6 @@ const addSupport = asyncHandler(async (req, res) => {
             addedBy: req.user._id
         });
         if (newSupport) {
-            let resuser = await User.find({ is_active: true, role: 'SuperAdmin' });
             let date = new Date();
             const savedNotification = await notificationModel.create({
                 description: `Support(${newSupport.TicketNo}) entry has been created`,
@@ -35,12 +34,13 @@ const addSupport = asyncHandler(async (req, res) => {
                 userId: newSupport.Sales,
                 Isread: false
             });
-            let insertdata = resuser.map(f => ({
-                description: `Support(${newSupport.TicketNo}) entry has been created`,
-                date: date,
-                userId: f._id,
-                Isread: false
-            }));
+            // let resuser = await User.find({ is_active: true, role: 'SuperAdmin' });
+            // let insertdata = resuser.map(f => ({
+            //     description: `Support(${newSupport.TicketNo}) entry has been created`,
+            //     date: date,
+            //     userId: f._id,
+            //     Isread: false
+            // }));
             if (insertdata.length > 0) {
                 const savedNotification = await notificationModel.insertMany(insertdata);
             }
@@ -211,42 +211,6 @@ const getSupportById = asyncHandler(async (req, res) => {
 
 });
 
-const updateSupport = asyncHandler(async (req, res) => {
-    try {
-        const existSupport = await Support.findById(req.body.id);
-        if (!existSupport) {
-            return res.status(200).json({
-                success: false,
-                msg: "Support not found.",
-                data: null,
-            });
-        }
-
-        const newSupport = await Support.findByIdAndUpdate(req.body.id, {
-            Status: req.body.status,
-            AdditionalNote: req.body.additionalNote,
-            ReasonForCancel: req.body.reasonforCancel,
-            DeliveryDetail: req.body.deliveryDetail,
-            DelayReason: req.body.delayReason
-        });
-
-        if (req.body.sendMail) {
-            sendMail(req.body.toMail, "Ticket Update", req.body.additionalNote);
-        }
-        return res.status(200).json({
-            success: true,
-            msg: "Support Updated. "
-        }).end();
-    } catch (err) {
-        return res.status(400).json({
-            success: false,
-            msg: "Error in updating Support. " + err.message,
-            data: null,
-        });
-    }
-
-});
-
 const updateStatus = asyncHandler(async (req, res) => {
     try {
         await Support.findByIdAndUpdate(req.body.id, {
@@ -325,7 +289,6 @@ module.exports = {
     addSupport,
     getAllSupport,
     getSupportById,
-    updateSupport,
     editSupport,
     updateStatus,
     removeSupport,

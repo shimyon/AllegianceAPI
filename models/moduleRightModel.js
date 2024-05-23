@@ -2,7 +2,8 @@ const mongoose = require('mongoose')
 const moduleRightSchema = mongoose.Schema(
   {
     role: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Role'
     },
     moduleId: {
       type: mongoose.Schema.Types.ObjectId,

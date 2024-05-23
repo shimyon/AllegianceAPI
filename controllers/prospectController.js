@@ -42,7 +42,6 @@ const addProspect = asyncHandler(async (req, res) => {
             is_active: true
         });
         if (prospect) {
-            let resuser = await User.find({ is_active: true, role: 'SuperAdmin' });
             let date = new Date();
             const savedNotification = await notificationModel.create({
                 description: `Prospect(${req.body.company}) entry has been created`,
@@ -50,16 +49,16 @@ const addProspect = asyncHandler(async (req, res) => {
                 userId: prospect.Sales,
                 Isread: false
             });
-            let insertdata = resuser.map(f => ({
-                description: `Prospect(${req.body.company}) entry has been created`,
-                date: date,
-                userId: f._id,
-                Isread: false
-            }));
-            if (insertdata.length > 0) {
-                const savedNotification = await notificationModel.insertMany(insertdata);
-            }
-
+            // let resuser = await User.find({ is_active: true, role: 'SuperAdmin' });
+            // let insertdata = resuser.map(f => ({
+            //     description: `Prospect(${req.body.company}) entry has been created`,
+            //     date: date,
+            //     userId: f._id,
+            //     Isread: false
+            // }));
+            // if (insertdata.length > 0) {
+            //     const savedNotification = await notificationModel.insertMany(insertdata);
+            // }
             return res.status(200).json(prospect).end();
         }
         else {
@@ -292,24 +291,17 @@ const changeProspectStage = asyncHandler(async (req, res) => {
         });
 
         if (prospect) {
-            let resuser = await User.find({ is_active: true, role: 'SuperAdmin' });
-            let date = new Date();
-            // const savedNotification = await notificationModel.create({
-            //     description: `Prospect(${prospect.Stage}) entry has been created`,
+            // let resuser = await User.find({ is_active: true, role: 'SuperAdmin' });
+            // let date = new Date();
+            // let insertdata = resuser.map(f => ({
+            //     description: `Prospect(${req.body.id}) move to ${req.body.stage} stage.`,
             //     date: date,
-            //     userId: prospect.Sales,
+            //     userId: f._id,
             //     Isread: false
-            // });
-            let insertdata = resuser.map(f => ({
-                description: `Prospect(${req.body.id}) move to ${req.body.stage} stage.`,
-                date: date,
-                userId: f._id,
-                Isread: false
-            }));
-            if (insertdata.length > 0) {
-                const savedNotification = await notificationModel.insertMany(insertdata);
-            }
-
+            // }));
+            // if (insertdata.length > 0) {
+            //     const savedNotification = await notificationModel.insertMany(insertdata);
+            // }
             return res.status(200).json(prospect).end();
         }
         else {
@@ -339,7 +331,6 @@ const addNext = asyncHandler(async (req, res) => {
             NextTalk: nextOn._id
         });
         if (nextOn) {
-            let resuser = await User.find({ is_active: true, role: 'SuperAdmin' });
             let date = new Date();
             const savedNotification = await notificationModel.create({
                 description: `Prospect(${leadExisting.Company}) Next Action Date ${req.body.date}`,
@@ -347,16 +338,16 @@ const addNext = asyncHandler(async (req, res) => {
                 userId: leadExisting.Sales._id,
                 Isread: false
             });
-            let insertdata = resuser.map(f => ({
-                description: `Prospect(${leadExisting.Company}) Next Action Date ${req.body.date}`,
-                date: date,
-                userId: f._id,
-                Isread: false
-            }));
-            if (insertdata.length > 0) {
-                const savedNotification = await notificationModel.insertMany(insertdata);
-            }
-
+            // let resuser = await User.find({ is_active: true, role: 'SuperAdmin' });
+            // let insertdata = resuser.map(f => ({
+            //     description: `Prospect(${leadExisting.Company}) Next Action Date ${req.body.date}`,
+            //     date: date,
+            //     userId: f._id,
+            //     Isread: false
+            // }));
+            // if (insertdata.length > 0) {
+            //     const savedNotification = await notificationModel.insertMany(insertdata);
+            // }
             return res.status(200).json({
                 success: true,
                 msg: "Data added successfully",

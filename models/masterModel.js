@@ -159,13 +159,12 @@ const statusSchema = mongoose.Schema(
         Name: {
             type: String
         },
-        GroupName:
-        {
+        GroupName: {
             type: String
         },
-        Role:
-        {
-            type: String
+        Role: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Role'
         },
         Assign: {
             type: mongoose.Schema.Types.ObjectId,

@@ -5,7 +5,6 @@ const {
     addSupport,
     getAllSupport,
     getSupportById,
-    updateSupport,
     editSupport,
     updateStatus,
     removeSupport,

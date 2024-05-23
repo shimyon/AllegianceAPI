@@ -44,7 +44,6 @@ const addLead = asyncHandler(async (req, res) => {
             is_active: true
         });
         if (newLead) {
-            let resuser = await User.find({ is_active: true, role: 'SuperAdmin' });
             let date = new Date();
             const savedNotification = await notificationModel.create({
                 description: `lead(${req.body.company}) entry has been created`,
@@ -52,16 +51,16 @@ const addLead = asyncHandler(async (req, res) => {
                 userId: newLead.Sales,
                 Isread: false
             });
-            let insertdata = resuser.map(f => ({
-                description: `lead(${req.body.company}) entry has been created`,
-                date: date,
-                userId: f._id,
-                Isread: false
-            }));
-            if (insertdata.length > 0) {
-                const savedNotification = await notificationModel.insertMany(insertdata);
-            }
-
+            // let resuser = await User.find({ is_active: true, role: 'SuperAdmin' });
+            // let insertdata = resuser.map(f => ({
+            //     description: `lead(${req.body.company}) entry has been created`,
+            //     date: date,
+            //     userId: f._id,
+            //     Isread: false
+            // }));
+            // if (insertdata.length > 0) {
+            //     const savedNotification = await notificationModel.insertMany(insertdata);
+            // }
             return res.status(200).json(newLead).end();
         }
         else {
@@ -323,7 +322,6 @@ const addNext = asyncHandler(async (req, res) => {
             NextTalk: nextOn._id
         });
         if (nextOn) {
-            let resuser = await User.find({ is_active: true, role: 'SuperAdmin' });
             let date = new Date();
             const savedNotification = await notificationModel.create({
                 description: `lead(${leadExisting.Company}) Next Action Date ${req.body.date}`,
@@ -331,16 +329,16 @@ const addNext = asyncHandler(async (req, res) => {
                 userId: leadExisting.Sales._id,
                 Isread: false
             });
-            let insertdata = resuser.map(f => ({
-                description: `lead(${leadExisting.Company}) Next Action Date ${req.body.date}`,
-                date: date,
-                userId: f._id,
-                Isread: false
-            }));
-            if (insertdata.length > 0) {
-                const savedNotification = await notificationModel.insertMany(insertdata);
-            }
-
+            // let resuser = await User.find({ is_active: true, role: 'SuperAdmin' });
+            // let insertdata = resuser.map(f => ({
+            //     description: `lead(${leadExisting.Company}) Next Action Date ${req.body.date}`,
+            //     date: date,
+            //     userId: f._id,
+            //     Isread: false
+            // }));
+            // if (insertdata.length > 0) {
+            //     const savedNotification = await notificationModel.insertMany(insertdata);
+            // }
             return res.status(200).json({
                 success: true,
                 msg: "Data added successfully",
@@ -484,7 +482,6 @@ const moveToProspect = asyncHandler(async (req, res) => {
             is_active: true
         });
         if (interaction) {
-            let resuser = await User.find({ is_active: true, role: 'SuperAdmin' });
             let date = new Date();
             const savedNotification = await notificationModel.create({
                 description: `lead(${interaction.Company}) Moved to prospect`,
@@ -492,16 +489,16 @@ const moveToProspect = asyncHandler(async (req, res) => {
                 userId: interaction.Sales._id,
                 Isread: false
             });
-            let insertdata = resuser.map(f => ({
-                description: `lead(${interaction.Company}) Moved to prospect`,
-                date: date,
-                userId: f._id,
-                Isread: false
-            }));
-            if (insertdata.length > 0) {
-                const savedNotification = await notificationModel.insertMany(insertdata);
-            }
-
+            // let resuser = await User.find({ is_active: true, role: 'SuperAdmin' });
+            // let insertdata = resuser.map(f => ({
+            //     description: `lead(${interaction.Company}) Moved to prospect`,
+            //     date: date,
+            //     userId: f._id,
+            //     Isread: false
+            // }));
+            // if (insertdata.length > 0) {
+            //     const savedNotification = await notificationModel.insertMany(insertdata);
+            // }
             return res.status(200).json(interaction).end();
         }
         else {

@@ -17,12 +17,13 @@ const userSchema = mongoose.Schema(
       required: [true, 'Please add a password'],
     },
     role: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Role',
       required: [true, 'Please add a role'],
     },
-    is_active:{
-      type:Boolean,
-      default:true
+    is_active: {
+      type: Boolean,
+      default: true
     }
   },
   {

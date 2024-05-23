@@ -23,17 +23,17 @@ const addRecovery = asyncHandler(async (req, res) => {
 
         });
         if (newRecovery) {
-            let resuser = await User.find({ is_active: true, role: 'SuperAdmin' });
-            let date = new Date();
-            let insertdata = resuser.map(f => ({
-                description: `Recovery(${newRecovery.RecoveryNo}) entry has been created`,
-                date: date,
-                userId: f._id,
-                Isread: false
-            }));
-            if (insertdata.length > 0) {
-                const savedNotification = await notificationModel.insertMany(insertdata);
-            }
+            // let resuser = await User.find({ is_active: true, role: 'SuperAdmin' });
+            // let date = new Date();
+            // let insertdata = resuser.map(f => ({
+            //     description: `Recovery(${newRecovery.RecoveryNo}) entry has been created`,
+            //     date: date,
+            //     userId: f._id,
+            //     Isread: false
+            // }));
+            // if (insertdata.length > 0) {
+            //     const savedNotification = await notificationModel.insertMany(insertdata);
+            // }
             return res.status(200).json(newRecovery).end();
         }
         else {

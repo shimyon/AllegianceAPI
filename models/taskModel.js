@@ -17,6 +17,11 @@ const taskSchema = mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
     },
+    LastComment: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'TaskComment',
+      default: null
+    },
     Reporter: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'

@@ -11,16 +11,16 @@ const addtask = asyncHandler(async (req, res) => {
         let taskadd = await Task.create({
             Name: req.body.Name,
             Description: req.body.Description,
-            Status: req.body.Status,
-            Assign: req.body.Assign,
-            Reporter: req.body.Reporter,
+            Status: req.body.Status||null,
+            Assign: req.body.Assign||null,
+            Reporter: req.body.Reporter||null,
             Priority: req.body.Priority,
             StartDate: req.body.StartDate,
             EndDate: req.body.EndDate,
             is_active: true,
             addedBy: req.user._id
         });
-        if (taskadd) {
+        if (taskadd.Assign) {
             let TaskList = await Task.findOne({ _id: taskadd._id }).populate("Assign").populate("addedBy")
             let html =
                 `<html>Hello,<br/><br/>Please take up the following task (${req.body.Name})<br/>${req.body.Description}<br/><br/>Please finish it by ${moment(req.body.EndDate).format("DD-MMM-YY")}<br/><br/>Thank you,<br/><b>${TaskList.addedBy?.name}</b></html>`;
@@ -42,10 +42,15 @@ const addtask = asyncHandler(async (req, res) => {
 const addtaskcomment = asyncHandler(async (req, res) => {
     try {
         let taskCommentadd = await TaskComment.create({
-            taskId:req.body.taskId,
+            taskId: req.body.taskId,
             TaskComment: req.body.Taskcomment,
             addedBy: req.user._id
         });
+        if (taskCommentadd) {
+            await Task.findByIdAndUpdate(req.body.taskId, {
+                LastComment: taskCommentadd._id
+            });
+        }
         return res.status(200).json({
             success: true,
             msg: "Task Comment Added.",

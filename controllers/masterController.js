@@ -8,6 +8,7 @@ const Unit = Master.UnitModal;
 const Category = Master.CategoryModal;
 const SubCategory = Master.SubCategoryModal;
 const Module = Master.ModuleModal;
+const moduleRight = require('../models/moduleRightModel');
 const Role = Master.RoleModal;
 const Status = Master.StatusModal;
 const MailAddress = Master.MailAddressModal;
@@ -896,7 +897,19 @@ const addRole = asyncHandler(async (req, res) => {
             Name: req.body.name,
             is_active: true,
         });
-
+        if(newRole){
+            let resuser = await Module.find({ is_group: true});
+            let insertdata = resuser.map(f => ({
+                role:newRole._id,
+                moduleId:f._id,
+                read:true,
+                write:true,
+                delete:true
+            }));
+            if (insertdata.length > 0) {
+                const savedNotification = await moduleRight.insertMany(insertdata);
+            }
+        }
         response.success = true;
         response.message = "Role added successfully";
         response.data = newRole;
@@ -1021,7 +1034,7 @@ const addStatus = asyncHandler(async (req, res) => {
         let newStatus = await Status.create({
             Name: req.body.name,
             GroupName: req.body.groupname,
-            Role: req.body.role,
+            Role: req.body.role||null,
             Assign: req.body.assign||null,
             is_active: true,
         });
@@ -1049,7 +1062,7 @@ const editStatus = asyncHandler(async (req, res) => {
 
         let newStatus = await Status.findByIdAndUpdate(req.body.id, {
             Name: req.body.name,
-            Role: req.body.role,
+            Role: req.body.role||null,
             Assign: req.body.assign||null,
         });
 

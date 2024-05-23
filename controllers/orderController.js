@@ -107,7 +107,6 @@ const addOrder = asyncHandler(async (req, res) => {
             if (err) throw err;
         });
         if (newOrder) {
-            let resuser = await User.find({ is_active: true, role: 'SuperAdmin' });
             let date = new Date();
             const savedNotification = await notificationModel.create({
                 description: `Order(${newOrder.OrderCode}) entry has been created`,
@@ -115,15 +114,16 @@ const addOrder = asyncHandler(async (req, res) => {
                 userId: newOrder.Sales,
                 Isread: false
             });
-            let insertdata = resuser.map(f => ({
-                description: `Order(${newOrder.OrderCode}) entry has been created`,
-                date: date,
-                userId: f._id,
-                Isread: false
-            }));
-            if (insertdata.length > 0) {
-                const savedNotification = await notificationModel.insertMany(insertdata);
-            }
+            // let resuser = await User.find({ is_active: true, role: 'SuperAdmin' });
+            // let insertdata = resuser.map(f => ({
+            //     description: `Order(${newOrder.OrderCode}) entry has been created`,
+            //     date: date,
+            //     userId: f._id,
+            //     Isread: false
+            // }));
+            // if (insertdata.length > 0) {
+            //     const savedNotification = await notificationModel.insertMany(insertdata);
+            // }
             return res.status(200).json(newOrder).end();
         }
         else {
