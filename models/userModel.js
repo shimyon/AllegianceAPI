@@ -1,7 +1,5 @@
 const mongoose = require('mongoose')
-//mongoose.set('strictQuery', false)
-
-const userSchema = mongoose.Schema(
+collection = mongoose.Schema(
   {
     name: {
       type: String,
@@ -19,7 +17,7 @@ const userSchema = mongoose.Schema(
     role: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Role',
-      required: [true, 'Please add a role'],
+      // required: [true, 'Please add a role'],
     },
     is_active: {
       type: Boolean,
@@ -30,5 +28,4 @@ const userSchema = mongoose.Schema(
     timestamps: true,
   }
 )
-
-module.exports = mongoose.model('User', userSchema)
+module.exports = (conn) => conn.model("User", collection);

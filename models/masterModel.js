@@ -296,6 +296,34 @@ const ApplicationSettingSchema = mongoose.Schema(
     {
         timestamps: true,
     });
+    const organizationSchema = mongoose.Schema(
+        {
+          Name: {
+            type: String
+          },
+          Code: {
+            type: String,
+            unique: true
+          },
+          Description: {
+            type: String
+          },
+          Website: {
+            type: String
+          },
+          Email: {
+            type: String
+          },
+          UserEmail: {
+            type: String
+          },
+          PhoneNo: {
+            type: String
+          },
+        },
+        {
+          timestamps: true,
+        });
 const ProductModal = mongoose.model('Products', productSchema);
 const TypeModal = mongoose.model('Types', typeSchema);
 const SourceModal = mongoose.model('Sources', sourceSchema);
@@ -308,6 +336,7 @@ const RoleModal = mongoose.model('Role', RoleSchema);
 const StatusModal = mongoose.model('Status', statusSchema);
 const MailAddressModal = mongoose.model('MailAddress', MailAddressSchema);
 const ApplicationSettingModal = mongoose.model('ApplicationSetting', ApplicationSettingSchema);
+const OrganizationModal = mongoose.model('Organization', organizationSchema);
 
 const syncIndex = async () => {
     await ProductModal.syncIndexes();
@@ -322,7 +351,8 @@ const syncIndex = async () => {
     await StatusModal.syncIndexes();
     await MailAddressModal.syncIndexes();
     await ApplicationSettingModal.syncIndexes();
+    await OrganizationModal.syncIndexes();
 }
 syncIndex();
 
-module.exports = { ProductModal, TypeModal, StateModal, SourceModal, UnitModal, CategoryModal, SubCategoryModal, ModuleModal, RoleModal, StatusModal, MailAddressModal, ApplicationSettingModal };
+module.exports = { ProductModal, TypeModal,OrganizationModal, StateModal, SourceModal, UnitModal, CategoryModal, SubCategoryModal, ModuleModal, RoleModal, StatusModal, MailAddressModal, ApplicationSettingModal };

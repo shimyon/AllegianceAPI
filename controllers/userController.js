@@ -4,6 +4,8 @@ const asyncHandler = require('express-async-handler')
 const User = require('../models/userModel')
 const DashboardModal = require('../models/dashboardModel')
 const Dashboard = DashboardModal.Dashboard
+const Master = require('../models/masterModel')
+const Organization = Master.OrganizationModal;
 const moment = require('moment');
 const { sendMail } = require('../middleware/sendMail')
 
@@ -271,6 +273,72 @@ const forgotPassword = asyncHandler(async (req, res) => {
     }
 })
 
+const addOrganizationUser = asyncHandler(async (req, res) => {
+    let Users = User(req.conn)
+    try {
+        let oldUser = await Organization.findOne({ Name: req.body.Name });
+
+        if (oldUser) {
+            return res.status(400).json({
+                success: false,
+                message: "Same Organization already exist.",
+            });
+        }
+
+        await Organization.create({
+            Name: req.body.Name,
+            Description: req.body.Description,
+            Email: req.body.Email,
+            Website: req.body.Website,
+            UserEmail: req.body.UserEmail,
+            Code: req.body.Code,
+            PhoneNo: req.body.PhoneNo,
+        });
+        const salt = await bcrypt.genSalt(10)
+        const hashedPassword = await bcrypt.hash(req.body.password, salt)
+        let newUser = await Users.create({
+            name: req.body.firstName,
+            // role: req.body.role,
+            email: req.body.UserEmail,
+            password: hashedPassword
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: "User added successfully",
+            data: newUser
+        });
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            message: "Error in adding User. " + err.message,
+        });
+    }
+});
+const checkOrganization = asyncHandler(async (req, res) => {
+    try {
+        let OrganizationExists = await Organization.findOne({ Code: req.body.code });
+        if (OrganizationExists) {
+            res.status(200).json({
+                success: true,
+                _id: OrganizationExists.id,
+                DB_NAME: OrganizationExists.Name,
+            }).end();
+        }
+        else {
+            res.status(400).json({
+                success: false,
+                msg: "Invalid Organization Code!",
+                data: "",
+            }).end();
+        }
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            message: "Error in Organization. " + err.message,
+        });
+    }
+});
 const generateToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SECRET, {
         expiresIn: '30d',
@@ -285,5 +353,7 @@ module.exports = {
     changePassword,
     getAllUser,
     forgotPassword,
-    removeUser
+    removeUser,
+    addOrganizationUser,
+    checkOrganization
 }
