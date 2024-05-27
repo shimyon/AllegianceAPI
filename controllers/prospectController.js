@@ -29,15 +29,15 @@ const addProspect = asyncHandler(async (req, res) => {
             City: req.body.city,
             State: req.body.state,
             Country: req.body.country,
-            Product: req.body.product,
+            Product: req.body.product || null,
             Notes: req.body.notes,
             ProspectAmount: req.body.prospectAmount,
             OrderTarget: req.body.orderTarget,
-            Sales: req.body.sales,
+            Sales: req.body.sales || null,
             addedBy: req.user._id,
             Stage: req.body.stage,
             Requirements: req.body.requirements,
-            Source: req.body.source,
+            Source: req.body.source || null,
             StageDate: new Date(),
             is_active: true
         });

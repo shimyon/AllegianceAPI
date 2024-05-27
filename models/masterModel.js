@@ -165,6 +165,9 @@ const statusSchema = mongoose.Schema(
         },
         is_active: {
             type: Boolean
+        },
+        Color: {
+            type: String
         }
     },
     {

@@ -1011,7 +1011,7 @@ const addStatus = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let oldStatus = await Status.findOne({ Name: req.body.name, GroupName: req.body.groupname });
+        let oldStatus = await Status.findOne({ Name: req.body.name, GroupName: req.body.groupname, Color: req.body.color, });
 
         if (oldStatus) {
             response.message = "Status with same name already exist.";
@@ -1021,6 +1021,7 @@ const addStatus = asyncHandler(async (req, res) => {
         let newStatus = await Status.create({
             Name: req.body.name,
             GroupName: req.body.groupname,
+            Color: req.body.color,
             is_active: true,
         });
 
@@ -1046,7 +1047,8 @@ const editStatus = asyncHandler(async (req, res) => {
         }
 
         let newStatus = await Status.findByIdAndUpdate(req.body.id, {
-            Name: req.body.name
+            Name: req.body.name,
+            Color: req.body.color
         });
 
         response.success = true;
