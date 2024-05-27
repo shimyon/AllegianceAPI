@@ -191,6 +191,25 @@ const getAllLead = asyncHandler(async (req, res) => {
                 $match: { Product: ObjectId(req.body.product) }
             });
         }
+        query.push(
+            {
+                '$lookup': {
+                    'from': 'products',
+                    'localField': 'Product',
+                    'foreignField': '_id',
+                    'as': 'Product'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$Product',
+                    preserveNullAndEmptyArrays: true
+                },
+            },
+            {
+                $sort: { createdAt: -1 }
+            }
+        );
         if (req.body.month) {
             if (req.body.month == "this") {
                 const currentMonth = new Date().getMonth() + 1;

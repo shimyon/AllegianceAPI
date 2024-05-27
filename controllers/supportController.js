@@ -4,6 +4,7 @@ const { ObjectId } = require('mongodb');
 const User = require('../models/userModel')
 const notificationModel = require('../models/notificationModel')
 const Support = SupportModel.SupportModal;
+const SupportnextOn = SupportModel.SupportNextOnModal;
 const { sendMail } = require('../middleware/sendMail')
 
 const addSupport = asyncHandler(async (req, res) => {
@@ -127,6 +128,33 @@ const getAllSupport = asyncHandler(async (req, res) => {
                 },
             },
             {
+                '$lookup': {
+                    'from': 'products',
+                    'localField': 'Products',
+                    'foreignField': '_id',
+                    'as': 'Products'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$Products'
+                },
+            },
+            {
+                '$lookup': {
+                    'from': 'supportnextons',
+                    'localField': 'NextTalk',
+                    'foreignField': '_id',
+                    'as': 'NextTalk'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$NextTalk',
+                    preserveNullAndEmptyArrays: true
+                },
+            },
+            {
                 $sort: { createdAt: -1 }
             }
         );
@@ -191,8 +219,8 @@ const getAllSupport = asyncHandler(async (req, res) => {
             data: null,
         });
     }
-
 });
+
 
 const getSupportById = asyncHandler(async (req, res) => {
     try {
@@ -285,6 +313,107 @@ const deleteSupport = asyncHandler(async (req, res) => {
 
 });
 
+const addNext = asyncHandler(async (req, res) => {
+    try {
+        let supportNextOn = await SupportnextOn.create({
+            supportId: req.body.supportid,
+            date: req.body.date,
+            note: req.body.note,
+            user: req.user._id
+        });
+
+        let supportExisting = await Support.findByIdAndUpdate(req.body.supportid, {
+            NextTalk: supportNextOn._id
+        });
+        if (supportNextOn) {
+            let resuser = await User.find({ is_active: true, role: 'SuperAdmin' });
+            let date = new Date();
+            const savedNotification = await notificationModel.create({
+                description: `Support(${supportExisting.Company}) Next Action Date ${req.body.date}`,
+                date: date,
+                userId: supportExisting.Sales._id,
+                Isread: false
+            });
+            let insertdata = resuser.map(f => ({
+                description: `Support(${supportExisting.Company}) Next Action Date ${req.body.date}`,
+                date: date,
+                userId: f._id,
+                Isread: false
+            }));
+            if (insertdata.length > 0) {
+                const savedNotification = await notificationModel.insertMany(insertdata);
+            }
+
+            return res.status(200).json({
+                success: true,
+                msg: "Data added successfully",
+            }).end();
+        }
+        else {
+            res.status(400)
+            throw new Error("Invalid data!")
+        }
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in adding data. " + err.message,
+            data: null,
+        });
+    }
+
+});
+const editNext = asyncHandler(async (req, res) => {
+    try {
+        let supportNextOn = await SupportnextOn.findByIdAndUpdate(req.body.id, {
+            date: req.body.date,
+            note: req.body.note,
+            user: req.user._id
+        });
+
+        if (supportNextOn) {
+            return res.status(200).json({
+                success: true,
+                msg: "Next Action edited successfully",
+            }).end();
+        }
+        else {
+            res.status(400)
+            throw new Error("Invalid data!")
+        }
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in adding data. " + err.message,
+            data: null,
+        });
+    }
+
+});
+const getNext = asyncHandler(async (req, res) => {
+    try {
+        const next = await SupportnextOn.find({ supportId: req.params.id })
+            .sort({ date: -1 })
+            .populate({
+                path: 'supportId',
+                populate: [{ path: "Customer", populate: { path: "Company" } }, { path: "addedBy" }]
+            });
+        res.status(200).json({
+            success: true,
+            msg: "",
+            data: next || [],
+        });
+    } catch (err) {
+        res.status(400).json({
+            success: false,
+            msg: "Error in getting status. " + err.message,
+            data: null,
+        });
+    }
+});
+
+
+
+
 module.exports = {
     addSupport,
     getAllSupport,
@@ -292,5 +421,8 @@ module.exports = {
     editSupport,
     updateStatus,
     removeSupport,
-    deleteSupport
+    deleteSupport,
+    addNext,
+    editNext,
+    getNext
 }

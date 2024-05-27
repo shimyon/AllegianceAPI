@@ -66,16 +66,46 @@ const supportSchema = mongoose.Schema(
         addedBy: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User'
-        }
+        },
+        NextTalk: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'SupportnextOn',
+            default: null
+        },
     },
     {
         timestamps: true,
-    })
+    });
+    const nextOnSchema = mongoose.Schema(
+        {
+            supportId: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'Support'
+            },
+            date: {
+                type: Date
+            },
+            note: {
+                type: String
+            },
+            user: {
+                type: mongoose.Schema.Types.ObjectId,
+                ref: 'User'
+            },
+           
+        },
+        {
+            timestamps: true,
+        });
 
 const SupportModal = mongoose.model('Support', supportSchema);
+const SupportNextOnModal = mongoose.model('SupportnextOn', nextOnSchema);
+
+
 const syncIndex = async () => {
     await SupportModal.syncIndexes();
+    await SupportNextOnModal.syncIndexes();
 }
 syncIndex();
 
-module.exports = { SupportModal };
+module.exports = { SupportModal, SupportNextOnModal };

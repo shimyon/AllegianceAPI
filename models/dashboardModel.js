@@ -50,6 +50,9 @@ const newsFeedSchema = mongoose.Schema(
         url: {
             type: String
         },
+        DateTime: {
+            type: Date,
+        },
         is_active: {
             type: Boolean,
             default: true

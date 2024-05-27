@@ -40,9 +40,10 @@ const saveNewsFeed = asyncHandler(async (req, res, fileName) => {
             title: req.body.title,
             description: req.body.description,
             url: req.body.url,
+            DateTime: req.body.DateTime,
             image: fileName.replace(",", ""),
             is_active: true,
-            addedBy: req.user._id,
+            addedBy: req.user._id,           
 
         });
         return res.status(200).json({
@@ -92,6 +93,7 @@ const editSave = asyncHandler(async (req, res, fileName) => {
             title: req.body.title,
             description: req.body.description,
             url: req.body.url,
+            DateTime: req.body.DateTime,
             image: fileName,
         });
         return res.status(200).json({

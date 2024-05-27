@@ -1036,6 +1036,7 @@ const addStatus = asyncHandler(async (req, res) => {
             GroupName: req.body.groupname,
             Role: req.body.role||null,
             Assign: req.body.assign||null,
+            Color: req.body.color,
             is_active: true,
         });
 
@@ -1064,6 +1065,7 @@ const editStatus = asyncHandler(async (req, res) => {
             Name: req.body.name,
             Role: req.body.role||null,
             Assign: req.body.assign||null,
+            Color: req.body.color
         });
 
         response.success = true;
