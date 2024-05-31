@@ -1034,8 +1034,8 @@ const addStatus = asyncHandler(async (req, res) => {
         let newStatus = await Status.create({
             Name: req.body.name,
             GroupName: req.body.groupname,
-            Role: req.body.role||null,
-            Assign: req.body.assign||null,
+            Role: req.body.role || null,
+            Assign: req.body.assign || null,
             Color: req.body.color,
             is_active: true,
         });
@@ -1152,6 +1152,41 @@ const deleteStatus = asyncHandler(async (req, res) => {
 
 });
 
+const editConfigurationStatus = asyncHandler(async (req, res) => {
+    let response = new Response();
+    try {
+        req.body.status.map((f) => {
+            let status = Status.findByIdAndUpdate(f._id, {
+                Role: f.role||null,
+                Assign: f.assign||null,
+                Color: f.color
+            });
+    })
+        // if (!req.body.groupName) {
+        //     response.message = "Group name is required.";
+        //     return res.status(400).json(response);
+        // }
+        
+        // const filter = { GroupName: req.body.groupName };
+        // const update = {
+        //     Color: req.body.color,
+        //     Role: req.body.role || null,
+        //     Assign: req.body.assign || null,
+        //     GroupName: req.body.groupName,
+        // };
+       
+        // const updateResult = await Status.updateMany(filter, update);
+
+        response.success = true;
+        response.message = `Status updated successfully`; 
+        response.data = ""; 
+       
+        return res.status(200).json(response);
+    } catch (err) {
+        response.message = "Error in updating Status. " + err.message;
+        return res.status(400).json(response);
+    }
+});
 
 const getApplicationSetting = asyncHandler(async (req, res) => {
     let response = new Response();
@@ -1568,6 +1603,7 @@ module.exports = {
     getStatus,
     getStatusById,
     deleteStatus,
+    editConfigurationStatus,
     addMailAddress,
     editMailAddress,
     changeMailAddressStatus,

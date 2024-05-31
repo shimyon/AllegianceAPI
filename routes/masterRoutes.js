@@ -60,6 +60,7 @@ const {
     getStatus,
     getStatusById,
     deleteStatus,
+    editConfigurationStatus,
     addMailAddress,
     editMailAddress,
     changeMailAddressStatus,
@@ -141,6 +142,7 @@ router.post('/changeStatus', protect, changeStatus)
 router.post('/getStatus', protect, getStatus)
 router.get('/Status/:id', protect, getStatusById)
 router.get('/deleteStatus/:id', protect, deleteStatus)
+router.post('/editConfigurationStatus', protect, editConfigurationStatus)
 
 router.post('/addMailAddress', protect, addMailAddress)
 router.post('/editMailAddress', protect, editMailAddress)
