@@ -1155,8 +1155,8 @@ const deleteStatus = asyncHandler(async (req, res) => {
 const editConfigurationStatus = asyncHandler(async (req, res) => {
     let response = new Response();
     try {
-        req.body.status.map((f) => {
-            let status = Status.findByIdAndUpdate(f._id, {
+        req.body.status.map(async(f) => {
+            let status = await Status.findByIdAndUpdate(f._id, {
                 Role: f.role||null,
                 Assign: f.assign||null,
                 Color: f.color
