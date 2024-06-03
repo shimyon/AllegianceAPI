@@ -1162,21 +1162,6 @@ const editConfigurationStatus = asyncHandler(async (req, res) => {
                 Color: f.color
             });
     })
-        // if (!req.body.groupName) {
-        //     response.message = "Group name is required.";
-        //     return res.status(400).json(response);
-        // }
-        
-        // const filter = { GroupName: req.body.groupName };
-        // const update = {
-        //     Color: req.body.color,
-        //     Role: req.body.role || null,
-        //     Assign: req.body.assign || null,
-        //     GroupName: req.body.groupName,
-        // };
-       
-        // const updateResult = await Status.updateMany(filter, update);
-
         response.success = true;
         response.message = `Status updated successfully`; 
         response.data = ""; 
