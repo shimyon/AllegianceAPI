@@ -132,7 +132,8 @@ const invoiceProductSchema = mongoose.Schema(
             type: Number
         },
         Unit: {
-            type: String
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Units'
         },
         Price: {
             type: Number

@@ -347,6 +347,7 @@ const Orderpdfcreate = asyncHandler(async (req, res) => {
                 path: 'Products',
                 populate: {
                     path: 'Product',
+                    path: 'Unit',
                 }
             })
             .populate("addedBy", 'name email')
@@ -399,7 +400,7 @@ const Orderpdfcreate = asyncHandler(async (req, res) => {
                 <td style="font-size: 11px;text-align:left"><b>${x.Product?.Name}</b><br/>${x.Product?.Description}</td>
                 <td style="font-size: 11px;text-align:center">${x.Quantity}</td>
                 <td style="font-size: 11px;text-align:center">${x.Price}</td>
-                <td style="font-size: 11px;text-align:center">${x.Unit}</td>
+                <td style="font-size: 11px;text-align:center">${x.Unit?.Name}</td>
                 <td style="font-size: 11px;text-align:center">${x.TotalAmount}</td>
                 </tr>`
         ))}
@@ -412,27 +413,27 @@ const Orderpdfcreate = asyncHandler(async (req, res) => {
         templateHtml = templateHtml.replace('{{token.gsttable}}', `<table border="1" cellpadding="10" cellspacing="0" style="width:100%;border-collapse: collapse;border-left:revert-layer">
         <tbody>
             <tr>
-            <th>S No.</th>
-            <th>Description</th>
-            <th>QTY</th>
-            <th>Unit Price</th>
-            <th>Unit</th>
-            <th>Amount</th>
-            <th>CGST</th>
-            <th>SGST</th>
-            <th>Total (₹)</th>
+            <th style="font-size: 11px;">S No.</th>
+            <th style="font-size: 11px;">Description</th>
+            <th style="font-size: 11px;">QTY</th>
+            <th style="font-size: 11px;">Unit Price</th>
+            <th style="font-size: 11px;">Unit</th>
+            <th style="font-size: 11px;">Amount</th>
+            <th style="font-size: 11px;">CGST</th>
+            <th style="font-size: 11px;">SGST</th>
+            <th style="font-size: 11px;">Total (₹)</th>
             </tr>
             ${customerList[0].Products.map((x, i) => (
             `<tr>
-            <td style="text-align:center">${i + 1}</td>
-            <td style="text-align:left"><b>${x.Product?.Name}</b><br/>${x.Product?.Description}</td>
-            <td style="text-align:center">${x.Quantity}</td>
-            <td style="text-align:center">${x.Price}</td>
-            <td style="text-align:center">${x.Unit}</td>
-            <td style="text-align:center">${x.TotalAmount}</td>
-            <td style="text-align:center">${(x.TotalAmount * x.CGST) / 100} (${x.CGST}%)</td>
-            <td style="text-align:center">${(x.TotalAmount * x.SGST) / 100} (${x.SGST}%)</td>
-            <td style="text-align:center">${x.FinalAmount}</td>
+            <td style="font-size: 11px;text-align:center">${i + 1}</td>
+            <td style="font-size: 11px;text-align:left"><b>${x.Product?.Name}</b><br/>${x.Product?.Description}</td>
+            <td style="font-size: 11px;text-align:center">${x.Quantity}</td>
+            <td style="font-size: 11px;text-align:center">${x.Price}</td>
+            <td style="font-size: 11px;text-align:center">${x.Unit?.Name}</td>
+            <td style="font-size: 11px;text-align:center">${x.TotalAmount}</td>
+            <td style="font-size: 11px;text-align:center">${(x.TotalAmount * x.CGST) / 100} (${x.CGST}%)</td>
+            <td style="font-size: 11px;text-align:center">${(x.TotalAmount * x.SGST) / 100} (${x.SGST}%)</td>
+            <td style="font-size: 11px;text-align:center">${x.FinalAmount}</td>
             </tr>`
         ))}
         </tbody>
@@ -440,25 +441,25 @@ const Orderpdfcreate = asyncHandler(async (req, res) => {
         templateHtml = templateHtml.replace('{{token.igsttable}}', `<table border="1" cellpadding="10" cellspacing="0" style="width:100%;border-collapse: collapse;border-left:revert-layer">
         <tbody>
             <tr>
-            <th>S No.</th>
-            <th>Description</th>
-            <th>QTY</th>
-            <th>Unit Price</th>
-            <th>Unit</th>
-            <th>Amount</th>
-            <th>IGST</th>
-            <th>Total (₹)</th>
+            <th style="font-size: 11px;">S No.</th>
+            <th style="font-size: 11px;">Description</th>
+            <th style="font-size: 11px;">QTY</th>
+            <th style="font-size: 11px;">Unit Price</th>
+            <th style="font-size: 11px;">Unit</th>
+            <th style="font-size: 11px;">Amount</th>
+            <th style="font-size: 11px;">IGST</th>
+            <th style="font-size: 11px;">Total (₹)</th>
             </tr>
             ${customerList[0].Products.map((x, i) => (
             `<tr>
-            <td style="text-align:center">${i + 1}</td>
-            <td style="text-align:left"><b>${x.Product?.Name}</b><br/>${x.Product?.Description}</td>
-            <td style="text-align:center">${x.Quantity}</td>
-            <td style="text-align:center">${x.Price}</td>
-            <td style="text-align:center">${x.Unit}</td>
-            <td style="text-align:center">${x.TotalAmount}</td>
-            <td style="text-align:center">${(x.TotalAmount * x.CGST) / 100 + (x.TotalAmount * x.SGST) / 100} (${(x.CGST * 2)}%)</td>
-            <td style="text-align:center">${x.FinalAmount}</td>
+            <td style="font-size: 11px;text-align:center">${i + 1}</td>
+            <td style="font-size: 11px;text-align:left"><b>${x.Product?.Name}</b><br/>${x.Product?.Description}</td>
+            <td style="font-size: 11px;text-align:center">${x.Quantity}</td>
+            <td style="font-size: 11px;text-align:center">${x.Price}</td>
+            <td style="font-size: 11px;text-align:center">${x.Unit?.Name}</td>
+            <td style="font-size: 11px;text-align:center">${x.TotalAmount}</td>
+            <td style="font-size: 11px;text-align:center">${(x.TotalAmount * x.CGST) / 100 + (x.TotalAmount * x.SGST) / 100} (${(x.CGST * 2)}%)</td>
+            <td style="font-size: 11px;text-align:center">${x.FinalAmount}</td>
             </tr>`
         ))}
         </tbody>
