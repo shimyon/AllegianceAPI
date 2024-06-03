@@ -42,9 +42,9 @@ const addSupport = asyncHandler(async (req, res) => {
             //     userId: f._id,
             //     Isread: false
             // }));
-            if (insertdata.length > 0) {
-                const savedNotification = await notificationModel.insertMany(insertdata);
-            }
+            // if (insertdata.length > 0) {
+            //     const savedNotification = await notificationModel.insertMany(insertdata);
+            // }
 
             return res.status(200).json(newSupport).end();
         }
