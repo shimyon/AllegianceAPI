@@ -326,24 +326,6 @@ const addNext = asyncHandler(async (req, res) => {
             NextTalk: supportNextOn._id
         });
         if (supportNextOn) {
-            let resuser = await User.find({ is_active: true, role: 'SuperAdmin' });
-            let date = new Date();
-            const savedNotification = await notificationModel.create({
-                description: `Support(${supportExisting.Company}) Next Action Date ${req.body.date}`,
-                date: date,
-                userId: supportExisting.Sales._id,
-                Isread: false
-            });
-            let insertdata = resuser.map(f => ({
-                description: `Support(${supportExisting.Company}) Next Action Date ${req.body.date}`,
-                date: date,
-                userId: f._id,
-                Isread: false
-            }));
-            if (insertdata.length > 0) {
-                const savedNotification = await notificationModel.insertMany(insertdata);
-            }
-
             return res.status(200).json({
                 success: true,
                 msg: "Data added successfully",
