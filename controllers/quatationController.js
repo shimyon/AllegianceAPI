@@ -346,12 +346,7 @@ const getQuatationById = asyncHandler(async (req, res) => {
     try {
         let QuatationList = await Quatation.find({ _id: req.params.id })
             .populate("Customer")
-            .populate({
-                path: 'Products',
-                populate: {
-                    path: 'Product',
-                }
-            })
+            .populate("Products")
             .populate("ShippingAddress")
             .populate("BillingAddress")
             .populate("Sales", 'name email')
@@ -373,12 +368,7 @@ const getQuatationById = asyncHandler(async (req, res) => {
 const moveToOrder = asyncHandler(async (req, res) => {
     try {
         let quatationExisting = await Quatation.findById(req.params.id).populate("Customer")
-            .populate({
-                path: 'Products',
-                populate: {
-                    path: 'Product',
-                }
-            })
+            .populate("Products")
             .populate("ShippingAddress")
             .populate("BillingAddress")
             .populate("Sales", 'name email')
@@ -452,7 +442,7 @@ const moveToOrder = asyncHandler(async (req, res) => {
             var pr = quatationExisting.Products[i];
             var newPr = {
                 OrderId: newOrder._id.toString(),
-                Product: pr.Product._id,
+                Product: pr.Product,
                 Quantity: pr.Quantity,
                 Unit: pr.Unit,
                 Price: pr.Price,
@@ -517,7 +507,7 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
         templateHtml = templateHtml.replace('{{token.ifsc}}', applicationSetting.IFSCNo || '')
         templateHtml = templateHtml.replace('{{token.accno}}', applicationSetting.AccNo || '')
         templateHtml = templateHtml.replace('{{token.OfficePhone2}}', applicationSetting.OfficePhone2 || '')
-        templateHtml = templateHtml.replace('{{token.OfficeAddress}}', applicationSetting.OfficeAddress.replace(/(\r\n|\n|\r)/gm, "<br>") || '')
+        templateHtml = templateHtml.replace('{{token.OfficeAddress}}', applicationSetting.OfficeAddress?.replace(/(\r\n|\n|\r)/gm, "<br>") || '')
         templateHtml = templateHtml.replace('{{token.QuatationName}}', customerList[0].QuatationName || '')
         templateHtml = templateHtml.replace('{{token.QuatationNo}}', customerList[0].QuatationCode || '')
         templateHtml = templateHtml.replace('{{token.CustomerNo}}', customerList[0].Customer?.CustomerCode || '')
@@ -530,7 +520,7 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
         templateHtml = templateHtml.replace('{{token.cmcompany}}', customerList[0].Customer?.Company)
         templateHtml = templateHtml.replace('{{token.cmname}}', cmname)
         templateHtml = templateHtml.replace('{{token.cmfirstname}}', customerList[0].Customer?.FirstName)
-        templateHtml = templateHtml.replace('{{token.termsandcondition}}', customerList[0].TermsAndCondition.replace(/(\r\n|\n|\r)/gm, "<br>") || '')
+        templateHtml = templateHtml.replace('{{token.termsandcondition}}', customerList[0].TermsAndCondition?.replace(/(\r\n|\n|\r)/gm, "<br>") || '')
         templateHtml = templateHtml.replace('{{token.BeforeTaxPrice}}', customerList[0].BeforeTaxPrice || '0')
         templateHtml = templateHtml.replace('{{token.Price}}', customerList[0].BeforeTaxPrice + customerList[0].OtherCharge)
         templateHtml = templateHtml.replace('{{token.AfterTaxPrice}}', customerList[0].AfterTaxPrice || '0')
@@ -547,7 +537,7 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
         <th style="font-size: 11px;text-align:left" colspan="7"><strong>DESCRIPTION OF WORK<strong></td>
             </tr>
             <tr>
-            <td style="font-size: 11px;text-align:left" colspan="7">${customerList[0].Descriptionofwork.replace(/(\r\n|\n|\r)/gm, "<br>")}</td>
+            <td style="font-size: 11px;text-align:left" colspan="7">${customerList[0].Descriptionofwork?.replace(/(\r\n|\n|\r)/gm, "<br>")}</td>
             </tr>
         <tr style="background-color: #ffd700;">
             <th style="font-size: 11px;">S No.</th>
@@ -557,10 +547,10 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
             <th style="font-size: 11px;">Unit</th>
             <th style="font-size: 11px;">Amount</th>
             </tr>
-            ${customerList[0].Products.map((x, i) => (
+            ${customerList[0].Products?.map((x, i) => (
             `<tr>
                 <td style="font-size: 11px;text-align:center">${i + 1}</td>
-                <td style="font-size: 11px;text-align:left"><b>${x.Product?.Name}</b><br/>${x.Product?.Description.replace(/(\r\n|\n|\r)/gm, "<br>")}</td>
+                <td style="font-size: 11px;text-align:left"><b>${x.Product?.Name}</b><br/>${x.Product?.Description?.replace(/(\r\n|\n|\r)/gm, "<br>")}</td>
                 <td style="font-size: 11px;text-align:center">${x.Quantity}</td>
                 <td style="font-size: 11px;text-align:center">${x.Price}</td>
                 <td style="font-size: 11px;text-align:center">${x.Unit?.Name}</td>
@@ -591,10 +581,10 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
             <th style="font-size: 11px;">SGST</th>
             <th style="font-size: 11px;">Total (₹)</th>
             </tr>
-            ${customerList[0].Products.map((x, i) => (
+            ${customerList[0].Products?.map((x, i) => (
             `<tr>
             <td style="font-size: 11px;text-align:center">${i + 1}</td>
-            <td style="font-size: 11px;text-align:left"><b>${x.Product?.Name}</b><br/>${x.Product?.Description}</td>
+            <td style="font-size: 11px;text-align:left"><b>${x.Product?.Name}</b><br/>${x.Product?.Description?.replace(/(\r\n|\n|\r)/gm, "<br>")}</td>
             <td style="font-size: 11px;text-align:center">${x.Quantity}</td>
             <td style="font-size: 11px;text-align:center">${x.Price}</td>
             <td style="font-size: 11px;text-align:center">${x.Unit?.Name}</td>
@@ -618,10 +608,10 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
             <th style="font-size: 11px;">IGST</th>
             <th style="font-size: 11px;">Total (₹)</th>
             </tr>
-            ${customerList[0].Products.map((x, i) => (
+            ${customerList[0].Products?.map((x, i) => (
             `<tr>
             <td style="font-size: 11px;text-align:center">${i + 1}</td>
-            <td style="font-size: 11px;text-align:left"><b>${x.Product?.Name}</b><br/>${x.Product?.Description}</td>
+            <td style="font-size: 11px;text-align:left"><b>${x.Product?.Name}</b><br/>${x.Product?.Description?.replace(/(\r\n|\n|\r)/gm, "<br>")}</td>
             <td style="font-size: 11px;text-align:center">${x.Quantity}</td>
             <td style="font-size: 11px;text-align:center">${x.Price}</td>
             <td style="font-size: 11px;text-align:center">${x.Unit?.Name}</td>

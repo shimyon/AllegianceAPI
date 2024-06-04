@@ -363,7 +363,7 @@ const Orderpdfcreate = asyncHandler(async (req, res) => {
         templateHtml = templateHtml.replace('{{token.ifsc}}', applicationSetting.IFSCNo || '')
         templateHtml = templateHtml.replace('{{token.accno}}', applicationSetting.AccNo || '')
         templateHtml = templateHtml.replace('{{token.OfficePhone2}}', applicationSetting.OfficePhone2 || '')
-        templateHtml = templateHtml.replace('{{token.OfficeAddress}}', applicationSetting.OfficeAddress.replace(/(\r\n|\n|\r)/gm, "<br>") || '')
+        templateHtml = templateHtml.replace('{{token.OfficeAddress}}', applicationSetting.OfficeAddress?.replace(/(\r\n|\n|\r)/gm, "<br>") || '')
         templateHtml = templateHtml.replace('{{token.OrderNo}}', customerList[0].OrderCode || '')
         templateHtml = templateHtml.replace('{{token.CustomerNo}}', customerList[0].Customer?.CustomerCode || '')
         templateHtml = templateHtml.replace('{{token.date}}', format('dd-MM-yyyy', customerList[0].OrderDate))
@@ -394,10 +394,10 @@ const Orderpdfcreate = asyncHandler(async (req, res) => {
             <th style="font-size: 11px;">Unit</th>
             <th style="font-size: 11px;">Amount</th>
             </tr>
-            ${customerList[0].Products.map((x, i) => (
+            ${customerList[0].Products?.map((x, i) => (
             `<tr>
                 <td style="font-size: 11px;text-align:center">${i + 1}</td>
-                <td style="font-size: 11px;text-align:left"><b>${x.Product?.Name}</b><br/>${x.Product?.Description}</td>
+                <td style="font-size: 11px;text-align:left"><b>${x.Product?.Name}</b><br/>${x.Product?.Description?.replace(/(\r\n|\n|\r)/gm, "<br>")}</td>
                 <td style="font-size: 11px;text-align:center">${x.Quantity}</td>
                 <td style="font-size: 11px;text-align:center">${x.Price}</td>
                 <td style="font-size: 11px;text-align:center">${x.Unit?.Name}</td>
@@ -405,7 +405,7 @@ const Orderpdfcreate = asyncHandler(async (req, res) => {
                 </tr>`
         ))}
         <tr style="background-color: #ffd700;">
-            <td style="font-size: 11px;text-align:left" colspan="5"><strong>${customerList[0].Note.replace(/(\r\n|\n|\r)/gm, "<br>")}<strong></td>
+            <td style="font-size: 11px;text-align:left" colspan="5"><strong>${customerList[0].Note?.replace(/(\r\n|\n|\r)/gm, "<br>")}<strong></td>
             <td style="font-size: 11px;text-align:center"><strong>₹&nbsp;&nbsp;${(customerList[0].BeforeTaxPrice + customerList[0].OtherCharge)}<strong></td>
             </tr>
         </tbody>
@@ -423,10 +423,10 @@ const Orderpdfcreate = asyncHandler(async (req, res) => {
             <th style="font-size: 11px;">SGST</th>
             <th style="font-size: 11px;">Total (₹)</th>
             </tr>
-            ${customerList[0].Products.map((x, i) => (
+            ${customerList[0].Products?.map((x, i) => (
             `<tr>
             <td style="font-size: 11px;text-align:center">${i + 1}</td>
-            <td style="font-size: 11px;text-align:left"><b>${x.Product?.Name}</b><br/>${x.Product?.Description}</td>
+            <td style="font-size: 11px;text-align:left"><b>${x.Product?.Name}</b><br/>${x.Product?.Description?.replace(/(\r\n|\n|\r)/gm, "<br>")}</td>
             <td style="font-size: 11px;text-align:center">${x.Quantity}</td>
             <td style="font-size: 11px;text-align:center">${x.Price}</td>
             <td style="font-size: 11px;text-align:center">${x.Unit?.Name}</td>
@@ -450,10 +450,10 @@ const Orderpdfcreate = asyncHandler(async (req, res) => {
             <th style="font-size: 11px;">IGST</th>
             <th style="font-size: 11px;">Total (₹)</th>
             </tr>
-            ${customerList[0].Products.map((x, i) => (
+            ${customerList[0].Products?.map((x, i) => (
             `<tr>
             <td style="font-size: 11px;text-align:center">${i + 1}</td>
-            <td style="font-size: 11px;text-align:left"><b>${x.Product?.Name}</b><br/>${x.Product?.Description}</td>
+            <td style="font-size: 11px;text-align:left"><b>${x.Product?.Name}</b><br/>${x.Product?.Description?.replace(/(\r\n|\n|\r)/gm, "<br>")}</td>
             <td style="font-size: 11px;text-align:center">${x.Quantity}</td>
             <td style="font-size: 11px;text-align:center">${x.Price}</td>
             <td style="font-size: 11px;text-align:center">${x.Unit?.Name}</td>
@@ -482,12 +482,7 @@ const getOrderById = asyncHandler(async (req, res) => {
     try {
         let customerList = await Order.find({ is_deleted: false, _id: req.params.id })
             .populate("Customer")
-            .populate({
-                path: 'Products',
-                populate: {
-                    path: 'Product',
-                }
-            })
+            .populate("Products")
             .populate("ShippingAddress")
             .populate("BillingAddress")
             .populate("Sales", 'name email')
@@ -536,12 +531,7 @@ const moveToInvoice = asyncHandler(async (req, res) => {
     try {
         let invoiceExisting = await Order.findById(req.params.id)
             .populate("Customer")
-            .populate({
-                path: 'Products',
-                populate: {
-                    path: 'Product',
-                }
-            })
+            .populate("Products")
             .populate("ShippingAddress")
             .populate("BillingAddress")
             .populate("Sales", 'name email')
@@ -613,7 +603,7 @@ const moveToInvoice = asyncHandler(async (req, res) => {
             var pr = invoiceExisting.Products[i];
             var newPr = {
                 InvoiceId: newInvoice._id.toString(),
-                Product: pr.Product._id,
+                Product: pr.Product,
                 Quantity: pr.Quantity,
                 Unit: pr.Unit,
                 Price: pr.Price,
