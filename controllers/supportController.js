@@ -6,6 +6,15 @@ const notificationModel = require('../models/notificationModel')
 const Support = SupportModel.SupportModal;
 const SupportnextOn = SupportModel.SupportNextOnModal;
 const { sendMail } = require('../middleware/sendMail')
+const moment = require('moment')
+var pdf = require('html-pdf')
+var fs = require('fs')
+var converter = require('number-to-words')
+var format = require('date-format')
+var test = require('tape')
+var path = require('path')
+const Template = require('../models/templateModel')
+const { generatePDF } = require('../services/pdfService')
 
 const addSupport = asyncHandler(async (req, res) => {
     try {
@@ -221,7 +230,6 @@ const getAllSupport = asyncHandler(async (req, res) => {
     }
 });
 
-
 const getSupportById = asyncHandler(async (req, res) => {
     try {
         let SupportList = await Support.find({ _id: req.params.id }).populate("Customer").populate("Sales").populate("Products").populate("addedBy", "_id name email role");
@@ -375,10 +383,7 @@ const getNext = asyncHandler(async (req, res) => {
     try {
         const next = await SupportnextOn.find({ supportId: req.params.id })
             .sort({ date: -1 })
-            .populate({
-                path: 'supportId',
-                populate: [{ path: "Customer", populate: { path: "Company" } }, { path: "addedBy" }]
-            });
+            .populate("user");
         res.status(200).json({
             success: true,
             msg: "",
@@ -392,9 +397,51 @@ const getNext = asyncHandler(async (req, res) => {
         });
     }
 });
+const Supportpdfcreate = asyncHandler(async (req, res) => {
+    try {
+        const data = await Template.findById(req.body.template_id)
+        var template = path.join(__dirname, '..', 'public', 'template.html')
+        var templateHtml = fs.readFileSync(template, 'utf8')
+        templateHtml = templateHtml.replace('{{Data}}', data.Detail)
+        var filename = template.replace('template.html', `Print.pdf`)
+        let customerList = await Support.find({ is_deleted: false, _id: req.body.id })
+            .populate("Customer").populate("Sales");
+            const next = await SupportnextOn.find({ supportId: req.body.id })
+            .sort({ date: -1 })
+            .populate("user");
+            templateHtml = templateHtml.replace('{{token.cmcompany}}', customerList[0].Customer?.Company)
+            templateHtml = templateHtml.replace('{{token.ticketdate}}', moment(customerList[0].TicketDate).format("DD-MMM-YY"))
+            templateHtml = templateHtml.replace('{{token.duedate}}', moment(customerList[0].DueDate).format("DD-MMM-YY"))
+            templateHtml = templateHtml.replace('{{token.sales}}', customerList[0].Sales?.Name)
+        templateHtml = templateHtml.replace('{{token.table}}', `<table border="1" cellpadding="10" cellspacing="0" style="width:100%;border-collapse: collapse;border-left:revert-layer">
+        <tbody>
+            <tr>
+            <th style="font-size: 11px;">Send by</th>
+            <th style="font-size: 11px;">Date</th>
+            <th style="font-size: 11px;">Note</th>
+            </tr>
+            ${next?.map((x, i) => (
+            `<tr>
+            <td style="font-size: 11px;text-align:left">${x.user?.Name}</td>
+            <td style="font-size: 11px;text-align:left">${moment(x.date).format("DD-MMM-YY")}</td>
+            <td style="font-size: 11px;text-align:left">${x.note}</td>
+            </tr>`
+        ))}
+        </tbody>
+        </table>`)
+        const pdfBufferHtml = await generatePDF(templateHtml);
+        res.contentType('application/pdf');
+        res.send(pdfBufferHtml);
 
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: err.message,
+            data: null,
+        });
+    }
 
-
+})
 
 module.exports = {
     addSupport,
@@ -406,5 +453,6 @@ module.exports = {
     deleteSupport,
     addNext,
     editNext,
-    getNext
+    getNext,
+    Supportpdfcreate
 }

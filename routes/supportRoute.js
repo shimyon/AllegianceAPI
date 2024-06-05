@@ -11,7 +11,8 @@ const {
     deleteSupport,
     addNext,
     editNext,
-    getNext
+    getNext,
+    Supportpdfcreate
  } = require('../controllers/supportController')
 const { protect } = require('../middleware/authMiddleware')
 
@@ -25,5 +26,6 @@ router.get('/deleteSupport/:id',protect, deleteSupport)
 router.post('/addNext', protect, addNext)
 router.post('/editNext', protect, editNext)
 router.get('/getNext/:id', protect, getNext)
+router.post('/Supportpdfcreate', Supportpdfcreate)
 
 module.exports = router
