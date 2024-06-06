@@ -412,7 +412,8 @@ const Supportpdfcreate = asyncHandler(async (req, res) => {
             templateHtml = templateHtml.replace('{{token.cmcompany}}', customerList[0].Customer?.Company)
             templateHtml = templateHtml.replace('{{token.ticketdate}}', moment(customerList[0].TicketDate).format("DD-MMM-YY"))
             templateHtml = templateHtml.replace('{{token.duedate}}', moment(customerList[0].DueDate).format("DD-MMM-YY"))
-            templateHtml = templateHtml.replace('{{token.sales}}', customerList[0].Sales?.Name)
+            templateHtml = templateHtml.replace('{{token.sales}}', customerList[0].Sales?.name)
+            templateHtml = templateHtml.replace('{{token.note}}', customerList[0].Note)
         templateHtml = templateHtml.replace('{{token.table}}', `<table border="1" cellpadding="10" cellspacing="0" style="width:100%;border-collapse: collapse;border-left:revert-layer">
         <tbody>
             <tr>
@@ -422,7 +423,7 @@ const Supportpdfcreate = asyncHandler(async (req, res) => {
             </tr>
             ${next?.map((x, i) => (
             `<tr>
-            <td style="font-size: 11px;text-align:left">${x.user?.Name}</td>
+            <td style="font-size: 11px;text-align:left">${x.user?.name}</td>
             <td style="font-size: 11px;text-align:left">${moment(x.date).format("DD-MMM-YY")}</td>
             <td style="font-size: 11px;text-align:left">${x.note}</td>
             </tr>`
