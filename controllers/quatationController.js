@@ -489,10 +489,10 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
             .populate("Customer")
             .populate({
                 path: 'Products',
-                populate: {
-                    path: 'Product',
-                    path: 'Unit',
-                }
+                populate: [
+                    { path: 'Product' },
+                    { path: 'Unit' }
+                ]
             })
             .populate("addedBy", 'name email')
         let cmname = customerList[0].Customer?.Title + ' ' + customerList[0].Customer?.FirstName + ' ' + customerList[0].Customer?.LastName;
@@ -533,27 +533,27 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
         templateHtml = templateHtml.replace('{{token.table}}', `<table border="1" bordercolor="#ccc" cellpadding="3" cellspacing="3"
         style="border-collapse:collapse;border-left:revert-layer;border-right:revert-layer;width:100%">
         <tbody>
-        <tr style="background-color: #ffd700;">
+        <tr style="background-color: #FFC000;">
         <th style="font-size: 11px;text-align:left" colspan="7"><strong>DESCRIPTION OF WORK<strong></td>
             </tr>
             <tr>
             <td style="font-size: 11px;text-align:left" colspan="7">${customerList[0].Descriptionofwork?.replace(/(\r\n|\n|\r)/gm, "<br>")}</td>
             </tr>
-        <tr style="background-color: #ffd700;">
+        <tr style="background-color: #FFC000;">
             <th style="font-size: 11px;">S No.</th>
             <th style="font-size: 11px;">Description</th>
-            <th style="font-size: 11px;">QTY</th>
-            <th style="font-size: 11px;">Unit Price</th>
             <th style="font-size: 11px;">Unit</th>
+            <th style="font-size: 11px;">QTY</th>
+            <th style="font-size: 11px;">Rate</th>
             <th style="font-size: 11px;">Amount</th>
             </tr>
             ${customerList[0].Products?.map((x, i) => (
             `<tr>
                 <td style="font-size: 11px;text-align:center">${i + 1}</td>
                 <td style="font-size: 11px;text-align:left"><b>${x.Product?.Name}</b><br/>${x.Product?.Description?.replace(/(\r\n|\n|\r)/gm, "<br>")}</td>
+                <td style="font-size: 11px;text-align:center">${x.Unit?.Name}</td>
                 <td style="font-size: 11px;text-align:center">${x.Quantity}</td>
                 <td style="font-size: 11px;text-align:center">${x.Price}</td>
-                <td style="font-size: 11px;text-align:center">${x.Unit?.Name}</td>
                 <td style="font-size: 11px;text-align:center">${x.TotalAmount}</td>
                 </tr>`
         ))}
@@ -562,9 +562,9 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
             <td style="font-size: 11px;text-align:left" colspan="4">Extra Charge:${customerList[0].OtherChargeName}</td>
             <td style="font-size: 11px;text-align:center">${customerList[0].OtherCharge}</td>
             </tr>
-        <tr style="background-color: #ffd700;">
+        <tr style="background-color: #FFC000;">
             <td style="font-size: 11px;text-align:left" colspan="5"><strong>${customerList[0].Note.replace(/(\r\n|\n|\r)/gm, "<br>")}<strong></td>
-            <td style="font-size: 11px;text-align:center"><strong>₹&nbsp;&nbsp;${(customerList[0].BeforeTaxPrice + customerList[0].OtherCharge)}<strong></td>
+            <td style="font-size: 11px;text-align:center"><strong>₹&nbsp;&nbsp;${customerList[0].FinalPrice}<strong></td>
             </tr>
         </tbody>
         </table>`)

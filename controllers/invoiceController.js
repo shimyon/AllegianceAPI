@@ -364,10 +364,10 @@ const Invoicepdfcreate = asyncHandler(async (req, res) => {
             .populate("Customer")
             .populate({
                 path: 'Products',
-                populate: {
-                    path: 'Product',
-                    path: 'Unit',
-                }
+                populate: [
+                    { path: 'Product' },
+                    { path: 'Unit' }
+                ]
             })
             .populate("addedBy", 'name email')
         let cmname = customerList[0].Customer?.Title || "" + customerList[0].Customer?.FirstName + ' ' + customerList[0].Customer?.LastName;
