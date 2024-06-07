@@ -21,6 +21,9 @@ const prospectSchema = mongoose.Schema(
         LastName: {
             type: String,
         },
+        Address: {
+            type: String
+        },
         Industry: {
             type: String
         },

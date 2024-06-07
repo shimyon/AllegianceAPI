@@ -28,6 +28,9 @@ const leadSchema = mongoose.Schema(
         Email: {
             type: String,
         },
+        Address: {
+            type: String
+        },
         City: {
             type: String
         },

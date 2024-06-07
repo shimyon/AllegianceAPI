@@ -520,7 +520,7 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
         templateHtml = templateHtml.replace('{{token.cmcompany}}', customerList[0].Customer?.Company)
         templateHtml = templateHtml.replace('{{token.cmname}}', cmname)
         templateHtml = templateHtml.replace('{{token.cmfirstname}}', customerList[0].Customer?.FirstName)
-        templateHtml = templateHtml.replace('{{token.termsandcondition}}', customerList[0].TermsAndCondition?.replace(/(\r\n|\n|\r)/gm, "<br>") || '')
+        templateHtml = templateHtml.replace('{{token.termsandcondition}}', customerList[0].TermsAndCondition || '')
         templateHtml = templateHtml.replace('{{token.BeforeTaxPrice}}', customerList[0].BeforeTaxPrice || '0')
         templateHtml = templateHtml.replace('{{token.Price}}', customerList[0].BeforeTaxPrice + customerList[0].OtherCharge)
         templateHtml = templateHtml.replace('{{token.AfterTaxPrice}}', customerList[0].AfterTaxPrice || '0')
