@@ -72,8 +72,9 @@ const leadSchema = mongoose.Schema(
             default: null
         },
         Status: {
-            type: String
-        },
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Status'
+          },
         Stage: {
             type: String
         },

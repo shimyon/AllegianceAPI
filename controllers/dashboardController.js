@@ -43,7 +43,7 @@ const saveNewsFeed = asyncHandler(async (req, res, fileName) => {
             DateTime: req.body.DateTime,
             image: fileName.replace(",", ""),
             is_active: true,
-            addedBy: req.user._id,           
+            addedBy: req.user._id,
 
         });
         return res.status(200).json({
@@ -171,10 +171,65 @@ const removeNewsFeed = asyncHandler(async (req, res) => {
 const getDashboardCount = asyncHandler(async (req, res) => {
     try {
         user = await Dashboard.findOne({ UserId: req.user._id }).populate("UserId");
+        const now = new Date();
+        const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+        const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+        
+        const leadresults = await Lead.aggregate([
+            {
+                $match: {
+                    createdAt: { $gte: sixMonthsAgo }
+                }
+            },
+            {
+                $match: {
+                    is_active: true
+                }
+            },
+            {
+                $group: {
+                    _id: { year: { $year: "$LeadSince" }, month: { $month: "$LeadSince" } },
+                    count: { $sum: 1 }
+                }
+            },
+            {
+                $sort: { "_id.year": 1, "_id.month": 1 }
+            }
+        ]);
+        const prospectresults = await Prospect.aggregate([
+            {
+                $match: {
+                    createdAt: { $gte: sixMonthsAgo }
+                }
+            },
+            {
+                $match: {
+                    is_active: true
+                }
+            },
+            {
+                $group: {
+                    _id: { year: { $year: "$createdAt" }, month: { $month: "$createdAt" } },
+                    count: { $sum: 1 }
+                }
+            },
+            {
+                $sort: { "_id.year": 1, "_id.month": 1 }
+            }
+        ]);
+
+        const leadcount = leadresults.map(result => ({
+            month: `${months[result._id.month - 1]} ${result._id.year}`,
+            count: result.count
+        }));
+        const prospectcount = prospectresults.map(result => ({
+            month: `${months[result._id.month - 1]} ${result._id.year}`,
+            count: result.count
+        }));
 
         return res.status(200).json({
             success: true,
-            data: user
+            data: {user,leadcount,prospectcount}
         }).end();
     } catch (err) {
         return res.status(400).json({

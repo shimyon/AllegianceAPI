@@ -77,11 +77,9 @@ const prospectSchema = mongoose.Schema(
         Tags: {
             type: String
         },
-        Status: {
-            type: String
-        },
         Stage: {
-            type: String
+           type: mongoose.Schema.Types.ObjectId,
+            ref: 'Status'
         },
         Source: {
             type: mongoose.Schema.Types.ObjectId,

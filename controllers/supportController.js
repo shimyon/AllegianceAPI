@@ -146,7 +146,22 @@ const getAllSupport = asyncHandler(async (req, res) => {
             },
             {
                 $unwind: {
-                    path: '$Products'
+                    path: '$Products',
+                    preserveNullAndEmptyArrays: true
+                },
+            },
+            {
+                '$lookup': {
+                    'from': 'status',
+                    'localField': 'Status',
+                    'foreignField': '_id',
+                    'as': 'Status'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$Status',
+                    preserveNullAndEmptyArrays: true
                 },
             },
             {

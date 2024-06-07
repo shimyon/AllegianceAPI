@@ -89,8 +89,9 @@ const orderSchema = mongoose.Schema(
             type: String
         },
         Status: {
-            type: String
-        },
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Status'
+          },
         is_deleted: {
             type: Boolean,
             default: false

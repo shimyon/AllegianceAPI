@@ -191,7 +191,7 @@ const getAllProspect = asyncHandler(async (req, res) => {
                     path: "user",
                     select: "_id name email role"
                 }
-            }).populate("Product").populate("OtherContact").populate("Sales").populate("Source").populate("addedBy", "_id name email role").sort({ createdAt: -1 })
+            }).populate("Product").populate("OtherContact").populate("Sales").populate("Stage").populate("Source").populate("addedBy", "_id name email role").sort({ createdAt: -1 })
             .exec((err, result) => {
                 if (err) {
                     return res.status(400).json({
@@ -270,7 +270,7 @@ const getProspectById = asyncHandler(async (req, res) => {
                     path: "user",
                     select: "_id name email role"
                 }
-            }).populate("Product").populate("OtherContact").populate("Sales").populate("Source").populate("addedBy", "_id name email role")
+            }).populate("Product").populate("OtherContact").populate("Sales").populate("Stage").populate("Source").populate("addedBy", "_id name email role")
         return res.status(200).json({
             success: true,
             data: prospectList
@@ -510,7 +510,7 @@ const importFiletoDB = asyncHandler(async (req, res, fileName) => {
                         LastName: val[4],
                         Mobile: val[5],
                         Email: val[6],
-                        Stage: "New",
+                        Stage: null,
                         Website: val[9],
                         Industry: val[10],
                         Segment: val[11],

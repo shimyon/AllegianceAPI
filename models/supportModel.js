@@ -34,10 +34,10 @@ const supportSchema = mongoose.Schema(
         {
             type:String
         },
-        Status:
-        {
-            type:String
-        },
+        Status: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Status'
+          },
         ReasonForCancel:
         {
             type:String
