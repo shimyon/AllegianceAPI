@@ -9,6 +9,7 @@ const LeadOtherContact = LeadModal.LeadOtherContact;
 const Master = require('../models/masterModel')
 const Product = Master.ProductModal;
 const Source = Master.SourceModal;
+const Status = Master.StatusModal;
 const ProspectModal = require('../models/prospectModel')
 const Prospect = ProspectModal.ProspectsModal;
 const uploadFile = require("../middleware/uploadFileMiddleware");
@@ -440,12 +441,12 @@ const moveToProspect = asyncHandler(async (req, res) => {
                 msg: "Lead already moved to prospect. "
             });
         }
-
         await Lead.findByIdAndUpdate(req.params.id, {
             Stage: "Prospect",
-            ProspectStage: "New",
             StageDate: new Date()
         });
+        
+        let status = await Status.find({GroupName:"Prospects"}).lean();
         let interaction = await Prospect.create({
             Company: leadExisting.Company,
             Title: leadExisting.Title,
@@ -464,7 +465,7 @@ const moveToProspect = asyncHandler(async (req, res) => {
             Source: leadExisting.Source,
             Requirements: leadExisting.Requirements,
             addedBy: req.user._id,
-            Stage: "New",
+            Stage: status[0],
             StageDate: new Date(),
             is_active: true
         });

@@ -81,10 +81,6 @@ const leadSchema = mongoose.Schema(
         StageDate: {
             type: Date
         },
-        ProspectStage: {
-            //this will use for prospect stages
-            type: String
-        },
         is_active: {
             type: Boolean,
             default: true

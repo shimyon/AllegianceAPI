@@ -6,6 +6,12 @@ const LeadModal = require('../models/leadModel')
 const Lead = LeadModal.LeadsModal;
 const ProspectModal = require('../models/prospectModel')
 const Prospect = ProspectModal.ProspectsModal;
+const OrderModal = require('../models/orderModel')
+const Order = OrderModal.OrderModal
+const InvoiceModal = require('../models/invoiceModel')
+const Invoice = InvoiceModal.InvoiceModal
+const QuatationModal = require('../models/quatationModel')
+const Quatation = QuatationModal.QuatationModal
 const ContractModel = require('../models/contractModel')
 const Contract = ContractModel.ContractModal;
 const SupportModel = require('../models/supportModel')
@@ -173,8 +179,7 @@ const getDashboardCount = asyncHandler(async (req, res) => {
         user = await Dashboard.findOne({ UserId: req.user._id }).populate("UserId");
         const now = new Date();
         const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
-        const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-        
+
         const leadresults = await Lead.aggregate([
             {
                 $match: {
@@ -196,6 +201,7 @@ const getDashboardCount = asyncHandler(async (req, res) => {
                 $sort: { "_id.year": 1, "_id.month": 1 }
             }
         ]);
+
         const prospectresults = await Prospect.aggregate([
             {
                 $match: {
@@ -218,18 +224,115 @@ const getDashboardCount = asyncHandler(async (req, res) => {
             }
         ]);
 
-        const leadcount = leadresults.map(result => ({
-            month: `${months[result._id.month - 1]} ${result._id.year}`,
-            count: result.count
-        }));
-        const prospectcount = prospectresults.map(result => ({
-            month: `${months[result._id.month - 1]} ${result._id.year}`,
-            count: result.count
-        }));
+        const orderresults = await Order.aggregate([
+            {
+                $match: {
+                    createdAt: { $gte: sixMonthsAgo }
+                }
+            },
+            {
+                $group: {
+                    _id: { year: { $year: "$createdAt" }, month: { $month: "$createdAt" } },
+                    count: { $sum: 1 }
+                }
+            },
+            {
+                $sort: { "_id.year": 1, "_id.month": 1 }
+            }
+        ]);
+
+        const invoiceresults = await Invoice.aggregate([
+            {
+                $match: {
+                    createdAt: { $gte: sixMonthsAgo }
+                }
+            },
+            {
+                $group: {
+                    _id: { year: { $year: "$createdAt" }, month: { $month: "$createdAt" } },
+                    count: { $sum: 1 }
+                }
+            },
+            {
+                $sort: { "_id.year": 1, "_id.month": 1 }
+            }
+        ]);
+
+        const quatationresults = await Quatation.aggregate([
+            {
+                $match: {
+                    createdAt: { $gte: sixMonthsAgo }
+                }
+            },
+            {
+                $group: {
+                    _id: { year: { $year: "$createdAt" }, month: { $month: "$createdAt" } },
+                    count: { $sum: 1 }
+                }
+            },
+            {
+                $sort: { "_id.year": 1, "_id.month": 1 }
+            }
+        ]);
+
+        const leadcount = Array.from({ length: 6 }, (_, i) => {
+            const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            const month = date.getMonth() + 1; // JavaScript months are 0-based
+            const year = date.getFullYear();
+            const record = leadresults.find(r => r._id.year === year && r._id.month === month);
+            return {
+                month: `${date.toLocaleString('default', { month: 'long' })}-${year}`,
+                count: record ? record.count : 0
+            };
+        }).reverse();
+
+        const prospectcount = Array.from({ length: 6 }, (_, i) => {
+            const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            const month = date.getMonth() + 1; // JavaScript months are 0-based
+            const year = date.getFullYear();
+            const record = prospectresults.find(r => r._id.year === year && r._id.month === month);
+            return {
+                month: `${date.toLocaleString('default', { month: 'long' })}-${year}`,
+                count: record ? record.count : 0
+            };
+        }).reverse();
+
+        const ordercount = Array.from({ length: 6 }, (_, i) => {
+            const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            const month = date.getMonth() + 1; // JavaScript months are 0-based
+            const year = date.getFullYear();
+            const record = orderresults.find(r => r._id.year === year && r._id.month === month);
+            return {
+                month: `${date.toLocaleString('default', { month: 'long' })}-${year}`,
+                count: record ? record.count : 0
+            };
+        }).reverse();
+
+        const invoicecount = Array.from({ length: 6 }, (_, i) => {
+            const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            const month = date.getMonth() + 1; // JavaScript months are 0-based
+            const year = date.getFullYear();
+            const record = invoiceresults.find(r => r._id.year === year && r._id.month === month);
+            return {
+                month: `${date.toLocaleString('default', { month: 'long' })}-${year}`,
+                count: record ? record.count : 0
+            };
+        }).reverse();
+
+        const quatationcount = Array.from({ length: 6 }, (_, i) => {
+            const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+            const month = date.getMonth() + 1; // JavaScript months are 0-based
+            const year = date.getFullYear();
+            const record = quatationresults.find(r => r._id.year === year && r._id.month === month);
+            return {
+                month: `${date.toLocaleString('default', { month: 'long' })}-${year}`,
+                count: record ? record.count : 0
+            };
+        }).reverse();
 
         return res.status(200).json({
             success: true,
-            data: {user,leadcount,prospectcount}
+            data: { user, leadcount, prospectcount, ordercount, invoicecount, quatationcount }
         }).end();
     } catch (err) {
         return res.status(400).json({
