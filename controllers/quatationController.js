@@ -550,7 +550,7 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
             ${customerList[0].Products?.map((x, i) => (
             `<tr>
                 <td style="font-size: 11px;text-align:center">${i + 1}</td>
-                <td style="font-size: 11px;text-align:left"><b>${x.Product?.Name}</b><br/>${x.Product?.Description?.replace(/(\r\n|\n|\r)/gm, "<br>")}</td>
+                <td style="font-size: 11px;text-align:left"><b>${x.Product?.Name}</b><br/>${x.Note?.replace(/(\r\n|\n|\r)/gm, "<br>")}</td>
                 <td style="font-size: 11px;text-align:center">${x.Unit?.Name}</td>
                 <td style="font-size: 11px;text-align:center">${x.Quantity}</td>
                 <td style="font-size: 11px;text-align:center">${x.Price}</td>
@@ -584,7 +584,7 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
             ${customerList[0].Products?.map((x, i) => (
             `<tr>
             <td style="font-size: 11px;text-align:center">${i + 1}</td>
-            <td style="font-size: 11px;text-align:left"><b>${x.Product?.Name}</b><br/>${x.Product?.Description?.replace(/(\r\n|\n|\r)/gm, "<br>")}</td>
+            <td style="font-size: 11px;text-align:left"><b>${x.Product?.Name}</b><br/>${x.Note?.replace(/(\r\n|\n|\r)/gm, "<br>")}</td>
             <td style="font-size: 11px;text-align:center">${x.Quantity}</td>
             <td style="font-size: 11px;text-align:center">${x.Price}</td>
             <td style="font-size: 11px;text-align:center">${x.Unit?.Name}</td>
@@ -611,7 +611,7 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
             ${customerList[0].Products?.map((x, i) => (
             `<tr>
             <td style="font-size: 11px;text-align:center">${i + 1}</td>
-            <td style="font-size: 11px;text-align:left"><b>${x.Product?.Name}</b><br/>${x.Product?.Description?.replace(/(\r\n|\n|\r)/gm, "<br>")}</td>
+            <td style="font-size: 11px;text-align:left"><b>${x.Product?.Name}</b><br/>${x.Note?.replace(/(\r\n|\n|\r)/gm, "<br>")}</td>
             <td style="font-size: 11px;text-align:center">${x.Quantity}</td>
             <td style="font-size: 11px;text-align:center">${x.Price}</td>
             <td style="font-size: 11px;text-align:center">${x.Unit?.Name}</td>
