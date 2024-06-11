@@ -5,6 +5,8 @@ const User = require('../models/userModel')
 const notificationModel = require('../models/notificationModel')
 const Support = SupportModel.SupportModal;
 const SupportnextOn = SupportModel.SupportNextOnModal;
+const Master = require('../models/masterModel')
+const Status = Master.StatusModal;
 const { sendMail } = require('../middleware/sendMail')
 const moment = require('moment')
 var pdf = require('html-pdf')
@@ -23,6 +25,7 @@ const addSupport = asyncHandler(async (req, res) => {
         if (ticketNo.length > 0) {
             maxTicket = ticketNo[0].TicketNo + 1;
         }
+        let status = await Status.find({GroupName:"Support"}).lean();
         const newSupport = await Support.create({
             Customer: req.body.customer,
             TicketNo: maxTicket,
@@ -31,7 +34,7 @@ const addSupport = asyncHandler(async (req, res) => {
             TicketDate: req.body.ticketDate,
             DueDate: req.body.dueDate,
             Note: req.body.note,
-            Status: "Pending",
+            Status: status[0],
             Sales: req.body.sales,
             Products: req.body.product,
             addedBy: req.user._id
