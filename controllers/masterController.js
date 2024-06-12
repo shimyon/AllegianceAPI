@@ -1098,9 +1098,12 @@ const changeStatus = asyncHandler(async (req, res) => {
 })
 const getStatus = asyncHandler(async (req, res) => {
     let response = new Response();
-
+    var condition = { is_active: req.body.active };
+    if (req.body.GroupName) {
+        condition.GroupName = req.body.GroupName
+    }
     try {
-        let Statuss = await Status.find({ is_active: req.body.active });
+        let Statuss = await Status.find(condition);
 
         response.success = true;
         response.data = Statuss;
