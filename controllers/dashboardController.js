@@ -17,6 +17,7 @@ const Contract = ContractModel.ContractModal;
 const SupportModel = require('../models/supportModel')
 const Support = SupportModel.SupportModal;
 const uploadFile = require("../middleware/uploadFileMiddleware");
+const moment = require('moment');
 
 
 const addNewsFeed = asyncHandler(async (req, res) => {
@@ -192,6 +193,11 @@ const getDashboardCount = asyncHandler(async (req, res) => {
                 }
             },
             {
+                $match: {
+                     Stage: "New"
+                }
+            },
+            {
                 $group: {
                     _id: { year: { $year: "$LeadSince" }, month: { $month: "$LeadSince" } },
                     count: { $sum: 1 }
@@ -281,7 +287,7 @@ const getDashboardCount = asyncHandler(async (req, res) => {
             const year = date.getFullYear();
             const record = leadresults.find(r => r._id.year === year && r._id.month === month);
             return {
-                month: `${date.toLocaleString('default', { month: 'long' })}-${year}`,
+                month: `${date.toLocaleString('default', { month: 'short' })}-${moment(date).format("YY")}`,
                 count: record ? record.count : 0
             };
         }).reverse();
@@ -292,7 +298,7 @@ const getDashboardCount = asyncHandler(async (req, res) => {
             const year = date.getFullYear();
             const record = prospectresults.find(r => r._id.year === year && r._id.month === month);
             return {
-                month: `${date.toLocaleString('default', { month: 'long' })}-${year}`,
+                month: `${date.toLocaleString('default', { month: 'short' })}-${moment(date).format("YY")}`,
                 count: record ? record.count : 0
             };
         }).reverse();
@@ -303,7 +309,7 @@ const getDashboardCount = asyncHandler(async (req, res) => {
             const year = date.getFullYear();
             const record = orderresults.find(r => r._id.year === year && r._id.month === month);
             return {
-                month: `${date.toLocaleString('default', { month: 'long' })}-${year}`,
+                month: `${date.toLocaleString('default', { month: 'short' })}-${moment(date).format("YY")}`,
                 count: record ? record.count : 0
             };
         }).reverse();
@@ -314,7 +320,7 @@ const getDashboardCount = asyncHandler(async (req, res) => {
             const year = date.getFullYear();
             const record = invoiceresults.find(r => r._id.year === year && r._id.month === month);
             return {
-                month: `${date.toLocaleString('default', { month: 'long' })}-${year}`,
+                month: `${date.toLocaleString('default', { month: 'short' })}-${moment(date).format("YY")}`,
                 count: record ? record.count : 0
             };
         }).reverse();
@@ -325,14 +331,20 @@ const getDashboardCount = asyncHandler(async (req, res) => {
             const year = date.getFullYear();
             const record = quatationresults.find(r => r._id.year === year && r._id.month === month);
             return {
-                month: `${date.toLocaleString('default', { month: 'long' })}-${year}`,
+                month: `${date.toLocaleString('default', { month: 'short' })}-${moment(date).format("YY")}`,
                 count: record ? record.count : 0
             };
         }).reverse();
 
+        const leadCountArray = [['Month', 'Count'], ...leadcount.map(item => [item.month, item.count])];
+        const prospectCountArray = [['Month', 'Count'], ...prospectcount.map(item => [item.month, item.count])];
+        const orderCountArray = [['Month', 'Count'], ...ordercount.map(item => [item.month, item.count])];
+        const invoiceCountArray = [['Month', 'Count'], ...invoicecount.map(item => [item.month, item.count])];
+        const quatationCountArray = [['Month', 'Count'], ...quatationcount.map(item => [item.month, item.count])];
+        
         return res.status(200).json({
             success: true,
-            data: { user, leadcount, prospectcount, ordercount, invoicecount, quatationcount }
+            data: { user, leadCountArray, prospectCountArray, orderCountArray, invoiceCountArray, quatationCountArray }
         }).end();
     } catch (err) {
         return res.status(400).json({
