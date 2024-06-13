@@ -341,9 +341,11 @@ const deleteSupport = asyncHandler(async (req, res) => {
 
 const addNext = asyncHandler(async (req, res) => {
     try {
+        const date = req.body.date || Date.now();
         let supportNextOn = await SupportnextOn.create({
             supportId: req.body.supportid,
             date: req.body.date,
+            date: date,
             note: req.body.note,
             user: req.user._id
         });
