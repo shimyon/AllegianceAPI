@@ -8,6 +8,7 @@ const InvoiceModal = require('../models/invoiceModel')
 const Invoice = InvoiceModal.InvoiceModal
 const InvoiceProduct = InvoiceModal.InvoiceProductModal
 const Master = require('../models/masterModel')
+const Status = Master.StatusModal;
 const ApplicationSetting = Master.ApplicationSettingModal;
 var pdf = require('html-pdf')
 var fs = require('fs')
@@ -51,6 +52,7 @@ const addOrder = asyncHandler(async (req, res) => {
         else {
             code = applicationSetting.OrderPrefix + maxOrder + `/${financialYearStart}-${financialYearEnd}` + applicationSetting.OrderSuffix;
         }
+        let status = await Status.find({GroupName:"Orders"}).lean();
         const newOrder = await Order.create({
             OrderNo: maxOrder,
             OrderCode: code,
@@ -59,7 +61,7 @@ const addOrder = asyncHandler(async (req, res) => {
             Descriptionofwork: req.body.Descriptionofwork,
             ShippingAddress: req.body.shippingAddress || null,
             BillingAddress: req.body.billingAddress || null,
-            Status: "New",
+            Status: status[0],
             Stage: "New",
             Sales: req.body.sales,
             addedBy: req.user._id,
@@ -263,6 +265,20 @@ const getAllOrder = asyncHandler(async (req, res) => {
             {
                 $unwind: {
                     path: '$Customer'
+                },
+            },
+            {
+                '$lookup': {
+                    'from': 'status',
+                    'localField': 'Status',
+                    'foreignField': '_id',
+                    'as': 'Status'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$Status',
+                    preserveNullAndEmptyArrays: true
                 },
             },
             {
