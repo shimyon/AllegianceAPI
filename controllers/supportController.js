@@ -117,7 +117,7 @@ const getAllSupport = asyncHandler(async (req, res) => {
         if (req.body.status) {
             query.push(
                 {
-                    $match: { Status: req.body.status },
+                    $match: { Status: ObjectId(req.body.status) }
                 });
         }
         if (req.body.sales) {

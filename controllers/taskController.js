@@ -11,6 +11,7 @@ const addtask = asyncHandler(async (req, res) => {
         let taskadd = await Task.create({
             Name: req.body.Name,
             Description: req.body.Description,
+            Reason: req.body.Reason,
             Status: req.body.Status||null,
             Assign: req.body.Assign||null,
             Reporter: req.body.Reporter||null,
@@ -84,6 +85,7 @@ const edittask = asyncHandler(async (req, res) => {
         await Task.findByIdAndUpdate(req.body.id, {
             Name: req.body.Name,
             Description: req.body.Description,
+            Reason: req.body.Reason,
             Status: req.body.Status,
             Assign: req.body.Assign,
             Reporter: req.body.Reporter,

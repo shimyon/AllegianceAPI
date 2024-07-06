@@ -213,6 +213,25 @@ const getAllLead = asyncHandler(async (req, res) => {
                 $sort: { createdAt: -1 }
             }
         );
+        query.push(
+            {
+                '$lookup': {
+                    'from': 'sources',
+                    'localField': 'Source',
+                    'foreignField': '_id',
+                    'as': 'Source'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$Source'
+                },
+            },
+            {
+                $sort: { createdAt: -1 }
+            }
+        );
+
         if (req.body.month) {
             if (req.body.month == "this") {
                 const currentMonth = new Date().getMonth() + 1;
