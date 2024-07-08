@@ -17,18 +17,53 @@ var test = require('tape')
 var path = require('path')
 const Template = require('../models/templateModel')
 const { generatePDF } = require('../services/pdfService')
+const ApplicationSetting = Master.ApplicationSettingModal;
+
 
 const addSupport = asyncHandler(async (req, res) => {
     try {
-        let ticketNo = await Support.find({}, { TicketNo: 1, _id: 0 }).sort({ TicketNo: -1 }).limit(1);
+        // let ticketNo = await Support.find({}, { TicketNo: 1, _id: 0 }).sort({ TicketNo: -1 }).limit(1);
+        // let maxTicket = 1;
+        // if (ticketNo.length > 0) {
+        //     maxTicket = ticketNo[0].TicketNo + 1;
+        // }
+       
+        let TicketNo = await Support.find({}, { TicketNo: 1, _id: 0 }).sort({ TicketNo: -1 }).limit(1);
         let maxTicket = 1;
-        if (ticketNo.length > 0) {
-            maxTicket = ticketNo[0].TicketNo + 1;
+        if (TicketNo.length > 0) {
+            maxTicket = TicketNo[0].TicketNo + 1;
         }
-        let status = await Status.find({GroupName:"Support"}).lean();
+        let applicationSetting = await ApplicationSetting.findOne();
+        let code = "";
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
+        let financialYearStart, financialYearEnd;
+        if (currentDate.getMonth() >= 3) {
+            financialYearStart = currentYear;
+            financialYearEnd = currentYear + 1;
+        } else {
+            financialYearStart = currentYear - 1;
+            financialYearEnd = currentYear;
+        }
+        if (applicationSetting.Ticket == true) {
+            code = req.body.ticketCode;
+        }
+        else {
+            code = applicationSetting.TicketPrefix + maxTicket + `/${financialYearStart}-${financialYearEnd}` + applicationSetting.TicketSuffix;
+        }
+        const existTicketCode = await Support.findOne({ $or: [{ TicketCode: req.body.ticketcode }] });
+        if (existTicketCode) {
+            return res.status(200).json({
+                success: false,
+                msg: "support Ticket already exist with same support Ticket code.",
+                data: null,
+            });
+        }
+        let status = await Status.find({ GroupName: "Support" }).lean();
         const newSupport = await Support.create({
             Customer: req.body.customer,
             TicketNo: maxTicket,
+            TicketCode: code,
             Qty: req.body.qty,
             Price: req.body.price,
             TicketDate: req.body.ticketDate,
@@ -42,7 +77,8 @@ const addSupport = asyncHandler(async (req, res) => {
         if (newSupport) {
             let date = new Date();
             const savedNotification = await notificationModel.create({
-                description: `Support(${newSupport.TicketNo}) entry has been created`,
+                // description: `Support(${newSupport.TicketNo}) entry has been created`,
+                description: `Support(${newSupport.TicketCode}) entry has been created`,
                 date: date,
                 userId: newSupport.Sales,
                 Isread: false
@@ -57,7 +93,6 @@ const addSupport = asyncHandler(async (req, res) => {
             // if (insertdata.length > 0) {
             //     const savedNotification = await notificationModel.insertMany(insertdata);
             // }
-
             return res.status(200).json(newSupport).end();
         }
         else {
@@ -86,7 +121,8 @@ const editSupport = asyncHandler(async (req, res) => {
 
         await Support.findByIdAndUpdate(req.body.id, {
             Customer: req.body.customer,
-            TicketNo: req.body.ticketNo,
+            TicketCode: req.body.ticketcode,
+            // TicketNo: req.body.ticketNo,
             Qty: req.body.qty,
             Price: req.body.price,
             TicketDate: req.body.ticketDate,
@@ -424,14 +460,15 @@ const Supportpdfcreate = asyncHandler(async (req, res) => {
         var filename = template.replace('template.html', `Print.pdf`)
         let customerList = await Support.find({ is_deleted: false, _id: req.body.id })
             .populate("Customer").populate("Sales");
-            const next = await SupportnextOn.find({ supportId: req.body.id })
+        const next = await SupportnextOn.find({ supportId: req.body.id })
             .sort({ date: -1 })
             .populate("user");
-            templateHtml = templateHtml.replace('{{token.cmcompany}}', customerList[0].Customer?.Company)
-            templateHtml = templateHtml.replace('{{token.ticketdate}}', moment(customerList[0].TicketDate).format("DD-MMM-YY"))
-            templateHtml = templateHtml.replace('{{token.duedate}}', moment(customerList[0].DueDate).format("DD-MMM-YY"))
-            templateHtml = templateHtml.replace('{{token.sales}}', customerList[0].Sales?.name)
-            templateHtml = templateHtml.replace('{{token.note}}', customerList[0].Note)
+        templateHtml = templateHtml.replace('{{token.cmcompany}}', customerList[0].Customer?.Company)
+        templateHtml = templateHtml.replace('{{token.ticketdate}}', moment(customerList[0].TicketDate).format("DD-MMM-YY"))
+        templateHtml = templateHtml.replace('{{token.duedate}}', moment(customerList[0].DueDate).format("DD-MMM-YY"))
+        templateHtml = templateHtml.replace('{{token.sales}}', customerList[0].Sales?.name)
+        templateHtml = templateHtml.replace('{{token.note}}', customerList[0].Note)
+        templateHtml = templateHtml.replace('{{token.TicketNo}}', customerList[0].TicketCode || '')
         templateHtml = templateHtml.replace('{{token.table}}', `<table border="1" cellpadding="10" cellspacing="0" style="width:100%;border-collapse: collapse;border-left:revert-layer">
         <tbody>
             <tr>
