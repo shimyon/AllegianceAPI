@@ -12,7 +12,7 @@ const supportSchema = mongoose.Schema(
         TicketNo:
         {
             type:Number,
-            // unique: true,
+            unique: true,
         },
         Qty:
         {

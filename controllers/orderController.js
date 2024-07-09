@@ -9,6 +9,7 @@ const Invoice = InvoiceModal.InvoiceModal
 const InvoiceProduct = InvoiceModal.InvoiceProductModal
 const Master = require('../models/masterModel')
 const ApplicationSetting = Master.ApplicationSettingModal;
+const Status = Master.StatusModal;
 var pdf = require('html-pdf')
 var fs = require('fs')
 var converter = require('number-to-words')
@@ -51,6 +52,7 @@ const addOrder = asyncHandler(async (req, res) => {
         else {
             code = applicationSetting.OrderPrefix + maxOrder + `/${financialYearStart}-${financialYearEnd}` + applicationSetting.OrderSuffix;
         }
+        let status = await Status.find({ GroupName: "Order" }).lean();
         const newOrder = await Order.create({
             OrderNo: maxOrder,
             OrderCode: code,
@@ -59,9 +61,9 @@ const addOrder = asyncHandler(async (req, res) => {
             Descriptionofwork: req.body.Descriptionofwork,
             ShippingAddress: req.body.shippingAddress || null,
             BillingAddress: req.body.billingAddress || null,
-            Status: "New",
+            Status: status[0],
             Stage: "New",
-            Sales: req.body.sales,
+            Sales: req.body.sales || null,
             addedBy: req.user._id,
             BeforeTaxPrice: req.body.BeforeTaxPrice,
             CGST: req.body.CGST,
@@ -157,7 +159,7 @@ const editOrder = asyncHandler(async (req, res) => {
             Descriptionofwork: req.body.Descriptionofwork,
             ShippingAddress: req.body.shippingAddress || null,
             BillingAddress: req.body.billingAddress || null,
-            Sales: req.body.sales,
+            Sales: req.body.sales || null,
             addedBy: req.user._id,
             BeforeTaxPrice: req.body.BeforeTaxPrice,
             CGST: req.body.CGST,
@@ -311,6 +313,7 @@ const getAllOrder = asyncHandler(async (req, res) => {
                 },
             }
         )
+        const lastOrderCode = await Order.find().sort({createdAt: -1});
         const orderList = await Order.aggregate(query).exec();
         if (orderList.length == 0) {
             return res.status(200).json({
@@ -321,7 +324,8 @@ const getAllOrder = asyncHandler(async (req, res) => {
         else {
             return res.status(200).json({
                 success: true,
-                data: orderList[0]
+                data: orderList[0],
+                lastOrderCode: lastOrderCode[0],
             }).end();
         }
     } catch (err) {

@@ -159,9 +159,11 @@ const removeCustomer = asyncHandler(async (req, res) => {
 const getAllCustomer = asyncHandler(async (req, res) => {
     try {
         let customerList = await Customer.find({ is_active: req.body.active }).populate("BillingAddress").populate("ShippingAddress").populate("addedBy", 'name email').sort({ createdAt: -1 })
+        const lastCustomerCode = await Customer.find().sort({createdAt: -1});
         return res.status(200).json({
             success: true,
-            data: customerList
+            data: customerList,
+            lastCustomerCode : lastCustomerCode[0]
         }).end();
     } catch (err) {
         return res.status(400).json({

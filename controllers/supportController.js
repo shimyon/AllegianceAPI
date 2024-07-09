@@ -27,7 +27,6 @@ const addSupport = asyncHandler(async (req, res) => {
         // if (ticketNo.length > 0) {
         //     maxTicket = ticketNo[0].TicketNo + 1;
         // }
-       
         let TicketNo = await Support.find({}, { TicketNo: 1, _id: 0 }).sort({ TicketNo: -1 }).limit(1);
         let maxTicket = 1;
         if (TicketNo.length > 0) {
@@ -46,7 +45,7 @@ const addSupport = asyncHandler(async (req, res) => {
             financialYearEnd = currentYear;
         }
         if (applicationSetting.Ticket == true) {
-            code = req.body.ticketCode;
+            code = req.body.ticketcode;
         }
         else {
             code = applicationSetting.TicketPrefix + maxTicket + `/${financialYearStart}-${financialYearEnd}` + applicationSetting.TicketSuffix;
@@ -263,6 +262,7 @@ const getAllSupport = asyncHandler(async (req, res) => {
             }
         )
         const SupportList = await Support.aggregate(query).exec();
+        let lastTicketCode = await Support.find().sort({ createdAt: -1 })
         if (SupportList.length == 0) {
             return res.status(200).json({
                 success: true,
@@ -272,7 +272,8 @@ const getAllSupport = asyncHandler(async (req, res) => {
         else {
             return res.status(200).json({
                 success: true,
-                data: SupportList[0]
+                data: SupportList[0],
+                lastTicketCode: lastTicketCode[0],
             }).end();
         }
     } catch (err) {
