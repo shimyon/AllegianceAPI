@@ -8,6 +8,7 @@ const OrderModal = require('../models/orderModel')
 const Order = OrderModal.OrderModal
 const OrderProduct = OrderModal.OrderProductModal
 const Master = require('../models/masterModel')
+const Status = Master.StatusModal;
 const ApplicationSetting = Master.ApplicationSettingModal;
 var pdf = require('html-pdf')
 var fs = require('fs')
@@ -410,6 +411,7 @@ const moveToOrder = asyncHandler(async (req, res) => {
         else {
             code = applicationSetting.OrderPrefix + maxOrder + `/${financialYearStart}-${financialYearEnd}` + applicationSetting.OrderSuffix;
         }
+        let status = await Status.find({GroupName:"Orders"}).lean();
         const newOrder = await Order.create({
             OrderNo: maxOrder,
             OrderCode: code,
@@ -419,7 +421,7 @@ const moveToOrder = asyncHandler(async (req, res) => {
             Descriptionofwork: quatationExisting.Descriptionofwork,
             ShippingAddress: quatationExisting.ShippingAddress,
             BillingAddress: quatationExisting.BillingAddress,
-            Status: "New",
+            Status: status[0],
             Stage: "New",
             Sales: quatationExisting.Sales,
             addedBy: req.user._id,

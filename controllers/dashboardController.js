@@ -174,6 +174,30 @@ const removeNewsFeed = asyncHandler(async (req, res) => {
     }
 
 });
+const deleteNewsFeed = asyncHandler(async (req, res) => {
+    try {
+        await NewsFeed.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {
+            if (err) {
+                return res.status(401).json({
+                    success: false,
+                    msg: err
+                }).end();
+            } else {
+                return res.status(200).json({
+                    success: true,
+                    msg: "NewsFeed removed. ",
+                }).end();
+            }
+        });
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in process. " + err.message,
+            data: null,
+        });
+    }
+
+});
 
 const getDashboardCount = asyncHandler(async (req, res) => {
     try {
@@ -360,5 +384,6 @@ module.exports = {
     getAllNews,
     getNewsById,
     removeNewsFeed,
+    deleteNewsFeed,
     getDashboardCount
 }

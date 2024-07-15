@@ -8,6 +8,7 @@ const InvoiceModal = require('../models/invoiceModel')
 const Invoice = InvoiceModal.InvoiceModal
 const InvoiceProduct = InvoiceModal.InvoiceProductModal
 const Master = require('../models/masterModel')
+const Status = Master.StatusModal;
 const ApplicationSetting = Master.ApplicationSettingModal;
 const Status = Master.StatusModal;
 var pdf = require('html-pdf')
@@ -52,7 +53,7 @@ const addOrder = asyncHandler(async (req, res) => {
         else {
             code = applicationSetting.OrderPrefix + maxOrder + `/${financialYearStart}-${financialYearEnd}` + applicationSetting.OrderSuffix;
         }
-        let status = await Status.find({ GroupName: "Order" }).lean();
+        let status = await Status.find({GroupName:"Orders"}).lean();
         const newOrder = await Order.create({
             OrderNo: maxOrder,
             OrderCode: code,
@@ -265,6 +266,20 @@ const getAllOrder = asyncHandler(async (req, res) => {
             {
                 $unwind: {
                     path: '$Customer'
+                },
+            },
+            {
+                '$lookup': {
+                    'from': 'status',
+                    'localField': 'Status',
+                    'foreignField': '_id',
+                    'as': 'Status'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$Status',
+                    preserveNullAndEmptyArrays: true
                 },
             },
             {
