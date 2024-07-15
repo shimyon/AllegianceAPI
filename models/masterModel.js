@@ -242,6 +242,16 @@ const ApplicationSettingSchema = mongoose.Schema(
         InvoiceSuffix: {
             type: String
         },
+        Ticket: {
+            type: Boolean,
+            default: false
+        },
+        TicketPrefix: {
+            type: String
+        },
+        TicketSuffix: {
+            type: String
+        },
         Customer: {
             type: Boolean,
             default: false

@@ -329,8 +329,8 @@ const getAllInvoice = asyncHandler(async (req, res) => {
                     data: "$stage2",
                 },
             }
-        )
-
+        )        
+        const lastInvoiceCode = await Invoice.find().sort({ createdAt : -1})
         const invoiceList = await Invoice.aggregate(query).exec();
         if (invoiceList.length == 0) {
             return res.status(200).json({
@@ -341,7 +341,8 @@ const getAllInvoice = asyncHandler(async (req, res) => {
         else {
             return res.status(200).json({
                 success: true,
-                data: invoiceList[0]
+                data: invoiceList[0],
+                lastInvoiceCode: lastInvoiceCode[0],
             }).end();
         }
     } catch (err) {

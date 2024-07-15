@@ -9,6 +9,9 @@ const taskSchema = mongoose.Schema(
     Description: {
       type: String
     },
+    Reason: {
+      type: String
+    },
     Status: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Status'

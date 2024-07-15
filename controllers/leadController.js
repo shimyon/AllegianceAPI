@@ -26,6 +26,7 @@ const addLead = asyncHandler(async (req, res) => {
             LastName: req.body.lastname,
             Address: req.body.Address,
             Designation: req.body.designation,
+            Icon: req.body.icon,
             Mobile: req.body.mobile,
             Email: req.body.email,
             City: req.body.city,
@@ -98,6 +99,7 @@ const editLead = asyncHandler(async (req, res) => {
             LastName: req.body.lastname,
             Address: req.body.Address,
             Designation: req.body.designation,
+            Icon: req.body.icon,
             Mobile: req.body.mobile,
             Email: req.body.email,
             City: req.body.city,
@@ -213,6 +215,25 @@ const getAllLead = asyncHandler(async (req, res) => {
                 $sort: { createdAt: -1 }
             }
         );
+        query.push(
+            {
+                '$lookup': {
+                    'from': 'sources',
+                    'localField': 'Source',
+                    'foreignField': '_id',
+                    'as': 'Source'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$Source'
+                },
+            },
+            {
+                $sort: { createdAt: -1 }
+            }
+        );
+
         if (req.body.month) {
             if (req.body.month == "this") {
                 const currentMonth = new Date().getMonth() + 1;
@@ -570,6 +591,7 @@ const importFiletoDB = asyncHandler(async (req, res, fileName) => {
                         InCharge: val[14],
                         NextTalkon: val[16],
                         NextTalkNotes: val[17],
+                        Icon: val[18],
                         addedBy: req.user._id,
                         Stage: "New",
                         LeadSince: new Date(),

@@ -6,9 +6,13 @@ const supportSchema = mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Customers'
         },
+        TicketCode: {
+            type: String,
+        },
         TicketNo:
         {
-            type:Number
+            type:Number,
+            unique: true,
         },
         Qty:
         {

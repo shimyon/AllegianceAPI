@@ -321,6 +321,7 @@ const getAllQuatation = asyncHandler(async (req, res) => {
                 },
             }
         )
+        const lastQuationCode = await Quatation.find().sort({createdAt: -1});
         const quatationList = await Quatation.aggregate(query).exec();
         if (quatationList.length == 0) {
             return res.status(200).json({
@@ -331,7 +332,8 @@ const getAllQuatation = asyncHandler(async (req, res) => {
         else {
             return res.status(200).json({
                 success: true,
-                data: quatationList[0]
+                data: quatationList[0],
+                lastQuationCode: lastQuationCode[0],
             }).end();
         }
     } catch (err) {

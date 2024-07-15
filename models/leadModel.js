@@ -58,6 +58,9 @@ const leadSchema = mongoose.Schema(
         Notes: {
             type: String
         },
+        Icon: {
+            type: String
+        },
         InCharge: {
             type: String
         },
