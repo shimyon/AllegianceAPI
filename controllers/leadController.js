@@ -213,9 +213,7 @@ const getAllLead = asyncHandler(async (req, res) => {
             },
             {
                 $sort: { createdAt: -1 }
-            }
-        );
-        query.push(
+            },
             {
                 '$lookup': {
                     'from': 'sources',
@@ -226,7 +224,8 @@ const getAllLead = asyncHandler(async (req, res) => {
             },
             {
                 $unwind: {
-                    path: '$Source'
+                    path: '$Source',
+                    preserveNullAndEmptyArrays: true
                 },
             },
             {

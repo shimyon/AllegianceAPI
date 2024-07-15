@@ -10,7 +10,6 @@ const InvoiceProduct = InvoiceModal.InvoiceProductModal
 const Master = require('../models/masterModel')
 const Status = Master.StatusModal;
 const ApplicationSetting = Master.ApplicationSettingModal;
-const Status = Master.StatusModal;
 var pdf = require('html-pdf')
 var fs = require('fs')
 var converter = require('number-to-words')
