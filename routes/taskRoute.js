@@ -9,7 +9,8 @@ const {
     gettaskById,
     gettaskboardCount,
     addtaskcomment,
-    getAlltaskcomment
+    getAlltaskcomment,
+    taskreason
  } = require('../controllers/taskController')
 const { protect } = require('../middleware/authMiddleware')
 
@@ -20,5 +21,6 @@ router.post('/getAll', protect, getAlltask)
 router.get('/getById/:id', protect, gettaskById)
 router.get('/gettaskboardCount',protect, gettaskboardCount)
 router.post('/addtaskcomment', protect, addtaskcomment)
+router.post('/taskreason', protect, taskreason)
 router.post('/getAlltaskcomment',protect, getAlltaskcomment)
 module.exports = router

@@ -11,7 +11,6 @@ const addtask = asyncHandler(async (req, res) => {
         let taskadd = await Task.create({
             Name: req.body.Name,
             Description: req.body.Description,
-            Reason: req.body.Reason,
             Status: req.body.Status||null,
             Assign: req.body.Assign||null,
             Reporter: req.body.Reporter||null,
@@ -85,7 +84,6 @@ const edittask = asyncHandler(async (req, res) => {
         await Task.findByIdAndUpdate(req.body.id, {
             Name: req.body.Name,
             Description: req.body.Description,
-            Reason: req.body.Reason,
             Status: req.body.Status,
             Assign: req.body.Assign,
             Reporter: req.body.Reporter,
@@ -103,6 +101,24 @@ const edittask = asyncHandler(async (req, res) => {
             })
         }
 
+        return res.status(200).json({
+            success: true,
+            msg: "Task Updated",
+        }).end();
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in creating Task. " + err.message,
+            data: null,
+        });
+    }
+
+});
+const taskreason = asyncHandler(async (req, res) => {
+    try {
+        await Task.findByIdAndUpdate(req.body.taskId, {
+            Reason: req.body.Reason
+        });
         return res.status(200).json({
             success: true,
             msg: "Task Updated",
@@ -250,5 +266,6 @@ module.exports = {
     gettaskById,
     gettaskboardCount,
     addtaskcomment,
-    getAlltaskcomment
+    getAlltaskcomment,
+    taskreason
 }
