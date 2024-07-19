@@ -45,7 +45,11 @@ const taskSchema = mongoose.Schema(
     is_active: {
       type: Boolean,
       default: true
-    }
+    },
+    LeadId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Leads'
+  },
   },
   {
     timestamps: true,
