@@ -11,6 +11,11 @@ const getAllNotificationByUId = asyncHandler(async (req, res) => {
                 $match: { userId: ObjectId(req.body.userId) }
             });
         }
+        if (req.body.filter) {
+            query.push({
+                $match: { Isread: JSON.parse(req.body.filter) }
+            });
+        }
         query.push(
             {
                 $sort: { createdAt: -1 }
