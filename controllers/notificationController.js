@@ -98,7 +98,27 @@ const setmarkasread = asyncHandler(async (req, res) => {
     }
 })
 
-module.exports = { getAllNotificationByUId, setmarkasread }
+const setmarkasallread = asyncHandler(async (req, res) => {
+    try {
+        const notification =await notificationModel.updateMany({ "userId": req.user._id}, {
+            Isread: true
+        });
+        res.status(200).json({
+            success: notification != null,
+            msg: "",
+            data: notification,
+        }).end();
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in getting status. " + err.message,
+            data: null,
+        });
+
+    }
+})
+
+module.exports = { getAllNotificationByUId, setmarkasread ,setmarkasallread}
 
 
 
