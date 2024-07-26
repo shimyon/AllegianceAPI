@@ -82,7 +82,7 @@ const getNotification = asyncHandler(async (req, res) => {
         const notification = await notificationModel.find({ userId: req.body.userId })
             .sort({ createdAt: -1 })
             .limit(5);
-        const notificationcount = await notificationModel.find({ userId: req.body.userId, isRead: false }).count();
+        const notificationcount = await notificationModel.find({ userId: req.body.userId, Isread: false }).count();
         if (notification.length == 0) {
             return res.status(200).json({
                 success: true,
