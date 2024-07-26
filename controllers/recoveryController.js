@@ -28,6 +28,7 @@ const addRecovery = asyncHandler(async (req, res) => {
             // let insertdata = resuser.map(f => ({
             //     description: `Recovery(${newRecovery.RecoveryNo}) entry has been created`,
             //     date: date,
+            //     link: "Recovery",
             //     userId: f._id,
             //     Isread: false
             // }));

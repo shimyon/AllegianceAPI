@@ -9,6 +9,9 @@ const notificationSchema = mongoose.Schema(
         date: {
             type: Date,
         },
+        link: {
+            type: String,
+        },
         userId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User'

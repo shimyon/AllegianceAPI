@@ -114,6 +114,7 @@ const addQuatation = asyncHandler(async (req, res) => {
             const savedNotification = await notificationModel.create({
                 description: `Quatation(${newQuatation.QuatationCode}) entry has been created`,
                 date: date,
+                link: "Quotes",
                 userId: newQuatation.Sales,
                 Isread: false
             });
@@ -121,6 +122,7 @@ const addQuatation = asyncHandler(async (req, res) => {
             // let insertdata = resuser.map(f => ({
             //     description: `Quatation(${newQuatation.QuatationCode}) entry has been created`,
             //     date: date,
+            //     link: "Quotes",
             //     userId: f._id,
             //     Isread: false
             // }));

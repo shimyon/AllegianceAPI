@@ -53,6 +53,7 @@ const addLead = asyncHandler(async (req, res) => {
             const savedNotification = await notificationModel.create({
                 description: `lead(${req.body.company}) entry has been created`,
                 date: date,
+                link: "Leads",
                 userId: newLead.Sales,
                 Isread: false
             });
@@ -60,6 +61,7 @@ const addLead = asyncHandler(async (req, res) => {
             // let insertdata = resuser.map(f => ({
             //     description: `lead(${req.body.company}) entry has been created`,
             //     date: date,
+            //     link:"Leads",
             //     userId: f._id,
             //     Isread: false
             // }));
@@ -497,6 +499,7 @@ const moveToProspect = asyncHandler(async (req, res) => {
             const savedNotification = await notificationModel.create({
                 description: `lead(${interaction.Company}) Moved to prospect`,
                 date: date,
+                link: "Prospects",
                 userId: interaction.Sales._id,
                 Isread: false
             });
@@ -504,6 +507,7 @@ const moveToProspect = asyncHandler(async (req, res) => {
             // let insertdata = resuser.map(f => ({
             //     description: `lead(${interaction.Company}) Moved to prospect`,
             //     date: date,
+            //     link:"Prospects",
             //     userId: f._id,
             //     Isread: false
             // }));

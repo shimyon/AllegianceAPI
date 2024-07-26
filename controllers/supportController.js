@@ -79,6 +79,7 @@ const addSupport = asyncHandler(async (req, res) => {
                 // description: `Support(${newSupport.TicketNo}) entry has been created`,
                 description: `Support(${newSupport.TicketCode}) entry has been created`,
                 date: date,
+                link: "Support",
                 userId: newSupport.Sales,
                 Isread: false
             });
@@ -86,6 +87,7 @@ const addSupport = asyncHandler(async (req, res) => {
             // let insertdata = resuser.map(f => ({
             //     description: `Support(${newSupport.TicketNo}) entry has been created`,
             //     date: date,
+            //     link: "Support",
             //     userId: f._id,
             //     Isread: false
             // }));

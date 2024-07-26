@@ -113,6 +113,7 @@ const addOrder = asyncHandler(async (req, res) => {
             const savedNotification = await notificationModel.create({
                 description: `Order(${newOrder.OrderCode}) entry has been created`,
                 date: date,
+                link: "Orders",
                 userId: newOrder.Sales,
                 Isread: false
             });
@@ -120,6 +121,7 @@ const addOrder = asyncHandler(async (req, res) => {
             // let insertdata = resuser.map(f => ({
             //     description: `Order(${newOrder.OrderCode}) entry has been created`,
             //     date: date,
+            //     link: "Orders",
             //     userId: f._id,
             //     Isread: false
             // }));

@@ -116,6 +116,7 @@ const addInvoice = asyncHandler(async (req, res) => {
             const savedNotification = await notificationModel.create({
                 description: `Invoice(${newInvoice.InvoiceCode}) entry has been created`,
                 date: date,
+                link:"Invoices",
                 userId: newInvoice.Sales,
                 Isread: false
             });
@@ -123,6 +124,7 @@ const addInvoice = asyncHandler(async (req, res) => {
             // let insertdata = resuser.map(f => ({
             //     description: `Invoice(${newInvoice.InvoiceCode}) entry has been created`,
             //     date: date,
+            //     link:"Invoices",
             //     userId: f._id,
             //     Isread: false
             // }));

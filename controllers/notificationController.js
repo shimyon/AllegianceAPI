@@ -77,7 +77,32 @@ const getAllNotificationByUId = asyncHandler(async (req, res) => {
         });
     }
 })
-
+const getNotification = asyncHandler(async (req, res) => {
+    try {
+        const notification = await notificationModel.find({ userId: req.body.userId })
+            .sort({ createdAt: -1 })
+            .limit(5);
+        const notificationcount = await notificationModel.find({ userId: req.body.userId, isRead: false }).count();
+        if (notification.length == 0) {
+            return res.status(200).json({
+                success: true,
+                data: { Count: 0, data: notification }
+            }).end();
+        }
+        else {
+            return res.status(200).json({
+                success: true,
+                data: { Count: notificationcount, data: notification }
+            }).end();
+        }
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in getting status. " + err.message,
+            data: null,
+        });
+    }
+})
 const setmarkasread = asyncHandler(async (req, res) => {
     try {
         const { id } = req.body;
@@ -100,7 +125,7 @@ const setmarkasread = asyncHandler(async (req, res) => {
 
 const setmarkasallread = asyncHandler(async (req, res) => {
     try {
-        const notification =await notificationModel.updateMany({ "userId": req.user._id}, {
+        const notification = await notificationModel.updateMany({ "userId": req.user._id }, {
             Isread: true
         });
         res.status(200).json({
@@ -118,7 +143,7 @@ const setmarkasallread = asyncHandler(async (req, res) => {
     }
 })
 
-module.exports = { getAllNotificationByUId, setmarkasread ,setmarkasallread}
+module.exports = { getAllNotificationByUId, getNotification, setmarkasread, setmarkasallread }
 
 
 

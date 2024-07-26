@@ -47,6 +47,7 @@ const addProspect = asyncHandler(async (req, res) => {
             const savedNotification = await notificationModel.create({
                 description: `Prospect(${req.body.company}) entry has been created`,
                 date: date,
+                link: "Prospects",
                 userId: prospect.Sales,
                 Isread: false
             });
@@ -54,6 +55,7 @@ const addProspect = asyncHandler(async (req, res) => {
             // let insertdata = resuser.map(f => ({
             //     description: `Prospect(${req.body.company}) entry has been created`,
             //     date: date,
+            //     link: "Prospects",
             //     userId: f._id,
             //     Isread: false
             // }));
