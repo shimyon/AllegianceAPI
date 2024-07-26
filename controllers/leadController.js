@@ -12,6 +12,8 @@ const Source = Master.SourceModal;
 const Status = Master.StatusModal;
 const ProspectModal = require('../models/prospectModel')
 const Prospect = ProspectModal.ProspectsModal;
+const TaskModal = require('../models/taskModel');
+const Task = TaskModal.TaskModal;
 const uploadFile = require("../middleware/uploadFileMiddleware");
 const readXlsxFile = require('read-excel-file/node')
 const path = require("path");
@@ -318,10 +320,11 @@ const getAllLead = asyncHandler(async (req, res) => {
 
 const getLeadById = asyncHandler(async (req, res) => {
     try {
-        let leadList = await Lead.find({ Stage: "New", _id: req.params.id }).populate("Source").populate("OtherContact").populate("Product").populate("Sales").populate("NextTalk").populate("addedBy")
+        let leadList = await Lead.find({ Stage: "New", _id: req.params.id }).populate("Source").populate("OtherContact").populate("Product").populate("Sales").populate("NextTalk").populate("addedBy");
+        let tasklist = await Task.find({ is_active: true, LeadId: req.params.id}).populate("Status").populate("Assign");
         return res.status(200).json({
             success: true,
-            data: leadList
+            data: {leadList, tasklist}
         }).end();
     } catch (err) {
         return res.status(400).json({
