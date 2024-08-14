@@ -503,6 +503,15 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
             .populate("addedBy", 'name email')
         let cmname = customerList[0].Customer?.Title + ' ' + customerList[0].Customer?.FirstName + ' ' + customerList[0].Customer?.LastName;
         let cmaddress = customerList[0].Customer?.Address + ' ' + '<br/>' + customerList[0].Customer?.City + ' ' + customerList[0].Customer?.State;
+        let extraChargeRow = '';
+        if (customerList[0].OtherCharge && customerList[0].OtherCharge !== 0) {
+            extraChargeRow = `
+    <tr>
+        <td style="font-size: 11px;text-align:center"></td>
+        <td style="font-size: 11px;text-align:left" colspan="4">Extra Charge: ${customerList[0].OtherChargeName}</td>
+        <td style="font-size: 11px;text-align:center">${customerList[0].OtherCharge}</td>
+    </tr>`;
+        }
         templateHtml = templateHtml.replace('{{token.companytitle}}', applicationSetting.CompanyTitle || '')
         templateHtml = templateHtml.replace('{{token.companysubtitle}}', applicationSetting.CompanySubTitle || '')
         templateHtml = templateHtml.replace('{{token.OfficeEmail}}', applicationSetting.OfficeEmail || '')
@@ -562,12 +571,8 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
                 <td style="font-size: 11px;text-align:center">${x.Price}</td>
                 <td style="font-size: 11px;text-align:center">${x.TotalAmount}</td>
                 </tr>`
-        ))}
-        <tr>
-            <td style="font-size: 11px;text-align:center"></td>
-            <td style="font-size: 11px;text-align:left" colspan="4">Extra Charge:${customerList[0].OtherChargeName}</td>
-            <td style="font-size: 11px;text-align:center">${customerList[0].OtherCharge}</td>
-            </tr>
+        )).join('')}
+        ${extraChargeRow}
         <tr style="background-color: #FFC000;">
             <td style="font-size: 11px;text-align:left" colspan="5"><strong>${customerList[0].Note.replace(/(\r\n|\n|\r)/gm, "<br>")}<strong></td>
             <td style="font-size: 11px;text-align:center"><strong>₹&nbsp;&nbsp;${customerList[0].FinalPrice}<strong></td>
