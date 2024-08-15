@@ -50,6 +50,10 @@ const taskSchema = mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Leads'
   },
+  ProspectId:{
+     type: mongoose.Schema.Types.ObjectId,
+      ref: 'Prospects'
+  }
   },
   {
     timestamps: true,

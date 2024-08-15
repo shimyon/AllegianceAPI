@@ -9,7 +9,8 @@ const moment = require('moment')
 const addtask = asyncHandler(async (req, res) => {
     try {
         let taskadd = await Task.create({
-            LeadId: req.body.id,
+            LeadId: req.body.LeadId||null,
+            ProspectId: req.body.ProspectId||null,
             Name: req.body.Name,
             Description: req.body.Description,
             Status: req.body.Status||null,

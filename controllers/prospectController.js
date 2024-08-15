@@ -9,6 +9,8 @@ const uploadFile = require("../middleware/uploadFileMiddleware");
 const path = require("path");
 const readXlsxFile = require('read-excel-file/node')
 const Master = require('../models/masterModel')
+const TaskModal = require('../models/taskModel');
+const Task = TaskModal.TaskModal;
 const Product = Master.ProductModal;
 const Source = Master.SourceModal;
 const CustomerModal = require('../models/customerModel')
@@ -23,7 +25,7 @@ const addProspect = asyncHandler(async (req, res) => {
             GSTNo: req.body.gstno,
             FirstName: req.body.firstname,
             LastName: req.body.lastname,
-            Address: req.body.Address,
+            Address: req.body.address,
             Mobile: req.body.mobile,
             Email: req.body.email,
             Website: req.body.website,
@@ -95,7 +97,7 @@ const editProspect = asyncHandler(async (req, res) => {
             GSTNo: req.body.gstno,
             FirstName: req.body.firstname,
             LastName: req.body.lastname,
-            Address: req.body.Address,
+            Address: req.body.address,
             Mobile: req.body.mobile,
             Email: req.body.email,
             Website: req.body.website,
@@ -265,6 +267,7 @@ const getAllProspect = asyncHandler(async (req, res) => {
 
 const getProspectById = asyncHandler(async (req, res) => {
     try {
+      
         let prospectList = await Prospect.find({ _id: req.params.id }).populate(
             {
                 path: "NextTalk",
@@ -273,9 +276,12 @@ const getProspectById = asyncHandler(async (req, res) => {
                     select: "_id name email role"
                 }
             }).populate("Product").populate("OtherContact").populate("Sales").populate("Stage").populate("Source").populate("addedBy", "_id name email role")
-        return res.status(200).json({
+            let prospectasklist = await Task.find({ is_active: true, ProspectId: req.params.id }).populate("Status").populate("Assign");    
+             return res.status(200).json({
             success: true,
-            data: prospectList
+            data: {prospectList, prospectasklist}
+          
+           
         }).end();
     } catch (err) {
         return res.status(400).json({
