@@ -91,6 +91,9 @@ const leadSchema = mongoose.Schema(
         RemoveReason: {
             type: String
         },
+        CustomerRefrence: {
+            type: String
+        },
         OtherContact: [{
             type: mongoose.Schema.Types.ObjectId,
             ref: 'LeadOtherContact'
