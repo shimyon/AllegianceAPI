@@ -611,7 +611,7 @@ const getStates = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let States = await State.find({ is_active: req.body.active });
+        let States = await State.find({ is_active: req.body.active }).populate("Country");
 
         response.success = true;
         response.data = States;
@@ -748,7 +748,7 @@ const getCitys = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let Citys = await City.find({ is_active: req.body.active });
+        let Citys = await City.find({ is_active: req.body.active }).populate("State");
 
         response.success = true;
         response.data = Citys;
