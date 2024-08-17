@@ -520,21 +520,31 @@ const changeCountryStatus = asyncHandler(async (req, res) => {
 })
 const deleteCountry = asyncHandler(async (req, res) => {
     try {
-        await State.deleteMany({ Country: req.params.id }).lean();
-        await Country.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {
-            if (err) {
-                return res.status(401).json({
+        let States = await State.find({ Country: req.params.id }).count();
+        if (States != 0) {
+            if (States) {
+                return res.status(400).json({
                     success: false,
-                    msg: err
-                }).end();
-            } else {
-                return res.status(200).json({
-                    success: true,
-                    msg: "Country removed. ",
-                }).end();
+                    msg: "You cannot delete this record because it is already in use",
+                    data: null,
+                });
             }
-        });
-
+        }
+        else {
+            await Country.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {
+                if (err) {
+                    return res.status(401).json({
+                        success: false,
+                        msg: err
+                    }).end();
+                } else {
+                    return res.status(200).json({
+                        success: true,
+                        msg: "Country removed. ",
+                    }).end();
+                }
+            });
+        }
     } catch (err) {
         return res.status(400).json({
             success: false,
@@ -647,21 +657,31 @@ const changeStateStatus = asyncHandler(async (req, res) => {
 })
 const deleteState = asyncHandler(async (req, res) => {
     try {
-        await City.deleteMany({ State: req.params.id }).lean();
-        await State.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {
-            if (err) {
-                return res.status(401).json({
+        let Citys = await City.find({ State: req.params.id }).count();
+        if (Citys != 0) {
+            if (Citys) {
+                return res.status(400).json({
                     success: false,
-                    msg: err
-                }).end();
-            } else {
-                return res.status(200).json({
-                    success: true,
-                    msg: "State removed. ",
-                }).end();
+                    msg: "You cannot delete this record because it is already in use",
+                    data: null,
+                });
             }
-        });
-
+        }
+        else {
+            await State.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {
+                if (err) {
+                    return res.status(401).json({
+                        success: false,
+                        msg: err
+                    }).end();
+                } else {
+                    return res.status(200).json({
+                        success: true,
+                        msg: "State removed. ",
+                    }).end();
+                }
+            });
+        }
     } catch (err) {
         return res.status(400).json({
             success: false,
@@ -1049,6 +1069,7 @@ const deleteIcon = asyncHandler(async (req, res) => {
     }
 
 });
+
 const addCategory = asyncHandler(async (req, res) => {
     let response = new Response();
 
@@ -1150,7 +1171,17 @@ const getCategoryById = asyncHandler(async (req, res) => {
 })
 const deleteCategory = asyncHandler(async (req, res) => {
     try {
-        await SubCategory.deleteMany({ Category: req.params.id }).lean();
+        let SubCategorys = await SubCategory.find({ Category: req.params.id }).count();
+        if (SubCategorys != 0) {
+            if (SubCategorys) {
+                return res.status(400).json({
+                    success: false,
+                    msg: "You cannot delete this record because it is already in use",
+                    data: null,
+                });
+            }
+        }
+        else {
         await Category.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {
             if (err) {
                 return res.status(401).json({
@@ -1164,7 +1195,7 @@ const deleteCategory = asyncHandler(async (req, res) => {
                 }).end();
             }
         });
-
+    }
     } catch (err) {
         return res.status(400).json({
             success: false,
@@ -1318,14 +1349,14 @@ const addRole = asyncHandler(async (req, res) => {
             Name: req.body.name,
             is_active: true,
         });
-        if(newRole){
-            let resuser = await Module.find({ is_group: true});
+        if (newRole) {
+            let resuser = await Module.find({ is_group: true });
             let insertdata = resuser.map(f => ({
-                role:newRole._id,
-                moduleId:f._id,
-                read:true,
-                write:true,
-                delete:true
+                role: newRole._id,
+                moduleId: f._id,
+                read: true,
+                write: true,
+                delete: true
             }));
             if (insertdata.length > 0) {
                 const savedNotification = await moduleRight.insertMany(insertdata);
@@ -1484,8 +1515,8 @@ const editStatus = asyncHandler(async (req, res) => {
 
         let newStatus = await Status.findByIdAndUpdate(req.body.id, {
             Name: req.body.name,
-            Role: req.body.role||null,
-            Assign: req.body.assign||null,
+            Role: req.body.role || null,
+            Assign: req.body.assign || null,
             Color: req.body.color
         });
 
@@ -1579,17 +1610,17 @@ const deleteStatus = asyncHandler(async (req, res) => {
 const editConfigurationStatus = asyncHandler(async (req, res) => {
     let response = new Response();
     try {
-        req.body.status.map(async(f) => {
+        req.body.status.map(async (f) => {
             let status = await Status.findByIdAndUpdate(f._id, {
-                Role: f.role||null,
-                Assign: f.assign||null,
+                Role: f.role || null,
+                Assign: f.assign || null,
                 Color: f.color
             });
-    })
+        })
         response.success = true;
-        response.message = `Status updated successfully`; 
-        response.data = ""; 
-       
+        response.message = `Status updated successfully`;
+        response.data = "";
+
         return res.status(200).json(response);
     } catch (err) {
         response.message = "Error in updating Status. " + err.message;
