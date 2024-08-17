@@ -3,8 +3,11 @@ const Master = require('../models/masterModel')
 const Product = Master.ProductModal;
 const Type = Master.TypeModal;
 const State = Master.StateModal;
+const Country = Master.CountryModal;
+const City = Master.CityModal;
 const Source = Master.SourceModal;
 const Unit = Master.UnitModal;
+const Icon = Master.IconModal;
 const Category = Master.CategoryModal;
 const SubCategory = Master.SubCategoryModal;
 const Module = Master.ModuleModal;
@@ -415,6 +418,132 @@ const deleteSource = asyncHandler(async (req, res) => {
 
 });
 
+const addCountry = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let oldCountry = await Country.findOne({ Name: req.body.name });
+
+        if (oldCountry) {
+            response.message = "Country with same name already exist.";
+            return res.status(400).json(response);
+        }
+
+        let newCountry = await Country.create({
+            Name: req.body.name,
+            Country: "India",
+            is_active: true,
+        });
+
+        response.success = true;
+        response.message = "Country added successfully";
+        response.data = newCountry;
+        return res.status(200).json(response);
+    } catch (err) {
+        response.message = "Error in adding Country. " + err.message;
+        return res.status(400).json(response);
+    }
+
+});
+const editCountry = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let oldCountry = Country.findById(req.body.id);
+
+        if (!oldCountry) {
+            response.message = "Country not found.";
+            return res.status(400).json(response);
+        }
+
+        let newCountry = await Country.findByIdAndUpdate(req.body.id, {
+            Name: req.body.name
+        });
+
+        response.success = true;
+        response.message = "Country added successfully";
+        response.data = newCountry;
+        return res.status(200).json(response);
+    } catch (err) {
+        response.message = "Error in updating Country. " + err.message;
+        return res.status(400).json(response);
+    }
+
+});
+const getCountrys = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let Countrys = await Country.find({ is_active: "true" });
+
+        response.success = true;
+        response.data = Countrys;
+        return res.status(200).json(response);
+    }
+    catch (err) {
+        response.message = "Error in getting Country. " + err.message;
+        return res.status(400).json(response);
+    }
+})
+const getCountryById = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let Countrys = await Country.findOne({ is_active: true, _id: req.params.id });
+
+        response.success = true;
+        response.data = Countrys;
+        return res.status(200).json(response);
+    }
+    catch (err) {
+        response.message = "Error in getting Country by id. " + err.message;
+        return res.status(400).json(response);
+    }
+})
+const changeCountryStatus = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let newCountry = await Country.findByIdAndUpdate(req.body.id, {
+            is_active: req.body.active
+        });
+
+        response.success = true;
+        response.message = "Country status updated successfully";
+        return res.status(200).json(response);
+    }
+    catch (err) {
+        response.message = "Error in updating Country. " + err.message;
+        return res.status(400).json(response);
+    }
+
+})
+const deleteCountry = asyncHandler(async (req, res) => {
+    try {
+        await State.deleteMany({ Country: req.params.id }).lean();
+        await Country.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {
+            if (err) {
+                return res.status(401).json({
+                    success: false,
+                    msg: err
+                }).end();
+            } else {
+                return res.status(200).json({
+                    success: true,
+                    msg: "Country removed. ",
+                }).end();
+            }
+        });
+
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in removing Country. " + err.message,
+            data: null,
+        });
+    }
+
+});
 
 const addState = asyncHandler(async (req, res) => {
     let response = new Response();
@@ -429,6 +558,7 @@ const addState = asyncHandler(async (req, res) => {
 
         let newState = await State.create({
             Name: req.body.name,
+            Country: req.body.country,
             is_active: true,
         });
 
@@ -442,7 +572,6 @@ const addState = asyncHandler(async (req, res) => {
     }
 
 });
-
 const editState = asyncHandler(async (req, res) => {
     let response = new Response();
 
@@ -468,7 +597,6 @@ const editState = asyncHandler(async (req, res) => {
     }
 
 });
-
 const getStates = asyncHandler(async (req, res) => {
     let response = new Response();
 
@@ -484,7 +612,6 @@ const getStates = asyncHandler(async (req, res) => {
         return res.status(400).json(response);
     }
 })
-
 const getStateById = asyncHandler(async (req, res) => {
     let response = new Response();
 
@@ -500,6 +627,176 @@ const getStateById = asyncHandler(async (req, res) => {
         return res.status(400).json(response);
     }
 })
+const changeStateStatus = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let newState = await State.findByIdAndUpdate(req.body.id, {
+            is_active: req.body.active
+        });
+
+        response.success = true;
+        response.message = "State status updated successfully";
+        return res.status(200).json(response);
+    }
+    catch (err) {
+        response.message = "Error in updating State. " + err.message;
+        return res.status(400).json(response);
+    }
+
+})
+const deleteState = asyncHandler(async (req, res) => {
+    try {
+        await City.deleteMany({ State: req.params.id }).lean();
+        await State.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {
+            if (err) {
+                return res.status(401).json({
+                    success: false,
+                    msg: err
+                }).end();
+            } else {
+                return res.status(200).json({
+                    success: true,
+                    msg: "State removed. ",
+                }).end();
+            }
+        });
+
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in removing State. " + err.message,
+            data: null,
+        });
+    }
+
+});
+
+const addCity = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let oldCity = await City.findOne({ Name: req.body.name });
+
+        if (oldCity) {
+            response.message = "City with same name already exist.";
+            return res.status(400).json(response);
+        }
+
+        let newCity = await City.create({
+            Name: req.body.name,
+            State: req.body.state,
+            is_active: true,
+        });
+
+        response.success = true;
+        response.message = "City added successfully";
+        response.data = newCity;
+        return res.status(200).json(response);
+    } catch (err) {
+        response.message = "Error in adding City. " + err.message;
+        return res.status(400).json(response);
+    }
+
+});
+const editCity = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let oldCity = City.findById(req.body.id);
+
+        if (!oldCity) {
+            response.message = "City not found.";
+            return res.status(400).json(response);
+        }
+
+        let newCity = await City.findByIdAndUpdate(req.body.id, {
+            Name: req.body.name
+        });
+
+        response.success = true;
+        response.message = "City added successfully";
+        response.data = newCity;
+        return res.status(200).json(response);
+    } catch (err) {
+        response.message = "Error in updating City. " + err.message;
+        return res.status(400).json(response);
+    }
+
+});
+const getCitys = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let Citys = await City.find({ is_active: "true" });
+
+        response.success = true;
+        response.data = Citys;
+        return res.status(200).json(response);
+    }
+    catch (err) {
+        response.message = "Error in getting City. " + err.message;
+        return res.status(400).json(response);
+    }
+})
+const getCityById = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let Citys = await City.findOne({ is_active: true, _id: req.params.id });
+
+        response.success = true;
+        response.data = Citys;
+        return res.status(200).json(response);
+    }
+    catch (err) {
+        response.message = "Error in getting City by id. " + err.message;
+        return res.status(400).json(response);
+    }
+})
+const changeCityStatus = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let newCity = await City.findByIdAndUpdate(req.body.id, {
+            is_active: req.body.active
+        });
+
+        response.success = true;
+        response.message = "City status updated successfully";
+        return res.status(200).json(response);
+    }
+    catch (err) {
+        response.message = "Error in updating City. " + err.message;
+        return res.status(400).json(response);
+    }
+
+})
+const deleteCity = asyncHandler(async (req, res) => {
+    try {
+        await City.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {
+            if (err) {
+                return res.status(401).json({
+                    success: false,
+                    msg: err
+                }).end();
+            } else {
+                return res.status(200).json({
+                    success: true,
+                    msg: "City removed. ",
+                }).end();
+            }
+        });
+
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in removing City. " + err.message,
+            data: null,
+        });
+    }
+
+});
 
 
 const addUnit = asyncHandler(async (req, res) => {
@@ -628,6 +925,130 @@ const deleteUnit = asyncHandler(async (req, res) => {
 });
 
 
+const addIcon = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let oldIcon = await Icon.findOne({ Name: req.body.name });
+
+        if (oldIcon) {
+            response.message = "Icon with same name already exist.";
+            return res.status(400).json(response);
+        }
+
+        let newIcon = await Icon.create({
+            Name: req.body.name,
+            is_active: true,
+        });
+
+        response.success = true;
+        response.message = "Icon added successfully";
+        response.data = newIcon;
+        return res.status(200).json(response);
+    } catch (err) {
+        response.message = "Error in adding Icon. " + err.message;
+        return res.status(400).json(response);
+    }
+
+});
+const editIcon = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let oldIcon = Icon.findById(req.body.id);
+
+        if (!oldIcon) {
+            response.message = "Icon not found.";
+            return res.status(400).json(response);
+        }
+
+        let newIcon = await Icon.findByIdAndUpdate(req.body.id, {
+            Name: req.body.name
+        });
+
+        response.success = true;
+        response.message = "Icon added successfully";
+        response.data = newIcon;
+        return res.status(200).json(response);
+    } catch (err) {
+        response.message = "Error in updating Icon. " + err.message;
+        return res.status(400).json(response);
+    }
+
+});
+const changeIconStatus = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let newIcon = await Icon.findByIdAndUpdate(req.body.id, {
+            is_active: req.body.active
+        });
+
+        response.success = true;
+        response.message = "Icon status updated successfully";
+        return res.status(200).json(response);
+    }
+    catch (err) {
+        response.message = "Error in updating Icon. " + err.message;
+        return res.status(400).json(response);
+    }
+
+})
+const getIcons = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let Icons = await Icon.find({ is_active: req.body.active });
+
+        response.success = true;
+        response.data = Icons;
+        return res.status(200).json(response);
+    }
+    catch (err) {
+        response.message = "Error in getting Icon. " + err.message;
+        return res.status(400).json(response);
+    }
+})
+const getIconById = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let Icons = await Icon.findOne({ is_active: true, _id: req.params.id });
+
+        response.success = true;
+        response.data = Icons;
+        return res.status(200).json(response);
+    }
+    catch (err) {
+        response.message = "Error in getting Icon by id. " + err.message;
+        return res.status(400).json(response);
+    }
+})
+const deleteIcon = asyncHandler(async (req, res) => {
+    try {
+        await Icon.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {
+            if (err) {
+                return res.status(401).json({
+                    success: false,
+                    msg: err
+                }).end();
+            } else {
+                return res.status(200).json({
+                    success: true,
+                    msg: "Icon removed. ",
+                }).end();
+            }
+        });
+
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in removing Icon. " + err.message,
+            data: null,
+        });
+    }
+
+});
 const addCategory = asyncHandler(async (req, res) => {
     let response = new Response();
 
@@ -1572,10 +1993,30 @@ module.exports = {
     getSubCategorys,
     getSubCategoryById,
     deleteSubCategory,
+    addIcon,
+    editIcon,
+    changeIconStatus,
+    getIcons,
+    getIconById,
+    deleteIcon,
+    addCountry,
+    editCountry,
+    getCountrys,
+    getCountryById,
+    changeCountryStatus,
+    deleteCountry,
     addState,
     editState,
     getStates,
     getStateById,
+    changeStateStatus,
+    deleteState,
+    addCity,
+    editCity,
+    getCitys,
+    getCityById,
+    changeCityStatus,
+    deleteCity,
     addModule,
     editModule,
     changeModuleStatus,
