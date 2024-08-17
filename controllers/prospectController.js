@@ -32,15 +32,16 @@ const addProspect = asyncHandler(async (req, res) => {
             City: req.body.city,
             State: req.body.state,
             Country: req.body.country,
-            Product: req.body.product||null,
+            Product: req.body.product || null,
             Notes: req.body.notes,
             ProspectAmount: req.body.prospectAmount,
             OrderTarget: req.body.orderTarget,
-            Sales: req.body.sales||null,
+            Sales: req.body.sales || null,
             addedBy: req.user._id,
             Stage: req.body.stage,
             Requirements: req.body.requirements,
-            Source: req.body.source||null,
+            Source: req.body.source || null,
+            CustomerRefrence: req.body.CustomerRefrence,
             StageDate: new Date(),
             is_active: true
         });
@@ -104,14 +105,15 @@ const editProspect = asyncHandler(async (req, res) => {
             City: req.body.city,
             State: req.body.state,
             Country: req.body.country,
-            Product: req.body.product||null,
+            Product: req.body.product || null,
             Notes: req.body.notes,
             ProspectAmount: req.body.prospectAmount,
             OrderTarget: req.body.orderTarget,
-            Sales: req.body.sales||null,
+            Sales: req.body.sales || null,
             addedBy: req.user._id,
             Stage: req.body.stage,
-            Source: req.body.source||null,
+            Source: req.body.source || null,
+            CustomerRefrence: req.body.CustomerRefrence,
             Requirements: req.body.requirements,
             StageDate: new Date(),
             is_active: true
@@ -267,7 +269,7 @@ const getAllProspect = asyncHandler(async (req, res) => {
 
 const getProspectById = asyncHandler(async (req, res) => {
     try {
-      
+
         let prospectList = await Prospect.find({ _id: req.params.id }).populate(
             {
                 path: "NextTalk",
@@ -276,12 +278,12 @@ const getProspectById = asyncHandler(async (req, res) => {
                     select: "_id name email role"
                 }
             }).populate("Product").populate("OtherContact").populate("Sales").populate("Stage").populate("Source").populate("addedBy", "_id name email role")
-            let prospectasklist = await Task.find({ is_active: true, ProspectId: req.params.id }).populate("Status").populate("Assign");    
-             return res.status(200).json({
+        let prospectasklist = await Task.find({ is_active: true, ProspectId: req.params.id }).populate("Status").populate("Assign");
+        return res.status(200).json({
             success: true,
-            data: {prospectList, prospectasklist}
-          
-           
+            data: { prospectList, prospectasklist }
+
+
         }).end();
     } catch (err) {
         return res.status(400).json({
@@ -529,6 +531,7 @@ const importFiletoDB = asyncHandler(async (req, res, fileName) => {
                         Product: productId._id,
                         ProspectAmount: val[16],
                         Notes: val[17],
+                        CustomerRefrence: val[18],
                         addedBy: req.user._id,
                         LeadSince: new Date(),
                         StageDate: new Date(),
