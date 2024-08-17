@@ -107,6 +107,9 @@ const prospectSchema = mongoose.Schema(
         RemoveReason: {
             type: String
         },
+        CustomerRefrence: {
+            type: String
+        },
         is_favorite: {
             type: Boolean,
             default: false
