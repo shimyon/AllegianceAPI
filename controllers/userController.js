@@ -17,9 +17,9 @@ const registerUser = asyncHandler(async (req, res) => {
         res.status(400)
         throw new Error('Name, Email, Password and Role  fields are required!')
     }
-
+    let Users = User(req.conn)
     //check if user exist
-    const userExists = await User.findOne({ email })
+    const userExists = await Users.findOne({ email })
     if (userExists) {
         res.status(400)
         throw new Error('User Already Exists!')
@@ -30,7 +30,7 @@ const registerUser = asyncHandler(async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt)
 
     //create user
-    const user = await User.create({
+    const user = await Users.create({
         name,
         email,
         role,
@@ -75,19 +75,19 @@ const updateUser = asyncHandler(async (req, res) => {
         res.status(400)
         throw new Error('User id not found!')
     }
-
+    let Users = User(req.conn)
     //check if user exist
-    const userExists = await User.findOne({ _id: id });
+    const userExists = await Users.findOne({ _id: id });
     if (!userExists) {
         res.status(400)
         throw new Error('User Not Found')
     }
 
-    let user = await User.findByIdAndUpdate(id, {
+    let user = await Users.findByIdAndUpdate(id, {
         name: name,
         role: role,
     });
-    user = await User.findOne({ _id: id });
+    user = await Users.findOne({ _id: id });
     if (user) {
         res.status(201).json({
             _id: user.id,
@@ -103,8 +103,9 @@ const updateUser = asyncHandler(async (req, res) => {
     }
 })
 const removeUser = asyncHandler(async (req, res) => {
+    let Users = User(req.conn)
     try {
-        const existUser = await User.findById(req.body.id);
+        const existUser = await Users.findById(req.body.id);
         if (!existUser) {
             return res.status(200).json({
                 success: false,
@@ -113,7 +114,7 @@ const removeUser = asyncHandler(async (req, res) => {
             });
         }
 
-        const newUser = await User.findByIdAndUpdate(req.body.id, {
+        const newUser = await Users.findByIdAndUpdate(req.body.id, {
             is_active: req.body.active
         });
 
@@ -139,20 +140,20 @@ const changePassword = asyncHandler(async (req, res) => {
         throw new Error('id, current password and new password field not found!')
     }
 
+    let Users = User(req.conn)
     //check if user exist
-    const userExists = await User.findOne({ _id: id });
+    const userExists = await Users.findOne({ _id: id });
     if (!userExists) {
         res.status(400)
         throw new Error('User Not Found')
     }
-
-    let user = await User.findOne({ _id: id });
+    let user = await Users.findOne({ _id: id });
     if (user) {
         if ((await bcrypt.compare(currentPassword, user.password))) {
             //Hash password
             const salt = await bcrypt.genSalt(10);
             const hashedPassword = await bcrypt.hash(newPassword, salt);
-            await User.findByIdAndUpdate(id, {
+            await Users.findByIdAndUpdate(id, {
                 password: hashedPassword
             });
             res.status(201).json({
@@ -176,8 +177,8 @@ const changePassword = asyncHandler(async (req, res) => {
 
 const loginUser = asyncHandler(async (req, res) => {
     const { email, password } = req.body
-
-    const user = await User.findOne({ email: email, is_active: true }).populate("role");
+    let Users = User(req.conn)
+    const user = await Users.findOne({ email: email, is_active: true }).populate("role");
     if (!user) {
         res.status(200)
         throw new Error("User Not Found!")
@@ -199,7 +200,8 @@ const loginUser = asyncHandler(async (req, res) => {
 })
 
 const getUserById = asyncHandler(async (req, res) => {
-    const { _id, name, email, role } = await User.findById(req.params.id)
+    let Users = User(req.conn)
+    const { _id, name, email, role } = await Users.findById(req.params.id)
 
     res.status(200).json({
         id: _id,
@@ -210,8 +212,9 @@ const getUserById = asyncHandler(async (req, res) => {
 })
 
 const getAllUser = asyncHandler(async (req, res) => {
+    let Users = User(req.conn)
     try {
-        const user = await User.find({ is_active: req.body.active }, { _id: 1, email: 1, name: 1, role: 1, is_active: 1 }).populate("role").sort({ createdAt: -1 });
+        const user = await Users.find({ is_active: req.body.active }, { _id: 1, email: 1, name: 1, role: 1, is_active: 1 }).populate("role").sort({ createdAt: -1 });
 
         res.status(200).json(user).end();
     } catch (err) {
@@ -241,9 +244,9 @@ const forgotPassword = asyncHandler(async (req, res) => {
         res.status(400)
         throw new Error('email field not found!')
     }
-
+    let Users = User(req.conn)
     //check if user exist
-    const userExists = await User.findOne({ email: email });
+    const userExists = await Users.findOne({ email: email });
     if (!userExists) {
         res.status(400)
         throw new Error('User Not Found')
@@ -254,7 +257,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
         const newPassword = generateRandomPassword();
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(newPassword, salt);
-        let user = await User.findByIdAndUpdate(userExists._id, {
+        let user = await Users.findByIdAndUpdate(userExists._id, {
             password: hashedPassword
         });
         if (user) {
