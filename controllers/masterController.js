@@ -474,7 +474,7 @@ const getCountrys = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let Countrys = await Country.find({ is_active: "true" });
+        let Countrys = await Country.find({ is_active:req.body.active });
 
         response.success = true;
         response.data = Countrys;
@@ -611,7 +611,7 @@ const getStates = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let States = await State.find({ is_active: "true" });
+        let States = await State.find({ is_active: req.body.active });
 
         response.success = true;
         response.data = States;
@@ -748,7 +748,7 @@ const getCitys = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let Citys = await City.find({ is_active: "true" });
+        let Citys = await City.find({ is_active: req.body.active });
 
         response.success = true;
         response.data = Citys;
