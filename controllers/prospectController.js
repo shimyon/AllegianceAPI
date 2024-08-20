@@ -13,6 +13,9 @@ const TaskModal = require('../models/taskModel');
 const Task = TaskModal.TaskModal;
 const Product = Master.ProductModal;
 const Source = Master.SourceModal;
+const Country = Master.CountryModal;
+const State = Master.StateModal;
+const City = Master.CityModal;
 const CustomerModal = require('../models/customerModel')
 const Customer = CustomerModal.CustomerModal
 
@@ -29,9 +32,9 @@ const addProspect = asyncHandler(async (req, res) => {
             Mobile: req.body.mobile,
             Email: req.body.email,
             Website: req.body.website,
-            City: req.body.city,
-            State: req.body.state,
-            Country: req.body.country,
+            City: req.body.city||null,
+            State: req.body.state||null,
+            Country: req.body.country||null,
             Product: req.body.product || null,
             Notes: req.body.notes,
             ProspectAmount: req.body.prospectAmount,
@@ -102,9 +105,9 @@ const editProspect = asyncHandler(async (req, res) => {
             Mobile: req.body.mobile,
             Email: req.body.email,
             Website: req.body.website,
-            City: req.body.city,
-            State: req.body.state,
-            Country: req.body.country,
+            City: req.body.city||null,
+            State: req.body.state||null,
+            Country: req.body.country||null,
             Product: req.body.product || null,
             Notes: req.body.notes,
             ProspectAmount: req.body.prospectAmount,
@@ -197,7 +200,7 @@ const getAllProspect = asyncHandler(async (req, res) => {
                     path: "user",
                     select: "_id name email role"
                 }
-            }).populate("Product").populate("OtherContact").populate("Sales").populate("Stage").populate("Source").populate("addedBy", "_id name email role").sort({ createdAt: -1 })
+            }).populate("Product").populate("OtherContact").populate("Country").populate("State").populate("City").populate("Sales").populate("Stage").populate("Source").populate("addedBy", "_id name email role").sort({ createdAt: -1 })
             .exec((err, result) => {
                 if (err) {
                     return res.status(400).json({
@@ -277,7 +280,7 @@ const getProspectById = asyncHandler(async (req, res) => {
                     path: "user",
                     select: "_id name email role"
                 }
-            }).populate("Product").populate("OtherContact").populate("Sales").populate("Stage").populate("Source").populate("addedBy", "_id name email role")
+            }).populate("Product").populate("OtherContact").populate("Country").populate("State").populate("City").populate("Sales").populate("Stage").populate("Source").populate("addedBy", "_id name email role")
         let prospectasklist = await Task.find({ is_active: true, ProspectId: req.params.id }).populate("Status").populate("Assign");
         return res.status(200).json({
             success: true,
@@ -484,33 +487,46 @@ const importFiletoDB = asyncHandler(async (req, res, fileName) => {
             var msg = "";
             for (var idx = 0; idx < rows.length; idx++) {
                 var val = rows[idx];
-                var sourceId = {};
-                var productId = {};
-                sourceId._id = null;
-                productId._id = null;
                 if (idx != 0) {
-                    if (val[18] != "" && val[18] != null) {
-                        sourceId = await Source.findOne({ Name: { $regex: val[18], $options: 'i' } }, { _id: 1 });
-                        if (!sourceId) {
-                            return res.status(400).json({
-                                success: true,
-                                msg: val[10] + " source not found. ",
-                                data: null,
-                            });
-                        }
+                    var sourceId = await Source.findOne({ Name: { $regex: val[14], $options: 'i' } }, { _id: 1 });
+                    if (!sourceId) {
+                        return res.status(400).json({
+                            success: true,
+                            msg: val[14] + " source not found. ",
+                            data: null,
+                        });
                     }
-
-                    if (val[15] != "" && val[15] != null) {
-                        productId = await Product.findOne({ Name: { $regex: val[15], $options: 'i' } }, { _id: 1 });
-                        if (!productId) {
-                            return res.status(400).json({
-                                success: true,
-                                msg: val[11] + " product not found. ",
-                                data: null,
-                            });
-
-
-                        }
+                    var productId = await Product.findOne({ Name: { $regex: val[15], $options: 'i' } }, { _id: 1 });
+                    if (!productId) {
+                        return res.status(400).json({
+                            success: true,
+                            msg: val[15] + " product not found. ",
+                            data: null,
+                        });
+                    }
+                    var CountryId = await Country.findOne({ Name: { $regex: val[11], $options: 'i' } }, { _id: 1 });
+                    if (!CountryId) {
+                        return res.status(400).json({
+                            success: true,
+                            msg: val[11] + " Country not found. ",
+                            data: null,
+                        });
+                    }
+                    var StateId = await State.findOne({ Name: { $regex: val[12], $options: 'i' } }, { _id: 1 });
+                    if (!StateId) {
+                        return res.status(400).json({
+                            success: true,
+                            msg: val[12] + " State not found. ",
+                            data: null,
+                        });
+                    }
+                    var CityId = await City.findOne({ Name: { $regex: val[13], $options: 'i' } }, { _id: 1 });
+                    if (!CityId) {
+                        return res.status(400).json({
+                            success: true,
+                            msg: val[13] + " City not found. ",
+                            data: null,
+                        });
                     }
                     importData.push({
                         Company: val[0],
@@ -521,12 +537,12 @@ const importFiletoDB = asyncHandler(async (req, res, fileName) => {
                         Mobile: val[5],
                         Email: val[6],
                         Stage: null,
-                        Website: val[9],
-                        Industry: val[10],
-                        Segment: val[11],
-                        Country: val[12],
-                        State: val[13],
-                        City: val[14],
+                        Website: val[8],
+                        Industry: val[9],
+                        Segment: val[10],
+                        Country: CountryId._id,
+                        State: StateId._id,
+                        City: CityId._id,
                         Source: sourceId._id,
                         Product: productId._id,
                         ProspectAmount: val[16],
@@ -588,9 +604,9 @@ const convertToCustomer = asyncHandler(async (req, res) => {
             LastName: pros.LastName,
             Mobile: pros.Mobile,
             Email: pros.Email,
-            City: pros.City,
-            State: pros.State,
-            Country: pros.Country,
+            City: pros.City||null,
+            State: pros.State||null,
+            Country: pros.Country||null,
             addedBy: req.user._id,
             Notes: pros.Notes,
             is_active: true

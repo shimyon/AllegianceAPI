@@ -40,14 +40,17 @@ const prospectSchema = mongoose.Schema(
             type: String,
         },
         City: {
-            type: String
-        },
-        State: {
-            type: String
-        },
-        Country: {
-            type: String
-        },
+            type: mongoose.Schema.Types.ObjectId,
+           ref: 'City'
+       },
+       State: {
+            type: mongoose.Schema.Types.ObjectId,
+           ref: 'States'
+       },
+       Country: {
+            type: mongoose.Schema.Types.ObjectId,
+           ref: 'Country'
+       },
         Product: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Products'
