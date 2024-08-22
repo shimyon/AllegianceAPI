@@ -45,18 +45,18 @@ const productSchema = mongoose.Schema(
     {
         timestamps: true,
     });
-    const countrySchema = mongoose.Schema(
-        {
-            Name: {
-                type: String
-            },
-            is_active: {
-                type: Boolean
-            }
+const countrySchema = mongoose.Schema(
+    {
+        Name: {
+            type: String
         },
-        {
-            timestamps: true,
-        });
+        is_active: {
+            type: Boolean
+        }
+    },
+    {
+        timestamps: true,
+    });
 const stateSchema = mongoose.Schema(
     {
         Name: {
@@ -74,7 +74,7 @@ const stateSchema = mongoose.Schema(
     {
         timestamps: true,
     });
-    
+
 const citySchema = mongoose.Schema(
     {
         Name: {
@@ -352,6 +352,12 @@ const ApplicationSettingSchema = mongoose.Schema(
         },
         OfficePhone2: {
             type: String
+        },
+        IndiaMartKey: {
+            type: String
+        },
+        JustDialKey: {
+            type: String
         }
     },
     {
@@ -392,4 +398,4 @@ const syncIndex = async () => {
 }
 syncIndex();
 
-module.exports = {ProductModal, TypeModal,CountryModal, StateModal,CityModal, SourceModal, UnitModal, IconModal,CategoryModal, SubCategoryModal, ModuleModal, RoleModal, StatusModal, MailAddressModal, ApplicationSettingModal };
+module.exports = { ProductModal, TypeModal, CountryModal, StateModal, CityModal, SourceModal, UnitModal, IconModal, CategoryModal, SubCategoryModal, ModuleModal, RoleModal, StatusModal, MailAddressModal, ApplicationSettingModal };
