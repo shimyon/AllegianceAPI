@@ -10,6 +10,9 @@ const Master = require('../models/masterModel')
 const Product = Master.ProductModal;
 const Source = Master.SourceModal;
 const Status = Master.StatusModal;
+const Country = Master.CountryModal;
+const State = Master.StateModal;
+const City = Master.CityModal;
 const ProspectModal = require('../models/prospectModel')
 const Prospect = ProspectModal.ProspectsModal;
 const TaskModal = require('../models/taskModel');
@@ -26,14 +29,14 @@ const addLead = asyncHandler(async (req, res) => {
             GSTNo: req.body.gstno,
             FirstName: req.body.firstname,
             LastName: req.body.lastname,
-            Address: req.body.Address,
+            Address: req.body.address,
             Designation: req.body.designation,
-            Icon: req.body.icon,
+            Icon: req.body.icon||null,
             Mobile: req.body.mobile,
             Email: req.body.email,
-            City: req.body.city,
-            State: req.body.state,
-            Country: req.body.country,
+            City: req.body.city||null,
+            State: req.body.state||null,
+            Country: req.body.country||null,
             Source: req.body.source||null,
             Product: req.body.product||null,
             Requirements: req.body.requirements,
@@ -41,6 +44,7 @@ const addLead = asyncHandler(async (req, res) => {
             InCharge: req.body.incharge,
             NextTalkon: req.body.nextTalkOn,
             NextTalkNotes: req.body.nextTalkNotes,
+            CustomerRefrence: req.body.CustomerRefrence,
             Sales: req.body.sales||null,
             addedBy: req.user._id,
             Stage: "New",
@@ -101,17 +105,18 @@ const editLead = asyncHandler(async (req, res) => {
             GSTNo: req.body.gstno,
             FirstName: req.body.firstname,
             LastName: req.body.lastname,
-            Address: req.body.Address,
+            Address: req.body.address,
             Designation: req.body.designation,
-            Icon: req.body.icon,
+            Icon: req.body.icon||null,
             Mobile: req.body.mobile,
             Email: req.body.email,
-            City: req.body.city,
-            State: req.body.state,
-            Country: req.body.country,
+            City: req.body.city||null,
+            State: req.body.state||null,
+            Country: req.body.country||null,
             Source: req.body.source||null,
             Product: req.body.product||null,
             Requirements: req.body.requirements,
+            CustomerRefrence: req.body.CustomerRefrence,
             Sales: req.body.sales||null,
             Notes: req.body.notes,
             InCharge: req.body.incharge,
@@ -233,6 +238,62 @@ const getAllLead = asyncHandler(async (req, res) => {
                 },
             },
             {
+                '$lookup': {
+                    'from': 'icons',
+                    'localField': 'Icon',
+                    'foreignField': '_id',
+                    'as': 'Icon'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$Icon',
+                    preserveNullAndEmptyArrays: true
+                },
+            },
+            {
+                '$lookup': {
+                    'from': 'countries',
+                    'localField': 'Country',
+                    'foreignField': '_id',
+                    'as': 'Country'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$Country',
+                    preserveNullAndEmptyArrays: true
+                },
+            },
+            {
+                '$lookup': {
+                    'from': 'states',
+                    'localField': 'State',
+                    'foreignField': '_id',
+                    'as': 'State'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$State',
+                    preserveNullAndEmptyArrays: true
+                },
+            },
+            {
+                '$lookup': {
+                    'from': 'cities',
+                    'localField': 'City',
+                    'foreignField': '_id',
+                    'as': 'City'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$City',
+                    preserveNullAndEmptyArrays: true
+                },
+            },
+            {
                 $sort: { createdAt: -1 }
             }
         );
@@ -322,7 +383,7 @@ const getAllLead = asyncHandler(async (req, res) => {
 
 const getLeadById = asyncHandler(async (req, res) => {
     try {
-        let leadList = await Lead.find({ Stage: "New", _id: req.params.id }).populate("Source").populate("OtherContact").populate("Product").populate("Sales").populate("NextTalk").populate("addedBy");
+        let leadList = await Lead.find({ Stage: "New", _id: req.params.id }).populate("Source").populate("Country").populate("State").populate("City").populate("Icon").populate("OtherContact").populate("Product").populate("Sales").populate("NextTalk").populate("addedBy");
         let tasklist = await Task.find({ is_active: true, LeadId: req.params.id}).populate("Status").populate("Assign");
         return res.status(200).json({
             success: true,
@@ -576,8 +637,30 @@ const importFiletoDB = asyncHandler(async (req, res, fileName) => {
                             msg: val[11] + " product not found. ",
                             data: null,
                         });
-
-
+                    }
+                    var CountryId = await Country.findOne({ Name: { $regex: val[9], $options: 'i' } }, { _id: 1 });
+                    if (!CountryId) {
+                        return res.status(400).json({
+                            success: true,
+                            msg: val[9] + " Country not found. ",
+                            data: null,
+                        });
+                    }
+                    var StateId = await State.findOne({ Name: { $regex: val[8], $options: 'i' } }, { _id: 1 });
+                    if (!StateId) {
+                        return res.status(400).json({
+                            success: true,
+                            msg: val[8] + " State not found. ",
+                            data: null,
+                        });
+                    }
+                    var CityId = await City.findOne({ Name: { $regex: val[7], $options: 'i' } }, { _id: 1 });
+                    if (!CityId) {
+                        return res.status(400).json({
+                            success: true,
+                            msg: val[7] + " City not found. ",
+                            data: null,
+                        });
                     }
                     importData.push({
                         Company: val[0],
@@ -587,9 +670,9 @@ const importFiletoDB = asyncHandler(async (req, res, fileName) => {
                         Designation: val[4],
                         Mobile: val[5],
                         Email: val[6],
-                        City: val[7],
-                        State: val[8],
-                        Country: val[9],
+                        City: CityId._id,
+                        State: StateId._id,
+                        Country: CountryId._id,
                         Source: sourceId._id,
                         Product: productId._id,
                         Requirements: val[12],
@@ -598,6 +681,7 @@ const importFiletoDB = asyncHandler(async (req, res, fileName) => {
                         NextTalkon: val[16],
                         NextTalkNotes: val[17],
                         Icon: val[18],
+                        CustomerRefrence: val[19],
                         addedBy: req.user._id,
                         Stage: "New",
                         LeadSince: new Date(),

@@ -32,13 +32,16 @@ const leadSchema = mongoose.Schema(
             type: String
         },
         City: {
-            type: String
+             type: mongoose.Schema.Types.ObjectId,
+            ref: 'City'
         },
         State: {
-            type: String
+             type: mongoose.Schema.Types.ObjectId,
+            ref: 'States'
         },
         Country: {
-            type: String
+             type: mongoose.Schema.Types.ObjectId,
+            ref: 'Country'
         },
         Source: {
             type: mongoose.Schema.Types.ObjectId,
@@ -59,7 +62,8 @@ const leadSchema = mongoose.Schema(
             type: String
         },
         Icon: {
-            type: String
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Icon'
         },
         InCharge: {
             type: String
@@ -89,6 +93,9 @@ const leadSchema = mongoose.Schema(
             default: true
         },
         RemoveReason: {
+            type: String
+        },
+        CustomerRefrence: {
             type: String
         },
         OtherContact: [{

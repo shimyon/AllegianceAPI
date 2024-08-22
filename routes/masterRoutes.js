@@ -1,15 +1,16 @@
 const express = require('express')
 const router = express.Router()
 
-const {
+const { 
     addProduct,
     editProduct,
     changeProductStatus,
-    addSource,
-    editSource,
     getProduct,
     getProductById,
     deleteProduct,
+    addSource,
+    editSource,
+    changeSourceStatus,
     getSources,
     getSourceById,
     deleteSource,
@@ -19,7 +20,6 @@ const {
     getUnits,
     getUnitById,
     deleteUnit,
-    changeSourceStatus,
     addCategory,
     editCategory,
     changeCategoryStatus,
@@ -32,10 +32,30 @@ const {
     getSubCategorys,
     getSubCategoryById,
     deleteSubCategory,
+    addIcon,
+    editIcon,
+    changeIconStatus,
+    getIcons,
+    getIconById,
+    deleteIcon,
+    addCountry,
+    editCountry,
+    changeCountryStatus,
+    getCountrys,
+    getCountryById,
+    deleteCountry,
     addState,
     editState,
+    changeStateStatus,
     getStates,
     getStateById,
+    deleteState,
+    addCity,
+    editCity,
+    changeCityStatus,
+    getCitys,
+    getCityById,
+    deleteCity,
     addType,
     editType,
     changeTypeStatus,
@@ -96,10 +116,26 @@ router.post('/getSource', protect, getSources)
 router.get('/source/:id', protect, getSourceById)
 router.get('/deleteSource/:id', protect, deleteSource)
 
+router.post('/addCountry', protect, addCountry)
+router.post('/editCountry', protect, editCountry)
+router.post('/changeCountryStatus', protect, changeCountryStatus)
+router.post('/getCountry', protect, getCountrys)
+router.get('/Country/:id', protect, getCountryById)
+router.get('/deleteCountry/:id', protect, deleteCountry)
+
 router.post('/addState', protect, addState)
 router.post('/editState', protect, editState)
-router.get('/getState', protect, getStates)
+router.post('/changeStateStatus', protect, changeStateStatus)
+router.post('/getState', protect, getStates)
 router.get('/state/:id', protect, getStateById)
+router.get('/deleteState/:id', protect, deleteState)
+
+router.post('/addCity', protect, addCity)
+router.post('/editCity', protect, editCity)
+router.post('/changeCityStatus', protect, changeCityStatus)
+router.post('/getCity', protect, getCitys)
+router.get('/city/:id', protect, getCityById)
+router.get('/deleteCity/:id', protect, deleteCity)
 
 router.post('/addUnit', protect, addUnit)
 router.post('/editUnit', protect, editUnit)
@@ -121,6 +157,13 @@ router.post('/changeSubCategoryStatus', protect, changeSubCategoryStatus)
 router.post('/getSubCategorys', protect, getSubCategorys)
 router.get('/subcategory/:id', protect, getSubCategoryById)
 router.get('/deleteSubCategory/:id', protect, deleteSubCategory)
+
+router.post('/addIcon', protect, addIcon)
+router.post('/editIcon', protect, editIcon)
+router.post('/changeIconStatus', protect, changeIconStatus)
+router.post('/getIcon', protect, getIcons)
+router.get('/icon/:id', protect, getIconById)
+router.get('/deleteIcon/:id', protect, deleteIcon)
 
 router.post('/addModule', protect, addModule)
 router.post('/editModule', protect, editModule)

@@ -61,9 +61,9 @@ const addCustomer = asyncHandler(async (req, res) => {
             Mobile: req.body.mobile,
             Email: req.body.email,
             Address: req.body.address,
-            City: req.body.city,
-            State: req.body.state,
-            Country: req.body.country,
+            City: req.body.city||null,
+            State: req.body.state||null,
+            Country: req.body.country||null,
             addedBy: req.user._id,
             Notes: req.body.notes,
             is_active: true
@@ -102,9 +102,9 @@ const editCustomer = asyncHandler(async (req, res) => {
             Mobile: req.body.mobile,
             Email: req.body.email,
             Address: req.body.address,
-            City: req.body.city,
-            State: req.body.state,
-            Country: req.body.country,
+            City: req.body.city||null,
+            State: req.body.state||null,
+            Country: req.body.country||null,
             addedBy: req.user._id,
             Notes: req.body.notes,
             is_active: true
@@ -158,7 +158,23 @@ const removeCustomer = asyncHandler(async (req, res) => {
 
 const getAllCustomer = asyncHandler(async (req, res) => {
     try {
-        let customerList = await Customer.find({ is_active: req.body.active }).populate("BillingAddress").populate("ShippingAddress").populate("addedBy", 'name email').sort({ createdAt: -1 })
+        let customerList = await Customer.find({ is_active: req.body.active }).populate("Country").populate("State").populate("City")
+        .populate({
+            path: 'BillingAddress',
+            populate: [
+                { path: 'Country' },
+                { path: 'State' },
+                { path: 'City' },
+            ]
+        }).populate({
+            path: 'ShippingAddress',
+            populate: [
+                { path: 'Country' },
+                { path: 'State' },
+                { path: 'City' }
+            ]
+        })
+        .populate("addedBy", 'name email').sort({ createdAt: -1 })
         const lastCustomerCode = await Customer.find().sort({createdAt: -1});
         return res.status(200).json({
             success: true,
@@ -175,7 +191,23 @@ const getAllCustomer = asyncHandler(async (req, res) => {
 })
 const getCustomerById = asyncHandler(async (req, res) => {
     try {
-        let customerList = await Customer.find({ _id: req.params.id }).populate("BillingAddress").populate("ShippingAddress").populate("addedBy", 'name email')
+        let customerList = await Customer.find({ _id: req.params.id }).populate("Country").populate("State").populate("City")
+        .populate({
+            path: 'BillingAddress',
+            populate: [
+                { path: 'Country' },
+                { path: 'State' },
+                { path: 'City' },
+            ]
+        }).populate({
+            path: 'ShippingAddress',
+            populate: [
+                { path: 'Country' },
+                { path: 'State' },
+                { path: 'City' }
+            ]
+        })
+        .populate("addedBy", 'name email')
         return res.status(200).json({
             success: true,
             data: customerList
@@ -195,9 +227,9 @@ const addBillingAddress = asyncHandler(async (req, res) => {
         const newBilling = await BillingAddress.create({
             Customer: req.body.customerId,
             Address: req.body.address,
-            City: req.body.city,
-            State: req.body.state,
-            Country: req.body.country,
+            City: req.body.city||null,
+            State: req.body.state||null,
+            Country: req.body.country||null,
             is_active: true
         });
         const existCustomer = await Customer.findById(req.body.customerId);
@@ -229,9 +261,9 @@ const editBillingAddress = asyncHandler(async (req, res) => {
 
         var newBill = await BillingAddress.findByIdAndUpdate(req.body.id, {
             Address: req.body.address,
-            City: req.body.city,
-            State: req.body.state,
-            Country: req.body.country
+            City: req.body.city||null,
+            State: req.body.state||null,
+            Country: req.body.country||null
         });
 
         return res.status(200).json({
@@ -280,9 +312,9 @@ const addShippingAddress = asyncHandler(async (req, res) => {
         const newShipping = await ShippingAddress.create({
             Customer: req.body.customerId,
             Address: req.body.address,
-            City: req.body.city,
-            State: req.body.state,
-            Country: req.body.country,
+            City: req.body.city||null,
+            State: req.body.state||null,
+            Country: req.body.country||null,
             addedBy: req.user._id,
             is_active: true
         });
@@ -315,9 +347,9 @@ const editShippingAddress = asyncHandler(async (req, res) => {
 
         await ShippingAddress.findByIdAndUpdate(req.body.id, {
             Address: req.body.address,
-            City: req.body.city,
-            State: req.body.state,
-            Country: req.body.country,
+            City: req.body.city||null,
+            State: req.body.state||null,
+            Country: req.body.country||null,
             addedBy: req.user._id,
         });
 

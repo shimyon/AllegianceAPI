@@ -39,14 +39,17 @@ const customerSchema = mongoose.Schema(
             type: String
         },
         City: {
-            type: String
-        },
-        State: {
-            type: String
-        },
-        Country: {
-            type: String
-        },
+            type: mongoose.Schema.Types.ObjectId,
+           ref: 'City'
+       },
+       State: {
+            type: mongoose.Schema.Types.ObjectId,
+           ref: 'States'
+       },
+       Country: {
+            type: mongoose.Schema.Types.ObjectId,
+           ref: 'Country'
+       },
         Notes: {
             type: String
         },
@@ -82,14 +85,17 @@ const billingAddressSchema = mongoose.Schema(
             type: String
         },
         City: {
-            type: String
-        },
-        State: {
-            type: String
-        },
-        Country: {
-            type: String
-        },
+            type: mongoose.Schema.Types.ObjectId,
+           ref: 'City'
+       },
+       State: {
+            type: mongoose.Schema.Types.ObjectId,
+           ref: 'States'
+       },
+       Country: {
+            type: mongoose.Schema.Types.ObjectId,
+           ref: 'Country'
+       },
         is_active: {
             type: Boolean,
             default: true
@@ -109,14 +115,17 @@ const shippingAddressSchema = mongoose.Schema(
             type: String
         },
         City: {
-            type: String
-        },
-        State: {
-            type: String
-        },
-        Country: {
-            type: String
-        },
+            type: mongoose.Schema.Types.ObjectId,
+           ref: 'City'
+       },
+       State: {
+            type: mongoose.Schema.Types.ObjectId,
+           ref: 'States'
+       },
+       Country: {
+            type: mongoose.Schema.Types.ObjectId,
+           ref: 'Country'
+       },
         is_active: {
             type: Boolean,
             default: true

@@ -45,11 +45,47 @@ const productSchema = mongoose.Schema(
     {
         timestamps: true,
     });
+    const countrySchema = mongoose.Schema(
+        {
+            Name: {
+                type: String
+            },
+            is_active: {
+                type: Boolean
+            }
+        },
+        {
+            timestamps: true,
+        });
 const stateSchema = mongoose.Schema(
     {
         Name: {
             type: String
         },
+        Country:
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Country'
+        },
+        is_active: {
+            type: Boolean
+        }
+    },
+    {
+        timestamps: true,
+    });
+    
+const citySchema = mongoose.Schema(
+    {
+        Name: {
+            type: String
+        },
+        State:
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'States'
+        }
+        ,
         is_active: {
             type: Boolean
         }
@@ -211,6 +247,18 @@ const MailAddressSchema = mongoose.Schema(
     {
         timestamps: true,
     });
+const iconSchema = mongoose.Schema(
+    {
+        Name: {
+            type: String
+        },
+        is_active: {
+            type: Boolean
+        }
+    },
+    {
+        timestamps: true,
+    });
 const ApplicationSettingSchema = mongoose.Schema(
     {
         CompanyTitle: {
@@ -312,8 +360,11 @@ const ApplicationSettingSchema = mongoose.Schema(
 const ProductModal = mongoose.model('Products', productSchema);
 const TypeModal = mongoose.model('Types', typeSchema);
 const SourceModal = mongoose.model('Sources', sourceSchema);
+const CountryModal = mongoose.model('Country', countrySchema);
 const StateModal = mongoose.model('States', stateSchema);
+const CityModal = mongoose.model('City', citySchema);
 const UnitModal = mongoose.model('Units', unitSchema);
+const IconModal = mongoose.model('Icon', iconSchema);
 const CategoryModal = mongoose.model('Category', categorySchema);
 const SubCategoryModal = mongoose.model('SubCategory', subCategorySchema);
 const ModuleModal = mongoose.model('Module_Master', ModuleSchema);
@@ -326,8 +377,11 @@ const syncIndex = async () => {
     await ProductModal.syncIndexes();
     await TypeModal.syncIndexes();
     await SourceModal.syncIndexes();
+    await CountryModal.syncIndexes();
     await StateModal.syncIndexes();
+    await CityModal.syncIndexes();
     await UnitModal.syncIndexes();
+    await IconModal.syncIndexes();
     await CategoryModal.syncIndexes();
     await SubCategoryModal.syncIndexes();
     await ModuleModal.syncIndexes();
@@ -338,4 +392,4 @@ const syncIndex = async () => {
 }
 syncIndex();
 
-module.exports = { ProductModal, TypeModal, StateModal, SourceModal, UnitModal, CategoryModal, SubCategoryModal, ModuleModal, RoleModal, StatusModal, MailAddressModal, ApplicationSettingModal };
+module.exports = {ProductModal, TypeModal,CountryModal, StateModal,CityModal, SourceModal, UnitModal, IconModal,CategoryModal, SubCategoryModal, ModuleModal, RoleModal, StatusModal, MailAddressModal, ApplicationSettingModal };
