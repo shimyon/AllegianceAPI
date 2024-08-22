@@ -206,6 +206,12 @@ const getAllLead = asyncHandler(async (req, res) => {
                 $match: { Product: ObjectId(req.body.product) }
             });
         }
+
+        if (req.body.icon) {
+            query.push({
+                $match: { Icon: ObjectId(req.body.icon) }
+            });
+        }
         query.push(
             {
                 '$lookup': {
