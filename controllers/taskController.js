@@ -170,9 +170,9 @@ const getAlltask = asyncHandler(async (req, res) => {
         outboxcondition.Status = req.body.status;
     }
     try {
-        let inboxList = await Task.find(inboxcondition).populate("Status").populate("Assign")
+        let inboxList = await Task.find(inboxcondition).populate("Status").populate("Assign", "_id name").populate("addedBy", "_id name")
             .sort({ createdAt: -1 })
-        let outboxList = await Task.find(outboxcondition).populate("Status").populate("Assign")
+        let outboxList = await Task.find(outboxcondition).populate("Status").populate("Assign", "_id name").populate("addedBy", "_id name")
             .sort({ createdAt: -1 })
         return res.status(200).json({
             success: true,

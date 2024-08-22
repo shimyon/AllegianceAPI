@@ -76,7 +76,6 @@ const addSupport = asyncHandler(async (req, res) => {
         if (newSupport) {
             let date = new Date();
             const savedNotification = await notificationModel.create({
-                // description: `Support(${newSupport.TicketNo}) entry has been created`,
                 description: `Support(${newSupport.TicketCode}) entry has been created`,
                 date: date,
                 link: "Support",

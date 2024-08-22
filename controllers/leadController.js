@@ -15,6 +15,7 @@ const State = Master.StateModal;
 const City = Master.CityModal;
 const ProspectModal = require('../models/prospectModel')
 const Prospect = ProspectModal.ProspectsModal;
+const ProNextOn = ProspectModal.ProNextOnModal;
 const TaskModal = require('../models/taskModel');
 const Task = TaskModal.TaskModal;
 const uploadFile = require("../middleware/uploadFileMiddleware");
@@ -31,21 +32,21 @@ const addLead = asyncHandler(async (req, res) => {
             LastName: req.body.lastname,
             Address: req.body.address,
             Designation: req.body.designation,
-            Icon: req.body.icon||null,
+            Icon: req.body.icon || null,
             Mobile: req.body.mobile,
             Email: req.body.email,
-            City: req.body.city||null,
-            State: req.body.state||null,
-            Country: req.body.country||null,
-            Source: req.body.source||null,
-            Product: req.body.product||null,
+            City: req.body.city || null,
+            State: req.body.state || null,
+            Country: req.body.country || null,
+            Source: req.body.source || null,
+            Product: req.body.product || null,
             Requirements: req.body.requirements,
             Notes: req.body.notes,
             InCharge: req.body.incharge,
             NextTalkon: req.body.nextTalkOn,
             NextTalkNotes: req.body.nextTalkNotes,
             CustomerRefrence: req.body.CustomerRefrence,
-            Sales: req.body.sales||null,
+            Sales: req.body.sales || null,
             addedBy: req.user._id,
             Stage: "New",
             LeadSince: new Date(),
@@ -107,17 +108,17 @@ const editLead = asyncHandler(async (req, res) => {
             LastName: req.body.lastname,
             Address: req.body.address,
             Designation: req.body.designation,
-            Icon: req.body.icon||null,
+            Icon: req.body.icon || null,
             Mobile: req.body.mobile,
             Email: req.body.email,
-            City: req.body.city||null,
-            State: req.body.state||null,
-            Country: req.body.country||null,
-            Source: req.body.source||null,
-            Product: req.body.product||null,
+            City: req.body.city || null,
+            State: req.body.state || null,
+            Country: req.body.country || null,
+            Source: req.body.source || null,
+            Product: req.body.product || null,
             Requirements: req.body.requirements,
             CustomerRefrence: req.body.CustomerRefrence,
-            Sales: req.body.sales||null,
+            Sales: req.body.sales || null,
             Notes: req.body.notes,
             InCharge: req.body.incharge,
             is_active: true
@@ -384,10 +385,10 @@ const getAllLead = asyncHandler(async (req, res) => {
 const getLeadById = asyncHandler(async (req, res) => {
     try {
         let leadList = await Lead.find({ Stage: "New", _id: req.params.id }).populate("Source").populate("Country").populate("State").populate("City").populate("Icon").populate("OtherContact").populate("Product").populate("Sales").populate("NextTalk").populate("addedBy");
-        let tasklist = await Task.find({ is_active: true, LeadId: req.params.id}).populate("Status").populate("Assign");
+        let tasklist = await Task.find({ is_active: true, LeadId: req.params.id }).populate("Status").populate("Assign");
         return res.status(200).json({
             success: true,
-            data: {leadList, tasklist}
+            data: { leadList, tasklist }
         }).end();
     } catch (err) {
         return res.status(400).json({
@@ -531,8 +532,8 @@ const moveToProspect = asyncHandler(async (req, res) => {
             Stage: "Prospect",
             StageDate: new Date()
         });
-        
-        let status = await Status.find({GroupName:"Prospects"}).lean();
+
+        let status = await Status.find({ GroupName: "Prospects" }).lean();
         let interaction = await Prospect.create({
             Company: leadExisting.Company,
             Title: leadExisting.Title,
@@ -550,12 +551,26 @@ const moveToProspect = asyncHandler(async (req, res) => {
             Sales: leadExisting.Sales,
             Source: leadExisting.Source,
             Requirements: leadExisting.Requirements,
+            CustomerRefrence: leadExisting.CustomerRefrence,
             addedBy: req.user._id,
             Stage: status[0],
             StageDate: new Date(),
             is_active: true
         });
         if (interaction) {
+            const next = await NextOn.find({ leadId: req.params.id }).sort({ date: -1 });
+            let insertProspectNext = next.map(f => ({
+                prospectId: interaction._id,
+                date: f.date,
+                note: f.note,
+                user: req.user._id
+            }));
+            if (insertProspectNext.length > 0) {
+                const savedNotification = await ProNextOn.insertMany(insertProspectNext);
+                let prospectExisting = await Prospect.findByIdAndUpdate(interaction._id, {
+                        NextTalk: savedNotification[0]._id
+                    });
+            }
             let date = new Date();
             const savedNotification = await notificationModel.create({
                 description: `lead(${interaction.Company}) Moved to prospect`,

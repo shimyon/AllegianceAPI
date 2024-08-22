@@ -17,7 +17,9 @@ const Country = Master.CountryModal;
 const State = Master.StateModal;
 const City = Master.CityModal;
 const CustomerModal = require('../models/customerModel')
-const Customer = CustomerModal.CustomerModal
+const Customer = CustomerModal.CustomerModal;
+const BillingAddress = CustomerModal.BillingAddressModal;
+const ShippingAddress = CustomerModal.ShippingAddressModal;
 
 const addProspect = asyncHandler(async (req, res) => {
     try {
@@ -612,6 +614,31 @@ const convertToCustomer = asyncHandler(async (req, res) => {
             is_active: true
         });
         if (newCustomer) {
+            const newBilling = await BillingAddress.create({
+                Customer: newCustomer._id,
+                Address: pros.Address,
+                City: pros.City||null,
+                State: pros.State||null,
+                Country: pros.Country||null,
+                is_active: true,
+                is_default: true
+            });
+            const newShipping = await ShippingAddress.create({
+                Customer: newCustomer._id,
+                Address: pros.Address,
+                City: pros.City||null,
+                State: pros.State||null,
+                Country: pros.Country||null,
+                addedBy: req.user._id,
+                is_active: true,
+                is_default: true
+            });
+            const existCustomer = await Customer.findById(newCustomer._id);
+            existCustomer.BillingAddress.push(newBilling);
+            existCustomer.ShippingAddress.push(newShipping);
+            existCustomer.save((err) => {
+                if (err) throw err;
+            });
             const newProspect = await Prospect.findByIdAndUpdate(req.params.id, {
                 is_customer: true
             });
