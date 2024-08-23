@@ -172,7 +172,7 @@ const removeLead = asyncHandler(async (req, res) => {
 
 const getAllLead = asyncHandler(async (req, res) => {
     try {
-        let { skip, per_page } = req.body;
+        let { skip, per_page, startdate, enddate } = req.body;
         let query = [];
         query.push({
             $match: { is_active: req.body.active, Stage: "New" }
@@ -210,6 +210,19 @@ const getAllLead = asyncHandler(async (req, res) => {
         if (req.body.icon) {
             query.push({
                 $match: { Icon: ObjectId(req.body.icon) }
+            });
+        }
+        if (startdate && enddate) {
+            const start = new Date(startdate);
+            const end = new Date(enddate);
+            end.setDate(end.getDate() + 1);
+            query.push({
+                $match: {
+                    LeadSince: {
+                        $gte: start,
+                        $lt: end
+                    }
+                }
             });
         }
         query.push(
@@ -305,31 +318,31 @@ const getAllLead = asyncHandler(async (req, res) => {
             }
         );
 
-        if (req.body.month) {
-            if (req.body.month == "this") {
-                const currentMonth = new Date().getMonth() + 1;
-                query.push({
-                    $match: {
-                        $expr: {
-                            $eq: [{ $month: "$LeadSince" }, currentMonth]
-                        }
-                    }
-                });
-            }
-            if (req.body.month == "last") {
-                let currentMonth = new Date().getMonth();
-                if (currentMonth == 0) {
-                    currentMonth = currentMonth + 12;
-                }
-                query.push({
-                    $match: {
-                        $expr: {
-                            $eq: [{ $month: "$LeadSince" }, currentMonth]
-                        }
-                    }
-                });
-            }
-        }
+        // if (req.body.month) {
+        //     if (req.body.month == "this") {
+        //         const currentMonth = new Date().getMonth() + 1;
+        //         query.push({
+        //             $match: {
+        //                 $expr: {
+        //                     $eq: [{ $month: "$LeadSince" }, currentMonth]
+        //                 }
+        //             }
+        //         });
+        //     }
+        //     if (req.body.month == "last") {
+        //         let currentMonth = new Date().getMonth();
+        //         if (currentMonth == 0) {
+        //             currentMonth = currentMonth + 12;
+        //         }
+        //         query.push({
+        //             $match: {
+        //                 $expr: {
+        //                     $eq: [{ $month: "$LeadSince" }, currentMonth]
+        //                 }
+        //             }
+        //         });
+        //     }
+        // }
         query.push(
             {
                 $facet: {
