@@ -4,12 +4,31 @@ const asyncHandler = require('express-async-handler')
 const User = require('../models/userModel')
 const Master = require('../models/masterModel')
 const Organization = Master.OrganizationModal;
-const Role = Master.RoleModal;
 const DashboardModal = require('../models/dashboardModel')
 const Dashboard = DashboardModal.Dashboard
 const moment = require('moment');
 const { sendMail } = require('../middleware/sendMail')
-
+const MasterSource = Master.SourceModal;
+const MasterState = Master.StateModal;
+const MasterCountry = Master.CountryModal;
+const MasterCity = Master.CityModal;
+const MasterUnit = Master.UnitModal;
+const MasterIcon = Master.IconModal;
+const MasterModule = Master.ModuleModal;
+const MasterRole = Master.RoleModal;
+const MasterStatus = Master.StatusModal;
+const MasterType = Master.TypeModal;
+const SaasModal = require('../models/saasmasterModel');
+const Source = SaasModal.SourceModal;
+const State = SaasModal.StateModal;
+const Country = SaasModal.CountryModal;
+const City = SaasModal.CityModal;
+const Unit = SaasModal.UnitModal;
+const Icon = SaasModal.IconModal;
+const Module = SaasModal.ModuleModal;
+const Role = SaasModal.RoleModal;
+const Status = SaasModal.StatusModal;
+const Type = SaasModal.TypeModal;
 
 const registerUser = asyncHandler(async (req, res) => {
     const { name, email, password, role } = req.body
@@ -177,23 +196,26 @@ const changePassword = asyncHandler(async (req, res) => {
 })
 
 const loginUser = asyncHandler(async (req, res) => {
+    let Roles = Role(req.conn);
     const { email, password } = req.body
     let Users = User(req.conn)
-    const user = await Users.findOne({ email: email, is_active: true }).populate("role");
+
+    const user = await Users.findOne({ email: email, is_active: true }).populate('role');
     if (!user) {
         res.status(200)
         throw new Error("User Not Found!")
     }
 
     if ((await bcrypt.compare(password, user.password))) {
-        res.json({
+        let jsonresult = {
             _id: user.id,
             name: user.name,
             email: user.email,
-            role: user.role?._id,
+            role: user.role?.id,
             rolename: user.role?.Name,
             token: generateToken(user.id),
-        })
+        };
+        res.json(jsonresult).end();
     }
     else {
         res.status(401).send({ message: "Invalid credentials!" })
@@ -277,7 +299,17 @@ const forgotPassword = asyncHandler(async (req, res) => {
     }
 })
 const addOrganizationUser = asyncHandler(async (req, res) => {
-    let Users = User(req.conn)
+    let Users = User(req.conn);
+    let Sources = Source(req.conn);
+    let States = State(req.conn);
+    let Countrys = Country(req.conn);
+    let Citys = City(req.conn);
+    let Units = Unit(req.conn);
+    let Icons = Icon(req.conn);
+    let Modules = Module(req.conn);
+    let Roles = Role(req.conn);
+    let Statuss = Status(req.conn);
+    let Types = Type(req.conn);
     try {
         let oldUser = await Organization.findOne({ Name: req.body.Name });
 
@@ -296,13 +328,66 @@ const addOrganizationUser = asyncHandler(async (req, res) => {
             Code: req.body.Code,
             PhoneNo: req.body.PhoneNo,
         });
-        
+        let oldSource = await MasterSource.find({});
+        let insertdataSource = oldSource.map(f => ({
+            Name: f.Name,
+            is_active: f.is_active,
+        }))
+        await Sources.insertMany(insertdataSource);
+        let oldCountry = await MasterCountry.find({});
+        let insertdataCountry = oldCountry.map(f => ({
+            Name: f.Name,
+            is_active: f.is_active,
+        }))
+        await Countrys.insertMany(insertdataCountry);
+        let oldUnit = await MasterUnit.find({});
+        let insertdataUnit = oldUnit.map(f => ({
+            Name: f.Name,
+            is_active: f.is_active,
+        }))
+        await Units.insertMany(insertdataUnit);
+        let oldIcon = await MasterIcon.find({});
+        let insertdataIcon = oldIcon.map(f => ({
+            Name: f.Name,
+            is_active: f.is_active,
+        }))
+        await Icons.insertMany(insertdataIcon);
+        let oldType = await MasterType.find({});
+        let insertdataType = oldType.map(f => ({
+            Name: f.Name,
+            is_active: f.is_active,
+        }))
+        await Types.insertMany(insertdataType);
+        let oldRole = await MasterRole.find({});
+        let insertdataRole = oldRole.map(f => ({
+            Name: f.Name,
+            is_active: f.is_active,
+        }))
+        await Roles.insertMany(insertdataRole);
+        let oldStatus = await MasterStatus.find({});
+        let insertdataStatus = oldStatus.map(f => ({
+            Name: f.Name,
+            Role: null,
+            Assign: null,
+            Assign: null,
+            Color: f.Color,
+            is_active: f.is_active,
+        }))
+        await Statuss.insertMany(insertdataStatus);
+        let oldModule = await MasterModule.find({});
+        let insertdataModule = oldModule.map(f => ({
+            Name: f.Name,
+            is_group: f.is_group,
+            GroupName: f.GroupName,
+            is_active: f.is_active,
+        }))
+        await Modules.insertMany(insertdataModule);
         const salt = await bcrypt.genSalt(10)
         const hashedPassword = await bcrypt.hash(req.body.password, salt)
-        var Roles = await Role.findOne({ Name: { $regex: "SuperAdmin", $options: 'i' } }, { _id: 1 });
+        var roles = await Roles.findOne({ Name: { $regex: "SuperAdmin", $options: 'i' } }, { _id: 1 });
         let newUser = await Users.create({
             name: req.body.firstName,
-            role: Roles._id,
+            role: roles._id,
             email: req.body.UserEmail,
             password: hashedPassword
         });

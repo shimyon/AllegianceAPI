@@ -363,7 +363,7 @@ const ApplicationSettingSchema = mongoose.Schema(
     {
         timestamps: true,
     });
-    const organizationSchema = mongoose.Schema(
+const organizationSchema = mongoose.Schema(
         {
             Name: {
                 type: String
@@ -392,18 +392,18 @@ const ApplicationSettingSchema = mongoose.Schema(
             timestamps: true,
         });
 const ProductModal = mongoose.model('Products', productSchema);
-const TypeModal = mongoose.model('Types', typeSchema);
-const SourceModal = mongoose.model('Sources', sourceSchema);
-const CountryModal = mongoose.model('Country', countrySchema);
-const StateModal = mongoose.model('States', stateSchema);
-const CityModal = mongoose.model('City', citySchema);
-const UnitModal = mongoose.model('Units', unitSchema);
-const IconModal = mongoose.model('Icon', iconSchema);
+const TypeModal = mongoose.model('MasterTypes', typeSchema);
+const SourceModal = mongoose.model('MasterSources', sourceSchema);
+const CountryModal = mongoose.model('MasterCountry', countrySchema);
+const StateModal = mongoose.model('MasterStates', stateSchema);
+const CityModal = mongoose.model('MasterCity', citySchema);
+const UnitModal = mongoose.model('MasterUnits', unitSchema);
+const IconModal = mongoose.model('MasterIcon', iconSchema);
 const CategoryModal = mongoose.model('Category', categorySchema);
 const SubCategoryModal = mongoose.model('SubCategory', subCategorySchema);
-const ModuleModal = mongoose.model('Module_Master', ModuleSchema);
-const RoleModal = mongoose.model('Role', RoleSchema);
-const StatusModal = mongoose.model('Status', statusSchema);
+const ModuleModal = mongoose.model('MasterModule_Master', ModuleSchema);
+const RoleModal = mongoose.model('MasterRole', RoleSchema);
+const StatusModal = mongoose.model('MasterStatus', statusSchema);
 const MailAddressModal = mongoose.model('MailAddress', MailAddressSchema);
 const ApplicationSettingModal = mongoose.model('ApplicationSetting', ApplicationSettingSchema);
 const OrganizationModal = mongoose.model('Organization', organizationSchema);
