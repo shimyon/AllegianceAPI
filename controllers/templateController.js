@@ -2,13 +2,14 @@ const asyncHandler = require('express-async-handler')
 const Template = require('../models/templateModel')
 
 const add = asyncHandler(async (req, res) => {
+    let Templates = Template(req.conn);
     const { Name, TemplateFor, Detail } = req.body
-    const templateExists = await Template.findOne({ Name: req.body.Name, TemplateFor: req.body.TemplateFor })
+    const templateExists = await Templates.findOne({ Name: req.body.Name, TemplateFor: req.body.TemplateFor })
     if (templateExists) {
         res.status(400)
         throw new Error('Template Already Exists!')
     }
-    const Templateadd = await Template.create({
+    const Templateadd = await Templates.create({
         Name,
         TemplateFor,
         Detail,
@@ -29,6 +30,7 @@ const add = asyncHandler(async (req, res) => {
 })
 
 const update = asyncHandler(async (req, res) => {
+    let Templates = Template(req.conn);
     const { id, Name, TemplateFor, Detail } = req.body
 
     if (!id) {
@@ -36,18 +38,18 @@ const update = asyncHandler(async (req, res) => {
         throw new Error('Template id not found!')
     }
 
-    const TemplateExists = await Template.findOne({ _id: id });
+    const TemplateExists = await Templates.findOne({ _id: id });
     if (!TemplateExists) {
         res.status(400)
         throw new Error('Template Not Found')
     }
 
-    let template = await Template.findByIdAndUpdate(id, {
+    let template = await Templates.findByIdAndUpdate(id, {
         Name: Name,
         TemplateFor: TemplateFor,
         Detail: Detail,
     });
-    template = await Template.findOne({ _id: id });
+    template = await Templates.findOne({ _id: id });
     if (template) {
         res.status(201).json({
             _id: template.id,
@@ -63,7 +65,8 @@ const update = asyncHandler(async (req, res) => {
 })
 
 const getById = asyncHandler(async (req, res) => {
-    const { _id, TemplateFor, Name, Detail, is_default, is_active } = await Template.findById(req.params.id)
+    let Templates = Template(req.conn);
+    const { _id, TemplateFor, Name, Detail, is_default, is_active } = await Templates.findById(req.params.id)
 
     res.status(200).json({
         id: _id,
@@ -77,7 +80,8 @@ const getById = asyncHandler(async (req, res) => {
 
 const getAll = asyncHandler(async (req, res) => {
     try {
-        const template = await Template.find({ is_active: req.body.active }, { _id: 1, TemplateFor: 1, Name: 1, Detail: 1, is_default: 1, is_active: 1 });
+    let Templates = Template(req.conn);
+        const template = await Templates.find({ is_active: req.body.active }, { _id: 1, TemplateFor: 1, Name: 1, Detail: 1, is_default: 1, is_active: 1 });
 
         res.status(200).json(template).end();
     } catch (err) {
@@ -90,9 +94,10 @@ const getAll = asyncHandler(async (req, res) => {
 })
 
 const remove = asyncHandler(async (req, res) => {
+    let Templates = Template(req.conn);
     let active = req.body.active == true ? "enabled" : "disabled";
     try {
-        const existTemplate = await Template.findById(req.params.id);
+        const existTemplate = await Templates.findById(req.params.id);
         if (!existTemplate) {
             return res.status(200).json({
                 success: false,
@@ -101,7 +106,7 @@ const remove = asyncHandler(async (req, res) => {
             });
         }
 
-        const newTemplate = await Template.findByIdAndUpdate(req.params.id, {
+        const newTemplate = await Templates.findByIdAndUpdate(req.params.id, {
             is_active: req.body.active
         });
 
@@ -121,36 +126,37 @@ const remove = asyncHandler(async (req, res) => {
 });
 
 const setDefault = asyncHandler(async (req, res) => {
+    let Templates = Template(req.conn);
     try {
         if (req.body.type == "Quotation") {
-            await Template.updateMany({ "TemplateFor": req.body.type }, {
+            await Templates.updateMany({ "TemplateFor": req.body.type }, {
                 is_default: false
             });
-            await Template.findByIdAndUpdate(req.body.id, {
+            await Templates.findByIdAndUpdate(req.body.id, {
                 is_default: req.body.default
             });
         }
         else if (req.body.type == "Order") {
-            await Template.updateMany({ "TemplateFor": req.body.type }, {
+            await Templates.updateMany({ "TemplateFor": req.body.type }, {
                 is_default: false
             });
-            await Template.findByIdAndUpdate(req.body.id, {
+            await Templates.findByIdAndUpdate(req.body.id, {
                 is_default: req.body.default
             });
         }
         else if (req.body.type == "Invoice") {
-            await Template.updateMany({ "TemplateFor": req.body.type }, {
+            await Templates.updateMany({ "TemplateFor": req.body.type }, {
                 is_default: false
             });
-            await Template.findByIdAndUpdate(req.body.id, {
+            await Templates.findByIdAndUpdate(req.body.id, {
                 is_default: req.body.default
             });
         }
         else {
-            await Template.updateMany({ "TemplateFor": req.body.type }, {
+            await Templates.updateMany({ "TemplateFor": req.body.type }, {
                 is_default: false
             });
-            await Template.findByIdAndUpdate(req.body.id, {
+            await Templates.findByIdAndUpdate(req.body.id, {
                 is_default: req.body.default
             });
         }
@@ -169,8 +175,9 @@ const setDefault = asyncHandler(async (req, res) => {
 });
 
 const deleteTemplate = asyncHandler(async (req, res) => {
+    let Templates = Template(req.conn);
     try {
-        await Template.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {
+        await Templates.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {
             if (err) {
                 return res.status(401).json({
                     success: false,

@@ -1,5 +1,5 @@
 const mongoose = require('mongoose')
-const templateSchema = mongoose.Schema(
+collection = mongoose.Schema(
   {
     TemplateFor: {
       type: String,
@@ -24,4 +24,4 @@ const templateSchema = mongoose.Schema(
   }
 )
 
-module.exports = mongoose.model('Template', templateSchema)
+module.exports = (conn) => conn.model("Template", collection);
