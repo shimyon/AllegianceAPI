@@ -1,6 +1,6 @@
 const mongoose = require('mongoose')
 
-const countrySchema = mongoose.Schema(
+const countrySchema = new mongoose.Schema(
     {
         Name: {
             type: String
@@ -12,7 +12,7 @@ const countrySchema = mongoose.Schema(
     {
         timestamps: true,
     });
-const stateSchema = mongoose.Schema(
+const stateSchema = new mongoose.Schema(
     {
         Name: {
             type: String
@@ -29,7 +29,7 @@ const stateSchema = mongoose.Schema(
     {
         timestamps: true,
     });
-const citySchema = mongoose.Schema(
+const citySchema = new  mongoose.Schema(
     {
         Name: {
             type: String
@@ -152,7 +152,202 @@ const iconSchema = mongoose.Schema(
     {
         timestamps: true,
     });
+const productSchema = mongoose.Schema(
+    {
+        Name: {
+            type: String,
+        },
+        Type: {
+            type: String
+        },
+        Code: {
+            type: String
+        },
+        Category: {
+            type: String
+        },
+        SubCategory: {
+            type: String
+        },
+        PurchasePrice: {
+            type: Number
+        },
+        SalePrice: {
+            type: Number
+        },
+        Tax: {
+            type: Number
+        },
+        MinStock: {
+            type: String
+        },
+        MaxStock: {
+            type: String
+        },
+        AvailableStock: {
+            type: String
+        },
+        Description: {
+            type: String
+        },
+        is_active: {
+            type: Boolean
+        }
+    },
+    {
+        timestamps: true,
+    });
+const categorySchema = mongoose.Schema(
+    {
+        Name: {
+            type: String
+        },
+        is_active: {
+            type: Boolean
+        }
+    },
+    {
+        timestamps: true,
+    });
+const subCategorySchema = mongoose.Schema(
+    {
+        Name: {
+            type: String
+        },
+        Category:
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Category'
+        }
+        ,
+        is_active: {
+            type: Boolean
+        }
+    },
+    {
+        timestamps: true,
+    });
+const MailAddressSchema = mongoose.Schema(
+    {
+        Name: {
+            type: String
+        },
+        Address:
+        {
+            type: String
+        },
+        Password:
+        {
+            type: String
+        },
+        Server:
+        {
+            type: String
+        },
+        Port:
+        {
+            type: String
+        },
+        is_default: {
+            type: Boolean
+        },
+        is_active: {
+            type: Boolean
+        }
+    },
+    {
+        timestamps: true,
+    });
+const ApplicationSettingSchema = mongoose.Schema(
+    {
+        CompanyTitle: {
+            type: String
+        },
+        CompanySubTitle: {
+            type: String
+        },
+        CompanyLogo: {
+            type: String
+        },
+        Quotation: {
+            type: Boolean,
+            default: false
+        },
+        QuotationPrefix: {
+            type: String
+        },
+        QuotationSuffix: {
+            type: String
+        },
+        Invoice: {
+            type: Boolean,
+            default: false
+        },
+        InvoicePrefix: {
+            type: String
+        },
+        InvoiceSuffix: {
+            type: String
+        },
+        Customer: {
+            type: Boolean,
+            default: false
+        },
+        CustomerPrefix: {
+            type: String
+        },
+        CustomerSuffix: {
+            type: String
+        },
+        Order: {
+            type: Boolean,
+            default: false
+        },
+        OrderPrefix: {
+            type: String
+        },
+        OrderSuffix: {
+            type: String
+        },
+        PanNo: {
+            type: String
+        },
+        GSTNo: {
+            type: String
+        },
+        RegisterNo: {
+            type: String
+        },
+        BankName: {
+            type: String
+        },
+        AccNo: {
+            type: String
+        },
+        IFSCNo: {
+            type: String
+        },
+        TermsAndCondition: {
+            type: String
+        },
+        OfficeAddress: {
+            type: String
+        },
+        OfficeEmail: {
+            type: String
+        },
+        OfficePhone1: {
+            type: String
+        },
+        OfficePhone2: {
+            type: String
+        }
+    },
+    {
+        timestamps: true,
+    });
 module.exports = {
+    ProductModal: (conn) => conn.model('Products', productSchema),
     TypeModal: (conn) => conn.model('Types', typeSchema),
     SourceModal: (conn) => conn.model('Sources', sourceSchema),
     CountryModal: (conn) => conn.model('Country', countrySchema),
@@ -162,5 +357,10 @@ module.exports = {
     IconModal: (conn) => conn.model('Icon', iconSchema),
     ModuleModal: (conn) => conn.model('Module_Master', ModuleSchema),
     RoleModal: (conn) => conn.model('Role', RoleSchema),
-    StatusModal: (conn) => conn.model('Status', statusSchema)
+    StatusModal: (conn) => conn.model('Status', statusSchema),
+    CategoryModal: (conn) => conn.model('Category', categorySchema),
+    SubCategoryModal: (conn) => conn.model('SubCategory', subCategorySchema),
+    MailAddressModal: (conn) => conn.model('MailAddress', MailAddressSchema),
+    ApplicationSettingModal: (conn) => conn.model('ApplicationSetting', ApplicationSettingSchema),
+
 }

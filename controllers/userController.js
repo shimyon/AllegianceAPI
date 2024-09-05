@@ -235,9 +235,11 @@ const getUserById = asyncHandler(async (req, res) => {
 })
 
 const getAllUser = asyncHandler(async (req, res) => {
-    let Users = User(req.conn)
+    let Roles = Role(req.conn);
+    let Users = User(req.conn);
+
     try {
-        const user = await Users.find({ is_active: req.body.active }, { _id: 1, email: 1, name: 1, role: 1, is_active: 1 }).populate("role").sort({ createdAt: -1 });
+        const user = await Users.find({ is_active: req.body.active }, { _id: 1, email: 1, name: 1, role: 1, is_active: 1 }).populate('role').sort({ createdAt: -1 });
 
         res.status(200).json(user).end();
     } catch (err) {
