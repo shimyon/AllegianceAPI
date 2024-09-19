@@ -18,7 +18,9 @@ var test = require('tape')
 var path = require('path')
 const Template = require('../models/templateModel')
 const { generatePDF } = require('../services/pdfService')
-
+const LeadModal = require('../models/leadModel')
+const Lead = LeadModal.LeadsModal;
+const Icon = Master.IconModal;
 const addQuatation = asyncHandler(async (req, res) => {
     try {
         const existQuatationCode = await Quatation.findOne({ $or: [{ QuatationCode: req.body.QuatationCode }] });
@@ -675,6 +677,56 @@ const deleteQuatation = asyncHandler(async (req, res) => {
 
 });
 
+const duplicateLead = asyncHandler(async (req, res) => {
+    const { quotationId } = req.body;
+
+    const quotation = await Quatation.findById(quotationId)
+    .populate({
+        path: 'Customer',
+        populate: [
+            { path: 'Country' },
+            { path: 'State' },
+            { path: 'City' }
+        ]
+    });    
+      
+    if (!quotation || !quotation.Customer) {
+        return res.status(404).json({ message: 'Quotation or Customer not found' });
+    } 
+
+    const icon = await Icon.findOne({ Name: 'Quotation' });
+    const iconId = icon ? icon._id : null;
+
+    const leadData = {
+        Company: quotation.Customer.Company,
+        GSTNo: quotation.Customer.GSTNo,
+        Title: quotation.Customer.Title,
+        FirstName: quotation.Customer.FirstName,
+        LastName: quotation.Customer.LastName,
+        Designation: quotation.Customer.Designation,
+        Mobile: quotation.Customer.Mobile,
+        Email: quotation.Customer.Email,
+        Address: quotation.Customer.Address,
+        Icon: iconId,
+        Stage: "New",
+        is_active: quotation.Customer.is_active,
+        Notes: quotation.Customer.Notes,
+        LeadSince: new Date(),
+        StageDate: new Date(),
+        City: quotation.Customer.City?._id || null, 
+        State: quotation.Customer.State?._id || null, 
+        Country: quotation.Customer.Country?._id || null, 
+        addedBy: req.user._id
+    };
+
+    const newLead = await Lead.create(leadData);
+    return res.status(200).json({
+        success: true,
+        msg: "Lead Added",
+        data: newLead
+    });
+});
+
 module.exports = {
     addQuatation,
     editQuatation,
@@ -683,5 +735,6 @@ module.exports = {
     getQuatationById,
     moveToOrder,
     Quatationpdfcreate,
-    deleteQuatation
+    deleteQuatation,
+    duplicateLead
 }
