@@ -113,6 +113,9 @@ const prospectSchema = mongoose.Schema(
         CustomerRefrence: {
             type: String
         },
+        LastOpen: {
+            type: Date
+        },
         is_favorite: {
             type: Boolean,
             default: false
