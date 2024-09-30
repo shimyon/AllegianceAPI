@@ -1,4 +1,5 @@
 const asyncHandler = require('express-async-handler')
+const SassMaster = require('../models/saasmasterModel');
 const Master = require('../models/masterModel')
 const Product = Master.ProductModal;
 const Type = Master.TypeModal;
@@ -16,6 +17,8 @@ const Role = Master.RoleModal;
 const Status = Master.StatusModal;
 const MailAddress = Master.MailAddressModal;
 const ApplicationSetting = Master.ApplicationSettingModal;
+const ApplicationSettingTenant = SassMaster.ApplicationSettingModal;
+
 const uploadFile = require("../middleware/uploadFileMiddleware");
 
 const Response = require('../models/responseModel')
@@ -1632,6 +1635,7 @@ const getApplicationSetting = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let ApplicationSetting = ApplicationSettingTenant(req.conn);
         let applicationSetting = await ApplicationSetting.findOne();
 
         response.success = true;
@@ -1668,7 +1672,7 @@ const addApplicationSetting = asyncHandler(async (req, res) => {
 const editSave = asyncHandler(async (req, res, fileName) => {
     try {
         const { Id, CompanyTitle, CompanySubTitle, BankName, AccNo, IFSCNo, CompanyLogo, Quotation, QuotationPrefix, RegisterNo, PanNo, GSTNo, QuotationSuffix, Invoice, InvoicePrefix, InvoiceSuffix, Ticket, TicketPrefix, TicketSuffix, Customer, CustomerPrefix, CustomerSuffix, Order, OrderPrefix, OrderSuffix, TermsAndCondition, OfficeAddress, OfficeEmail, OfficePhone1, OfficePhone2,IndiaMartKey,JustDialKey } = req.body
-
+        let ApplicationSetting = ApplicationSettingTenant(req.conn);
         let existNews = await ApplicationSetting.findById(Id);
         if (!existNews) {
             return res.status(400).json({
