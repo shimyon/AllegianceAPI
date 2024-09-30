@@ -339,7 +339,39 @@ const addOrganizationUser = asyncHandler(async (req, res) => {
             Name: f.Name,
             is_active: f.is_active,
         }))
-        await Countrys.insertMany(insertdataCountry);
+        let newCountry = await Countrys.insertMany(insertdataCountry);
+        let oldState = await MasterState.find({});
+        let insertdataState = [];
+        newCountry.forEach(nc => {
+            let correspondingOldCountry = oldCountry.find(oc => oc.Name === nc.Name);
+            if (correspondingOldCountry) {
+                let filteredStates = oldState.filter(state => state.Country.equals(correspondingOldCountry._id));
+                filteredStates.forEach(f => {
+                    insertdataState.push({
+                        Name: f.Name,
+                        Country: nc._id,
+                        is_active: f.is_active,
+                    });
+                });
+            }
+        });
+        let newState = await States.insertMany(insertdataState);
+        let oldCity = await MasterCity.find({});
+        let insertdataCity = [];
+        newState.forEach(ns => {
+            let correspondingOldState = oldState.find(os => os.Name === ns.Name);
+            if (correspondingOldState) {
+                let filteredcitys = oldCity.filter(city => city.State.equals(correspondingOldState._id));
+                filteredcitys.forEach(f => {
+                    insertdataCity.push({
+                        Name: f.Name,
+                        State: ns._id,
+                        is_active: f.is_active,
+                    });
+                });
+            }
+        });
+        let newCity = await Citys.insertMany(insertdataCity);
         let oldUnit = await MasterUnit.find({});
         let insertdataUnit = oldUnit.map(f => ({
             Name: f.Name,
