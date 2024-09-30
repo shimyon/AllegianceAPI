@@ -29,6 +29,8 @@ const Module = SaasModal.ModuleModal;
 const Role = SaasModal.RoleModal;
 const Status = SaasModal.StatusModal;
 const Type = SaasModal.TypeModal;
+const ModuleRights = SaasModal.ModuleRightModal;
+const ModuleRight = require('../models/moduleRightModel')
 
 const registerUser = asyncHandler(async (req, res) => {
     const { name, email, password, role } = req.body
@@ -310,6 +312,7 @@ const addOrganizationUser = asyncHandler(async (req, res) => {
     let Roles = Role(req.conn);
     let Statuss = Status(req.conn);
     let Types = Type(req.conn);
+    let MdleRights = ModuleRights(req.conn);
     try {
         let oldUser = await Organization.findOne({ Name: req.body.Name });
 
@@ -395,7 +398,8 @@ const addOrganizationUser = asyncHandler(async (req, res) => {
             Name: f.Name,
             is_active: f.is_active,
         }))
-        await Roles.insertMany(insertdataRole);
+        let newRole = await Roles.insertMany(insertdataRole);       
+
         let oldStatus = await MasterStatus.find({});
         let insertdataStatus = oldStatus.map(f => ({
             Name: f.Name,
@@ -414,6 +418,28 @@ const addOrganizationUser = asyncHandler(async (req, res) => {
             is_active: f.is_active,
         }))
         await Modules.insertMany(insertdataModule);
+
+
+        let oldModuleRight = await ModuleRight.find({});
+        let insertdataModuleRight = [];
+        newRole.forEach(nr => {
+            let correspondingOldRole = oldRole.find(or => or.Name === nr.Name);
+            // let correspondingOldModule = oldModule.find(om => om.)
+            if(correspondingOldRole){
+                let filteredModuleRight = oldModuleRight.filter(moduleRight => moduleRight.role.equals(correspondingOldRole._id));
+                filteredModuleRight.forEach(f => {
+                    insertdataModuleRight.push({
+                        role: nr._id,
+                        moduleId: f.moduleId,
+                        read: f.read,
+                        write: f.write,
+                        delete: f.delete,
+                    })
+                })
+            }  
+        })
+        let newModuleRight = await MdleRights.insertMany(insertdataModuleRight);
+        
         const salt = await bcrypt.genSalt(10)
         const hashedPassword = await bcrypt.hash(req.body.password, salt)
         var roles = await Roles.findOne({ Name: { $regex: "SuperAdmin", $options: 'i' } }, { _id: 1 });

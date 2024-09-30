@@ -152,6 +152,32 @@ const iconSchema = mongoose.Schema(
     {
         timestamps: true,
     });
+const moduleRightSchema = mongoose.Schema(
+    {
+        role: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Role'
+        },
+        moduleId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Module_Master'
+        },
+        read: {
+            type: Boolean,
+            default: false
+        },
+        write: {
+            type: Boolean,
+            default: false
+        },
+        delete: {
+            type: Boolean,
+            default: false
+        },
+    },
+    {
+        timestamps: true,
+    })
 module.exports = {
     TypeModal: (conn) => conn.model('Types', typeSchema),
     SourceModal: (conn) => conn.model('Sources', sourceSchema),
@@ -162,5 +188,6 @@ module.exports = {
     IconModal: (conn) => conn.model('Icon', iconSchema),
     ModuleModal: (conn) => conn.model('Module_Master', ModuleSchema),
     RoleModal: (conn) => conn.model('Role', RoleSchema),
-    StatusModal: (conn) => conn.model('Status', statusSchema)
+    StatusModal: (conn) => conn.model('Status', statusSchema),
+    ModuleRightModal: (conn) => conn.model('ModuleRights', moduleRightSchema)
 }
