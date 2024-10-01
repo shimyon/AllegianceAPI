@@ -1,12 +1,12 @@
 const asyncHandler = require('express-async-handler')
 const SassMaster = require('../models/saasmasterModel');
 const Master = require('../models/masterModel')
-const Product = Master.ProductModal;
-const Type = Master.TypeModal;
-const State = Master.StateModal;
-const Country = Master.CountryModal;
-const City = Master.CityModal;
-const Source = Master.SourceModal;
+// const Product = Master.ProductModal;
+// const Type = Master.TypeModal;
+// const State = Master.StateModal;
+// const Country = Master.CountryModal;
+// const City = Master.CityModal;
+// const Source = Master.SourceModal;
 const Unit = Master.UnitModal;
 const Icon = Master.IconModal;
 const Category = Master.CategoryModal;
@@ -18,6 +18,12 @@ const Status = Master.StatusModal;
 const MailAddress = Master.MailAddressModal;
 const ApplicationSetting = Master.ApplicationSettingModal;
 const ApplicationSettingTenant = SassMaster.ApplicationSettingModal;
+const Products = SassMaster.ProductModal;
+const Types = SassMaster.TypeModal;
+const Sources = SassMaster.SourceModal;
+const Countrys = SassMaster.CountryModal;
+const States = SassMaster.StateModal;
+const Citys = SassMaster.CityModal;
 
 const uploadFile = require("../middleware/uploadFileMiddleware");
 
@@ -28,6 +34,7 @@ const addProduct = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let Product = Products(req.conn);
         let oldProduct = await Product.findOne({ Name: req.body.name, Type: req.body.type });
 
         if (oldProduct) {
@@ -64,6 +71,7 @@ const editProduct = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let Product = Products(req.conn);
         let oldProduct = Product.findById(req.body.id);
 
         if (!oldProduct) {
@@ -100,6 +108,7 @@ const changeProductStatus = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let Product = Products(req.conn);
         let newProduct = await Product.findByIdAndUpdate(req.body.id, {
             is_active: req.body.active
         });
@@ -118,6 +127,7 @@ const getProduct = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let Product = Products(req.conn);
         let products = await Product.find({ is_active: req.body.active }).sort({ createdAt: -1 });
 
         response.success = true;
@@ -133,6 +143,7 @@ const getProductById = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let Product = Products(req.conn);
         let products = await Product.findOne({ is_active: true, _id: req.params.id });
 
         response.success = true;
@@ -146,6 +157,7 @@ const getProductById = asyncHandler(async (req, res) => {
 })
 const deleteProduct = asyncHandler(async (req, res) => {
     try {
+        let Product = Products(req.conn);
         await Product.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {
             if (err) {
                 return res.status(401).json({
@@ -175,6 +187,7 @@ const addType = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let Type = Types(req.conn);
         let oldType = await Type.findOne({ Name: req.body.name });
 
         if (oldType) {
@@ -200,6 +213,7 @@ const editType = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let Type = Types(req.conn);
         let oldType = Type.findById(req.body.id);
 
         if (!oldType) {
@@ -225,6 +239,7 @@ const changeTypeStatus = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let Type = Types(req.conn);
         let newType = await Type.findByIdAndUpdate(req.body.id, {
             is_active: req.body.active
         });
@@ -243,10 +258,11 @@ const getType = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let Types = await Type.find({ is_active: req.body.active }).sort({ createdAt: -1 });
+        let Type = Types(req.conn);
+        let types = await Type.find({ is_active: req.body.active }).sort({ createdAt: -1 });
 
         response.success = true;
-        response.data = Types;
+        response.data = types;
         return res.status(200).json(response);
     }
     catch (err) {
@@ -258,10 +274,11 @@ const getTypeById = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let Types = await Type.findOne({ is_active: true, _id: req.params.id });
+        let Type = Types(req.conn);
+        let types = await Type.findOne({ is_active: true, _id: req.params.id });
 
         response.success = true;
-        response.data = Types;
+        response.data = types;
         return res.status(200).json(response);
     }
     catch (err) {
@@ -271,6 +288,7 @@ const getTypeById = asyncHandler(async (req, res) => {
 })
 const deleteType = asyncHandler(async (req, res) => {
     try {
+        let Type = Types(req.conn);
         await Type.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {
             if (err) {
                 return res.status(401).json({
@@ -300,6 +318,7 @@ const addSource = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let Source = Sources(req.conn);
         let oldSource = await Source.findOne({ Name: req.body.name });
 
         if (oldSource) {
@@ -326,6 +345,7 @@ const editSource = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let Source = Sources(req.conn);
         let oldSource = Source.findById(req.body.id);
 
         if (!oldSource) {
@@ -351,6 +371,7 @@ const changeSourceStatus = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let Source = Sources(req.conn);
         let newSource = await Source.findByIdAndUpdate(req.body.id, {
             is_active: req.body.active
         });
@@ -369,6 +390,7 @@ const getSources = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let Source = Sources(req.conn);
         let sources = await Source.find({ is_active: req.body.active });
 
         response.success = true;
@@ -384,6 +406,7 @@ const getSourceById = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let Source = Sources(req.conn);        
         let sources = await Source.findOne({ is_active: true, _id: req.params.id });
 
         response.success = true;
@@ -397,6 +420,7 @@ const getSourceById = asyncHandler(async (req, res) => {
 })
 const deleteSource = asyncHandler(async (req, res) => {
     try {
+        let Source = Sources(req.conn);
         await Source.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {
             if (err) {
                 return res.status(401).json({
@@ -425,6 +449,7 @@ const addCountry = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let Country = Countrys(req.conn);
         let oldCountry = await Country.findOne({ Name: req.body.name });
 
         if (oldCountry) {
@@ -452,6 +477,7 @@ const editCountry = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let Country = Countrys(req.conn);
         let oldCountry = Country.findById(req.body.id);
 
         if (!oldCountry) {
@@ -477,10 +503,11 @@ const getCountrys = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let Countrys = await Country.find({ is_active:req.body.active });
+        let Country = Countrys(req.conn);
+        let countrys = await Country.find({ is_active:req.body.active });
 
         response.success = true;
-        response.data = Countrys;
+        response.data = countrys;
         return res.status(200).json(response);
     }
     catch (err) {
@@ -492,10 +519,11 @@ const getCountryById = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let Countrys = await Country.findOne({ is_active: true, _id: req.params.id });
+        let Country = Countrys(req.conn);
+        let countrys = await Country.findOne({ is_active: true, _id: req.params.id });
 
         response.success = true;
-        response.data = Countrys;
+        response.data = countrys;
         return res.status(200).json(response);
     }
     catch (err) {
@@ -507,6 +535,7 @@ const changeCountryStatus = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let Country = Countrys(req.conn);
         let newCountry = await Country.findByIdAndUpdate(req.body.id, {
             is_active: req.body.active
         });
@@ -523,9 +552,11 @@ const changeCountryStatus = asyncHandler(async (req, res) => {
 })
 const deleteCountry = asyncHandler(async (req, res) => {
     try {
-        let States = await State.find({ Country: req.params.id }).count();
-        if (States != 0) {
-            if (States) {
+        let Country = Countrys(req.conn);
+        let State = States(req.conn);
+        let states = await State.find({ Country: req.params.id }).count();
+        if (states != 0) {
+            if (states) {
                 return res.status(400).json({
                     success: false,
                     msg: "You cannot delete this record because it is already in use",
@@ -562,6 +593,7 @@ const addState = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let State = States(req.conn);
         let oldState = await State.findOne({ Name: req.body.name });
 
         if (oldState) {
@@ -589,6 +621,7 @@ const editState = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let State = States(req.conn);
         let oldState = State.findById(req.body.id);
 
         if (!oldState) {
@@ -613,11 +646,14 @@ const editState = asyncHandler(async (req, res) => {
 const getStates = asyncHandler(async (req, res) => {
     let response = new Response();
 
+
     try {
-        let States = await State.find({ is_active: req.body.active }).populate("Country");
+        let Country = Countrys(req.conn);
+        let State = States(req.conn);
+        let states = await State.find({ is_active: req.body.active }).populate("Country");
 
         response.success = true;
-        response.data = States;
+        response.data = states;
         return res.status(200).json(response);
     }
     catch (err) {
@@ -629,10 +665,11 @@ const getStateById = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let States = await State.findOne({ is_active: true, _id: req.params.id });
+        let State = States(req.conn);
+        let states = await State.findOne({ is_active: true, _id: req.params.id });
 
         response.success = true;
-        response.data = States;
+        response.data = states;
         return res.status(200).json(response);
     }
     catch (err) {
@@ -644,6 +681,7 @@ const changeStateStatus = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let State = States(req.conn);
         let newState = await State.findByIdAndUpdate(req.body.id, {
             is_active: req.body.active
         });
@@ -660,9 +698,12 @@ const changeStateStatus = asyncHandler(async (req, res) => {
 })
 const deleteState = asyncHandler(async (req, res) => {
     try {
-        let Citys = await City.find({ State: req.params.id }).count();
-        if (Citys != 0) {
-            if (Citys) {
+        let State = States(req.conn);
+        let City = Citys(req.conn);
+
+        let citys = await City.find({ State: req.params.id }).count();
+        if (citys != 0) {
+            if (citys) {
                 return res.status(400).json({
                     success: false,
                     msg: "You cannot delete this record because it is already in use",
@@ -751,6 +792,9 @@ const getCitys = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let State = StateTenant(req.conn)
+        let City = CityTenant(req.conn)
+
         let Citys = await City.find({ is_active: req.body.active }).populate("State");
 
         response.success = true;

@@ -136,15 +136,21 @@ const shippingAddressSchema = mongoose.Schema(
         }
     })
 
-const CustomerModal = mongoose.model('Customers', customerSchema);
-const BillingAddressModal = mongoose.model('BillingAddress', billingAddressSchema);
-const ShippingAddressModal = mongoose.model('ShippingAddress', shippingAddressSchema);
+// const CustomerModal = mongoose.model('Customers', customerSchema);
+// const BillingAddressModal = mongoose.model('BillingAddress', billingAddressSchema);
+// const ShippingAddressModal = mongoose.model('ShippingAddress', shippingAddressSchema);
 
-const syncIndex = async () => {
-    await CustomerModal.syncIndexes();
-    await BillingAddressModal.syncIndexes();
-    await ShippingAddressModal.syncIndexes();
+// const syncIndex = async () => {
+//     await CustomerModal.syncIndexes();
+//     await BillingAddressModal.syncIndexes();
+//     await ShippingAddressModal.syncIndexes();
+// }
+// syncIndex();
+
+// module.exports = { CustomerModal, BillingAddressModal, ShippingAddressModal };
+module.exports = {
+    CustomerModal: (conn) => conn.model('Customers', customerSchema),
+    BillingAddressModal: (conn) => conn.model('BillingAddress', billingAddressSchema),
+    ShippingAddressModal: (conn) => conn.model('ShippingAddress', shippingAddressSchema),
+
 }
-syncIndex();
-
-module.exports = { CustomerModal, BillingAddressModal, ShippingAddressModal };

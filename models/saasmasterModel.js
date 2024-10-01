@@ -1,5 +1,50 @@
 const mongoose = require('mongoose')
 
+const productSchema = mongoose.Schema(
+    {
+        Name: {
+            type: String,
+        },
+        Type: {
+            type: String
+        },
+        Code: {
+            type: String
+        },
+        Category: {
+            type: String
+        },
+        SubCategory: {
+            type: String
+        },
+        PurchasePrice: {
+            type: Number
+        },
+        SalePrice: {
+            type: Number
+        },
+        Tax: {
+            type: Number
+        },
+        MinStock: {
+            type: String
+        },
+        MaxStock: {
+            type: String
+        },
+        AvailableStock: {
+            type: String
+        },
+        Description: {
+            type: String
+        },
+        is_active: {
+            type: Boolean
+        }
+    },
+    {
+        timestamps: true,
+    });
 const countrySchema = mongoose.Schema(
     {
         Name: {
@@ -178,7 +223,113 @@ const moduleRightSchema = mongoose.Schema(
     {
         timestamps: true,
     })
+const ApplicationSettingSchema = mongoose.Schema(
+    {
+        CompanyTitle: {
+            type: String
+        },
+        CompanySubTitle: {
+            type: String
+        },
+        CompanyLogo: {
+            type: String
+        },
+        Quotation: {
+            type: Boolean,
+            default: false
+        },
+        QuotationPrefix: {
+            type: String
+        },
+        QuotationSuffix: {
+            type: String
+        },
+        Invoice: {
+            type: Boolean,
+            default: false
+        },
+        InvoicePrefix: {
+            type: String
+        },
+        InvoiceSuffix: {
+            type: String
+        },
+        Ticket: {
+            type: Boolean,
+            default: false
+        },
+        TicketPrefix: {
+            type: String
+        },
+        TicketSuffix: {
+            type: String
+        },
+        Customer: {
+            type: Boolean,
+            default: false
+        },
+        CustomerPrefix: {
+            type: String
+        },
+        CustomerSuffix: {
+            type: String
+        },
+        Order: {
+            type: Boolean,
+            default: false
+        },
+        OrderPrefix: {
+            type: String
+        },
+        OrderSuffix: {
+            type: String
+        },
+        PanNo: {
+            type: String
+        },
+        GSTNo: {
+            type: String
+        },
+        RegisterNo: {
+            type: String
+        },
+        BankName: {
+            type: String
+        },
+        AccNo: {
+            type: String
+        },
+        IFSCNo: {
+            type: String
+        },
+        TermsAndCondition: {
+            type: String
+        },
+        OfficeAddress: {
+            type: String
+        },
+        OfficeEmail: {
+            type: String
+        },
+        OfficePhone1: {
+            type: String
+        },
+        OfficePhone2: {
+            type: String
+        },
+        IndiaMartKey: {
+            type: String
+        },
+        JustDialKey: {
+            type: String
+        }
+    },
+    {
+        timestamps: true,
+    });
 module.exports = {
+    
+    ProductModal: (conn) => conn.model('Products', productSchema),
     TypeModal: (conn) => conn.model('Types', typeSchema),
     SourceModal: (conn) => conn.model('Sources', sourceSchema),
     CountryModal: (conn) => conn.model('Country', countrySchema),
@@ -189,5 +340,6 @@ module.exports = {
     ModuleModal: (conn) => conn.model('Module_Master', ModuleSchema),
     RoleModal: (conn) => conn.model('Role', RoleSchema),
     StatusModal: (conn) => conn.model('Status', statusSchema),
-    ModuleRightModal: (conn) => conn.model('ModuleRights', moduleRightSchema)
+    ModuleRightModal: (conn) => conn.model('ModuleRights', moduleRightSchema),
+    ApplicationSettingModal: (conn) => conn.model('ApplicationSetting', ApplicationSettingSchema)
 }

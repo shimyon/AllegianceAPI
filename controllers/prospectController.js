@@ -21,6 +21,15 @@ const Customer = CustomerModal.CustomerModal;
 const BillingAddress = CustomerModal.BillingAddressModal;
 const ShippingAddress = CustomerModal.ShippingAddressModal;
 
+
+const SassMaster = require('../models/saasmasterModel');
+const CountryTenant = SassMaster.CountryModal;
+const StateTenant = SassMaster.StateModal;
+const CityTenant = SassMaster.CityModal;
+const RoleTenant = SassMaster.RoleModal;
+const ApplicationSettingTenant = SassMaster.ApplicationSettingModal;
+
+
 const addProspect = asyncHandler(async (req, res) => {
     try {
 
@@ -172,6 +181,15 @@ const removeProspect = asyncHandler(async (req, res) => {
 
 const getAllProspect = asyncHandler(async (req, res) => {
     try {
+
+
+        
+        let Country = CountryTenant(req.conn);
+        let State = StateTenant(req.conn);
+        let City = CityTenant(req.conn);
+        let Role = RoleTenant(req.conn);
+        // let Prospect = Prospects(req.conn);
+
         var condition = { is_active: req.body.active };
         var cDate = new Date();
         if (req.body.sales) {
