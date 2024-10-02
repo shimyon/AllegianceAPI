@@ -116,6 +116,36 @@ const unitSchema = mongoose.Schema(
     {
         timestamps: true,
     });
+const categorySchema = mongoose.Schema(
+    {
+        Name: {
+            type: String
+        },
+        is_active: {
+            type: Boolean
+        }
+    },
+    {
+        timestamps: true,
+    });
+const subCategorySchema = mongoose.Schema(
+    {
+        Name: {
+            type: String
+        },
+        Category:
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Category'
+        }
+        ,
+        is_active: {
+            type: Boolean
+        }
+    },
+    {
+        timestamps: true,
+    });
 const typeSchema = mongoose.Schema(
     {
         Name: {
@@ -180,6 +210,37 @@ const statusSchema = mongoose.Schema(
         },
         Color: {
             type: String
+        }
+    },
+    {
+        timestamps: true,
+    });
+const MailAddressSchema = mongoose.Schema(
+    {
+        Name: {
+            type: String
+        },
+        Address:
+        {
+            type: String
+        },
+        Password:
+        {
+            type: String
+        },
+        Server:
+        {
+            type: String
+        },
+        Port:
+        {
+            type: String
+        },
+        is_default: {
+            type: Boolean
+        },
+        is_active: {
+            type: Boolean
         }
     },
     {
@@ -328,7 +389,7 @@ const ApplicationSettingSchema = mongoose.Schema(
         timestamps: true,
     });
 module.exports = {
-    
+
     ProductModal: (conn) => conn.model('Products', productSchema),
     TypeModal: (conn) => conn.model('Types', typeSchema),
     SourceModal: (conn) => conn.model('Sources', sourceSchema),
@@ -336,10 +397,13 @@ module.exports = {
     StateModal: (conn) => conn.model('States', stateSchema),
     CityModal: (conn) => conn.model('City', citySchema),
     UnitModal: (conn) => conn.model('Units', unitSchema),
+    CategoryModal: (conn) => conn.model('Category', categorySchema),
+    SubCategoryModal: (conn) => conn.model('SubCategory', subCategorySchema),
     IconModal: (conn) => conn.model('Icon', iconSchema),
     ModuleModal: (conn) => conn.model('Module_Master', ModuleSchema),
     RoleModal: (conn) => conn.model('Role', RoleSchema),
     StatusModal: (conn) => conn.model('Status', statusSchema),
+    MailAddressModal: (conn) => conn.model('MailAddress', MailAddressSchema),
     ModuleRightModal: (conn) => conn.model('ModuleRights', moduleRightSchema),
     ApplicationSettingModal: (conn) => conn.model('ApplicationSetting', ApplicationSettingSchema)
 }

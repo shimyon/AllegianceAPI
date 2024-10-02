@@ -18,6 +18,13 @@ var path = require('path')
 const Template = require('../models/templateModel')
 const { generatePDF } = require('../services/pdfService')
 const ApplicationSetting = Master.ApplicationSettingModal;
+const SassMaster = require('../models/saasmasterModel');
+
+const ApplicationSettings = SassMaster.ApplicationSettingModal;
+const Statuss = SassMaster.StatusModal;
+const notificationModels = require('../models/notificationModel')
+
+
 
 
 const addSupport = asyncHandler(async (req, res) => {
@@ -27,7 +34,11 @@ const addSupport = asyncHandler(async (req, res) => {
         // if (ticketNo.length > 0) {
         //     maxTicket = ticketNo[0].TicketNo + 1;
         // }
-        let TicketNo = await Support.find({}, { TicketNo: 1, _id: 0 }).sort({ TicketNo: -1 }).limit(1);
+        let Status = Statuss(req.conn);
+        let ApplicationSetting = ApplicationSettings(req.conn);
+        let Supports = Support(req.conn);
+        let notificationModel = notificationModels(req.conn);
+        let TicketNo = await Supports.find({}, { TicketNo: 1, _id: 0 }).sort({ TicketNo: -1 }).limit(1);
         let maxTicket = 1;
         if (TicketNo.length > 0) {
             maxTicket = TicketNo[0].TicketNo + 1;
@@ -50,7 +61,7 @@ const addSupport = asyncHandler(async (req, res) => {
         else {
             code = applicationSetting.TicketPrefix + maxTicket + `/${financialYearStart}-${financialYearEnd}` + applicationSetting.TicketSuffix;
         }
-        const existTicketCode = await Support.findOne({ $or: [{ TicketCode: req.body.ticketcode }] });
+        const existTicketCode = await Supports.findOne({ $or: [{ TicketCode: req.body.ticketcode }] });
         if (existTicketCode) {
             return res.status(200).json({
                 success: false,
@@ -59,7 +70,7 @@ const addSupport = asyncHandler(async (req, res) => {
             });
         }
         let status = await Status.find({ GroupName: "Support" }).lean();
-        const newSupport = await Support.create({
+        const newSupport = await Supports.create({
             Customer: req.body.customer,
             TicketNo: maxTicket,
             TicketCode: code,
@@ -145,6 +156,10 @@ const editSupport = asyncHandler(async (req, res) => {
 
 const getAllSupport = asyncHandler(async (req, res) => {
     try {
+        let Status = Statuss(req.conn);
+        let ApplicationSetting = ApplicationSettings(req.conn);
+        let Supports = Support(req.conn);
+        let notificationModel = notificationModels(req.conn);
         let { skip, per_page } = req.body;
         let query = [];
         query.push({
@@ -262,8 +277,8 @@ const getAllSupport = asyncHandler(async (req, res) => {
                 },
             }
         )
-        const SupportList = await Support.aggregate(query).exec();
-        let lastTicketCode = await Support.find().sort({ createdAt: -1 })
+        const SupportList = await Supports.aggregate(query).exec();
+        let lastTicketCode = await Supports.find().sort({ createdAt: -1 })
         if (SupportList.length == 0) {
             return res.status(200).json({
                 success: true,

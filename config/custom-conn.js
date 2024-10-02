@@ -1,8 +1,15 @@
 const mongoose = require('mongoose')
 
 module.exports = async (DB_NAME) => {
-    const connectionString = process.env.DB_URI + process.env.DB_PREFIX + DB_NAME;
-    const conn = await mongoose.createConnection(connectionString);
+    let databasename = process.env.DB_PREFIX + DB_NAME;
+    let connstr = process.env.DB_URI;
+    if (connstr.indexOf('?') > 0) {
+        let connstrarr = connstr.split('?');
+        connstr = connstrarr[0] + databasename + '?' + connstrarr[1];
+    } else {
+        connstr += process.env.DB_PREFIX + DB_NAME;
+    }
+    const conn = await mongoose.createConnection(connstr);
 
     mongoose.connection.on('connected', () => {
         console.info(`mongoose successfully connected with DB: ${DB_NAME}`);

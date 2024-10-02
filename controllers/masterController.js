@@ -1,22 +1,22 @@
 const asyncHandler = require('express-async-handler')
 const SassMaster = require('../models/saasmasterModel');
-const Master = require('../models/masterModel')
+// const Master = require('../models/masterModel')
 // const Product = Master.ProductModal;
 // const Type = Master.TypeModal;
 // const State = Master.StateModal;
 // const Country = Master.CountryModal;
 // const City = Master.CityModal;
 // const Source = Master.SourceModal;
-const Unit = Master.UnitModal;
-const Icon = Master.IconModal;
-const Category = Master.CategoryModal;
-const SubCategory = Master.SubCategoryModal;
-const Module = Master.ModuleModal;
-const moduleRight = require('../models/moduleRightModel');
-const Role = Master.RoleModal;
-const Status = Master.StatusModal;
-const MailAddress = Master.MailAddressModal;
-const ApplicationSetting = Master.ApplicationSettingModal;
+// const Unit = Master.UnitModal;
+// const Icon = Master.IconModal;
+// const Category = Master.CategoryModal;
+// const SubCategory = Master.SubCategoryModal;
+// const Module = Master.ModuleModal;
+// const moduleRight = require('../models/moduleRightModel');
+// const Role = Master.RoleModal;
+// const Status = Master.StatusModal;
+// const MailAddress = Master.MailAddressModal;
+// const ApplicationSetting = Master.ApplicationSettingModal;
 const ApplicationSettingTenant = SassMaster.ApplicationSettingModal;
 const Products = SassMaster.ProductModal;
 const Types = SassMaster.TypeModal;
@@ -24,6 +24,15 @@ const Sources = SassMaster.SourceModal;
 const Countrys = SassMaster.CountryModal;
 const States = SassMaster.StateModal;
 const Citys = SassMaster.CityModal;
+const Units = SassMaster.UnitModal;
+const Icons = SassMaster.IconModal;
+const Categorys = SassMaster.CategoryModal;
+const SubCategorys = SassMaster.SubCategoryModal;
+const Roles = SassMaster.RoleModal;
+const Statuss = SassMaster.StatusModal;
+const MailAddresss = SassMaster.MailAddressModal;
+const Modules = SassMaster.ModuleModal;
+const ModuleRights = SassMaster.ModuleRightModal;
 
 const uploadFile = require("../middleware/uploadFileMiddleware");
 
@@ -740,6 +749,7 @@ const addCity = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let City = Citys(req.conn);
         let oldCity = await City.findOne({ Name: req.body.name });
 
         if (oldCity) {
@@ -767,6 +777,7 @@ const editCity = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let City = Citys(req.conn);
         let oldCity = City.findById(req.body.id);
 
         if (!oldCity) {
@@ -792,13 +803,13 @@ const getCitys = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let State = StateTenant(req.conn)
-        let City = CityTenant(req.conn)
+        let State = States(req.conn)
+        let City = Citys(req.conn)
 
-        let Citys = await City.find({ is_active: req.body.active }).populate("State");
+        let citys = await City.find({ is_active: req.body.active }).populate("State");
 
         response.success = true;
-        response.data = Citys;
+        response.data = citys;
         return res.status(200).json(response);
     }
     catch (err) {
@@ -810,6 +821,7 @@ const getCityById = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let City = Citys(req.conn);
         let Citys = await City.findOne({ is_active: true, _id: req.params.id });
 
         response.success = true;
@@ -825,6 +837,7 @@ const changeCityStatus = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let City = Citys(req.conn);
         let newCity = await City.findByIdAndUpdate(req.body.id, {
             is_active: req.body.active
         });
@@ -841,6 +854,7 @@ const changeCityStatus = asyncHandler(async (req, res) => {
 })
 const deleteCity = asyncHandler(async (req, res) => {
     try {
+        let City = Citys(req.conn);
         await City.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {
             if (err) {
                 return res.status(401).json({
@@ -870,6 +884,7 @@ const addUnit = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let Unit = Units(req.conn);
         let oldUnit = await Unit.findOne({ Name: req.body.name });
 
         if (oldUnit) {
@@ -896,6 +911,7 @@ const editUnit = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let Unit = Units(req.conn);
         let oldUnit = Unit.findById(req.body.id);
 
         if (!oldUnit) {
@@ -921,6 +937,7 @@ const changeUnitStatus = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let Unit = Units(req.conn);
         let newUnit = await Unit.findByIdAndUpdate(req.body.id, {
             is_active: req.body.active
         });
@@ -939,10 +956,11 @@ const getUnits = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let Units = await Unit.find({ is_active: req.body.active });
+        let Unit = Units(req.conn);
+        let units = await Unit.find({ is_active: req.body.active });
 
         response.success = true;
-        response.data = Units;
+        response.data = units;
         return res.status(200).json(response);
     }
     catch (err) {
@@ -954,6 +972,7 @@ const getUnitById = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let Unit = Units(req.conn);
         let Units = await Unit.findOne({ is_active: true, _id: req.params.id });
 
         response.success = true;
@@ -967,6 +986,7 @@ const getUnitById = asyncHandler(async (req, res) => {
 })
 const deleteUnit = asyncHandler(async (req, res) => {
     try {
+        let Unit = Units(req.conn);
         await Unit.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {
             if (err) {
                 return res.status(401).json({
@@ -996,6 +1016,7 @@ const addIcon = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let Icon = Icons(req.conn);
         let oldIcon = await Icon.findOne({ Name: req.body.name });
 
         if (oldIcon) {
@@ -1022,6 +1043,7 @@ const editIcon = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let Icon = Icons(req.conn);
         let oldIcon = Icon.findById(req.body.id);
 
         if (!oldIcon) {
@@ -1047,6 +1069,7 @@ const changeIconStatus = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let Icon = Icons(req.conn);
         let newIcon = await Icon.findByIdAndUpdate(req.body.id, {
             is_active: req.body.active
         });
@@ -1065,10 +1088,11 @@ const getIcons = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let Icons = await Icon.find({ is_active: req.body.active });
+        let Icon = Icons(req.conn);
+        let icons = await Icon.find({ is_active: req.body.active });
 
         response.success = true;
-        response.data = Icons;
+        response.data = icons;
         return res.status(200).json(response);
     }
     catch (err) {
@@ -1080,10 +1104,11 @@ const getIconById = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let Icons = await Icon.findOne({ is_active: true, _id: req.params.id });
+        let Icon = Icons(req.conn);
+        let icons = await Icon.findOne({ is_active: true, _id: req.params.id });
 
         response.success = true;
-        response.data = Icons;
+        response.data = icons;
         return res.status(200).json(response);
     }
     catch (err) {
@@ -1093,6 +1118,7 @@ const getIconById = asyncHandler(async (req, res) => {
 })
 const deleteIcon = asyncHandler(async (req, res) => {
     try {
+        let Icon = Icons(req.conn);
         await Icon.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {
             if (err) {
                 return res.status(401).json({
@@ -1121,6 +1147,7 @@ const addCategory = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let Category = Categorys(req.conn);
         let oldCategory = await Category.findOne({ Name: req.body.name });
 
         if (oldCategory) {
@@ -1147,6 +1174,7 @@ const editCategory = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let Category = Categorys(req.conn);
         let oldCategory = Category.findById(req.body.id);
 
         if (!oldCategory) {
@@ -1172,6 +1200,7 @@ const changeCategoryStatus = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let Category = Categorys(req.conn);
         let newCategory = await Category.findByIdAndUpdate(req.body.id, {
             is_active: req.body.active
         });
@@ -1190,10 +1219,11 @@ const getCategorys = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let Categorys = await Category.find({ is_active: req.body.active });
+        let Category = Categorys(req.conn);
+        let categorys = await Category.find({ is_active: req.body.active });
 
         response.success = true;
-        response.data = Categorys;
+        response.data = categorys;
         return res.status(200).json(response);
     }
     catch (err) {
@@ -1205,10 +1235,11 @@ const getCategoryById = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let Categorys = await Category.findOne({ is_active: true, _id: req.params.id });
+        let Category = Categorys(req.conn);
+        let categorys = await Category.findOne({ is_active: true, _id: req.params.id });
 
         response.success = true;
-        response.data = Categorys;
+        response.data = categorys;
         return res.status(200).json(response);
     }
     catch (err) {
@@ -1218,9 +1249,12 @@ const getCategoryById = asyncHandler(async (req, res) => {
 })
 const deleteCategory = asyncHandler(async (req, res) => {
     try {
-        let SubCategorys = await SubCategory.find({ Category: req.params.id }).count();
-        if (SubCategorys != 0) {
-            if (SubCategorys) {
+        let Category = Categorys(req.conn);
+        let SubCategory = SubCategorys(req.conn);
+
+        let subCategorys = await SubCategory.find({ Category: req.params.id }).count();
+        if (subCategorys != 0) {
+            if (subCategorys) {
                 return res.status(400).json({
                     success: false,
                     msg: "You cannot delete this record because it is already in use",
@@ -1258,6 +1292,8 @@ const addSubCategory = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let SubCategory = SubCategorys(req.conn);
+
         let oldSubCategory = await SubCategory.findOne({ Name: req.body.name, Category: req.body.category });
 
         if (oldSubCategory) {
@@ -1285,6 +1321,7 @@ const editSubCategory = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let SubCategory = SubCategorys(req.conn);
         let oldSubCategory = SubCategory.findById(req.body.id);
 
         if (!oldSubCategory) {
@@ -1310,6 +1347,7 @@ const changeSubCategoryStatus = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let SubCategory = SubCategorys(req.conn);
         let newSubCategory = await SubCategory.findByIdAndUpdate(req.body.id, {
             is_active: req.body.active
         });
@@ -1328,10 +1366,13 @@ const getSubCategorys = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let SubCategorys = await SubCategory.find({ is_active: req.body.active }).populate("Category");
+        let SubCategory = SubCategorys(req.conn);
+        let Category = Categorys(req.conn);
+
+        let subCategorys = await SubCategory.find({ is_active: req.body.active }).populate("Category");
 
         response.success = true;
-        response.data = SubCategorys;
+        response.data = subCategorys;
         return res.status(200).json(response);
     }
     catch (err) {
@@ -1343,10 +1384,11 @@ const getSubCategoryById = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let SubCategorys = await SubCategory.findOne({ is_active: true, _id: req.params.id });
+        let SubCategory = SubCategorys(req.conn);
+        let subCategorys = await SubCategory.findOne({ is_active: true, _id: req.params.id });
 
         response.success = true;
-        response.data = SubCategorys;
+        response.data = subCategorys;
         return res.status(200).json(response);
     }
     catch (err) {
@@ -1356,6 +1398,7 @@ const getSubCategoryById = asyncHandler(async (req, res) => {
 })
 const deleteSubCategory = asyncHandler(async (req, res) => {
     try {
+        let SubCategory = SubCategorys(req.conn);
         await SubCategory.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {
             if (err) {
                 return res.status(401).json({
@@ -1385,6 +1428,8 @@ const addRole = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let moduleRight =  ModuleRights(req.conn);
+        let Role = Roles(req.conn);
         let oldRole = await Role.findOne({ Name: req.body.name });
 
         if (oldRole) {
@@ -1423,6 +1468,7 @@ const editRole = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let Role = Roles(req.conn);
         let oldRole = Role.findById(req.body.id);
 
         if (!oldRole) {
@@ -1448,6 +1494,7 @@ const changeRoleStatus = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let Role = Roles(req.conn);
         let newRole = await Role.findByIdAndUpdate(req.body.id, {
             is_active: req.body.active
         });
@@ -1466,10 +1513,11 @@ const getRoles = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let Roles = await Role.find({ is_active: req.body.active });
+        let Role = Roles(req.conn);
+        let roles = await Role.find({ is_active: req.body.active });
 
         response.success = true;
-        response.data = Roles;
+        response.data = roles;
         return res.status(200).json(response);
     }
     catch (err) {
@@ -1481,10 +1529,11 @@ const getRoleById = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let Roles = await Role.findOne({ is_active: true, _id: req.params.id });
+        let Role = Roles(req.conn);
+        let roles = await Role.findOne({ is_active: true, _id: req.params.id });
 
         response.success = true;
-        response.data = Roles;
+        response.data = roles;
         return res.status(200).json(response);
     }
     catch (err) {
@@ -1494,6 +1543,7 @@ const getRoleById = asyncHandler(async (req, res) => {
 })
 const deleteRole = asyncHandler(async (req, res) => {
     try {
+        let Role = Roles(req.conn);
         await Role.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {
             if (err) {
                 return res.status(401).json({
@@ -1523,6 +1573,7 @@ const addStatus = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let Status = Statuss(req.conn);
         let oldStatus = await Status.findOne({ Name: req.body.name, GroupName: req.body.groupname });
 
         if (oldStatus) {
@@ -1553,6 +1604,7 @@ const editStatus = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let Status = Statuss(req.conn);
         let oldStatus = Status.findById(req.body.id);
 
         if (!oldStatus) {
@@ -1581,6 +1633,7 @@ const changeStatus = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let Status = Statuss(req.conn);
         let newStatus = await Status.findByIdAndUpdate(req.body.id, {
             is_active: req.body.active
         });
@@ -1602,10 +1655,11 @@ const getStatus = asyncHandler(async (req, res) => {
         condition.GroupName = req.body.GroupName
     }
     try {
-        let Statuss = await Status.find(condition);
+        let Status = Statuss(req.conn);
+        let statuss = await Status.find(condition);
 
         response.success = true;
-        response.data = Statuss;
+        response.data = statuss;
         return res.status(200).json(response);
     }
     catch (err) {
@@ -1617,10 +1671,11 @@ const getStatusById = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let Statuss = await Status.findOne({ is_active: true, _id: req.params.id });
+        let Status = Statuss(req.conn);
+        let statuss = await Status.findOne({ is_active: true, _id: req.params.id });
 
         response.success = true;
-        response.data = Statuss;
+        response.data = statuss;
         return res.status(200).json(response);
     }
     catch (err) {
@@ -1630,6 +1685,7 @@ const getStatusById = asyncHandler(async (req, res) => {
 })
 const deleteStatus = asyncHandler(async (req, res) => {
     try {
+        let Status = Statuss(req.conn);
         await Status.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {
             if (err) {
                 return res.status(401).json({
@@ -1657,6 +1713,7 @@ const deleteStatus = asyncHandler(async (req, res) => {
 const editConfigurationStatus = asyncHandler(async (req, res) => {
     let response = new Response();
     try {
+        let Status = Statuss(req.conn);
         req.body.status.map(async (f) => {
             let status = await Status.findByIdAndUpdate(f._id, {
                 Role: f.role || null,
@@ -1776,6 +1833,7 @@ const editSave = asyncHandler(async (req, res, fileName) => {
 const addModule = asyncHandler(async (req, res) => {
     let response = new Response();
     try {
+        let Module = Modules(req.conn);
         let oldModule = await Module.findOne({ Name: req.body.name, GroupName: req.body.groupname });
 
         if (oldModule) {
@@ -1797,11 +1855,11 @@ const addModule = asyncHandler(async (req, res) => {
         return res.status(400).json(response);
     }
 });
-
 const editModule = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let Module = Modules(req.conn);
         let oldModule = Module.findById(req.body.id);
 
         if (!oldModule) {
@@ -1823,11 +1881,11 @@ const editModule = asyncHandler(async (req, res) => {
     }
 
 });
-
 const changeModuleStatus = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let Module = Modules(req.conn);
         let newModule = await Module.findByIdAndUpdate(req.body.id, {
             is_active: req.body.active
         });
@@ -1842,11 +1900,11 @@ const changeModuleStatus = asyncHandler(async (req, res) => {
     }
 
 })
-
 const getModule = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let Module = Modules(req.conn);
         let sources = await Module.find({ is_active: req.body.active });
 
         response.success = true;
@@ -1858,10 +1916,11 @@ const getModule = asyncHandler(async (req, res) => {
         return res.status(400).json(response);
     }
 })
-
 const getModulegroup = asyncHandler(async (req, res) => {
     let response = new Response();
     try {
+        let Module = Modules(req.conn);
+
         const sources = await Module.aggregate([
 
             {
@@ -1885,11 +1944,11 @@ const getModulegroup = asyncHandler(async (req, res) => {
         return res.status(400).json(response);
     }
 })
-
 const getModuleById = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let Module = Modules(req.conn);
         let sources = await Module.findOne({ is_active: true, _id: req.params.id });
 
         response.success = true;
@@ -1906,6 +1965,7 @@ const addMailAddress = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let MailAddress = MailAddresss(req.conn);
         let oldMailAddress = await MailAddress.findOne({ Address: req.body.Address });
 
         if (oldMailAddress) {
@@ -1932,11 +1992,11 @@ const addMailAddress = asyncHandler(async (req, res) => {
     }
 
 });
-
 const editMailAddress = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let MailAddress = MailAddresss(req.conn);
         let oldMailAddress = MailAddress.findById(req.body.id);
 
         if (!oldMailAddress) {
@@ -1961,11 +2021,11 @@ const editMailAddress = asyncHandler(async (req, res) => {
     }
 
 });
-
 const changeMailAddressStatus = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let MailAddress = MailAddresss(req.conn);
         let newMailAddress = await MailAddress.findByIdAndUpdate(req.body.id, {
             is_active: req.body.active
         });
@@ -1980,15 +2040,15 @@ const changeMailAddressStatus = asyncHandler(async (req, res) => {
     }
 
 })
-
 const getMailAddress = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let MailAddresss = await MailAddress.find({ is_active: req.body.active }).sort({ createdAt: -1 });
+        let MailAddress = MailAddresss(req.conn);
+        let mailAddresss = await MailAddress.find({ is_active: req.body.active }).sort({ createdAt: -1 });
 
         response.success = true;
-        response.data = MailAddresss;
+        response.data = mailAddresss;
         return res.status(200).json(response);
     }
     catch (err) {
@@ -1996,15 +2056,15 @@ const getMailAddress = asyncHandler(async (req, res) => {
         return res.status(400).json(response);
     }
 })
-
 const getMailAddressById = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let MailAddresss = await MailAddress.findOne({ is_active: true, _id: req.params.id });
+        let MailAddress = MailAddresss(req.conn);
+        let mailAddresss = await MailAddress.findOne({ is_active: true, _id: req.params.id });
 
         response.success = true;
-        response.data = MailAddresss;
+        response.data = mailAddresss;
         return res.status(200).json(response);
     }
     catch (err) {
@@ -2012,9 +2072,9 @@ const getMailAddressById = asyncHandler(async (req, res) => {
         return res.status(400).json(response);
     }
 })
-
 const setDefaultMailAddress = asyncHandler(async (req, res) => {
     try {
+        let MailAddress = MailAddresss(req.conn);
         await MailAddress.updateMany({
             is_default: false
         });

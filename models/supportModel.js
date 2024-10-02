@@ -102,14 +102,18 @@ const supportSchema = mongoose.Schema(
             timestamps: true,
         });
 
-const SupportModal = mongoose.model('Support', supportSchema);
-const SupportNextOnModal = mongoose.model('SupportnextOn', nextOnSchema);
+// const SupportModal = mongoose.model('Support', supportSchema);
+// const SupportNextOnModal = mongoose.model('SupportnextOn', nextOnSchema);
 
 
-const syncIndex = async () => {
-    await SupportModal.syncIndexes();
-    await SupportNextOnModal.syncIndexes();
+// const syncIndex = async () => {
+//     await SupportModal.syncIndexes();
+//     await SupportNextOnModal.syncIndexes();
+// }
+// syncIndex();
+
+// module.exports = { SupportModal, SupportNextOnModal };
+module.exports = {
+    SupportModal: (conn) => conn.model('Support', supportSchema),
+    SupportNextOnModal: (conn) => conn.model('SupportnextOn', nextOnSchema)
 }
-syncIndex();
-
-module.exports = { SupportModal, SupportNextOnModal };

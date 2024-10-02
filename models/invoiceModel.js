@@ -158,13 +158,17 @@ const invoiceProductSchema = mongoose.Schema(
         timestamps: true,
     })
 
-const InvoiceModal = mongoose.model('Invoices', invoiceSchema);
-const InvoiceProductModal = mongoose.model('InvoiceProduct', invoiceProductSchema);
+// const InvoiceModal = mongoose.model('Invoices', invoiceSchema);
+// const InvoiceProductModal = mongoose.model('InvoiceProduct', invoiceProductSchema);
 
-const syncIndex = async () => {
-    await InvoiceModal.syncIndexes();
-    await InvoiceProductModal.syncIndexes();
+// const syncIndex = async () => {
+//     await InvoiceModal.syncIndexes();
+//     await InvoiceProductModal.syncIndexes();
+// }
+// syncIndex();
+
+// module.exports = { InvoiceModal, InvoiceProductModal };
+module.exports = {
+    InvoiceModal: (conn) => conn.model('Invoices', invoiceSchema),
+    InvoiceProductModal: (conn) => conn.model('InvoiceProduct', invoiceProductSchema),
 }
-syncIndex();
-
-module.exports = { InvoiceModal, InvoiceProductModal };

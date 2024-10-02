@@ -27,4 +27,4 @@ const moduleRightSchema = mongoose.Schema(
   }
 )
 
-module.exports = mongoose.model('ModuleRight', moduleRightSchema)
+module.exports = mongoose.model('MasterModuleRight', moduleRightSchema)
