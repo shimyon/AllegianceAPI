@@ -2,9 +2,9 @@ const asyncHandler = require('express-async-handler')
 const SupportModel = require('../models/supportModel')
 const { ObjectId } = require('mongodb');
 const User = require('../models/userModel')
-const notificationModel = require('../models/notificationModel')
+// const notificationModel = require('../models/notificationModel')
 const Support = SupportModel.SupportModal;
-const SupportnextOn = SupportModel.SupportNextOnModal;
+const SupportnextOns = SupportModel.SupportNextOnModal;
 const Master = require('../models/masterModel')
 const Status = Master.StatusModal;
 const { sendMail } = require('../middleware/sendMail')
@@ -15,17 +15,19 @@ var converter = require('number-to-words')
 var format = require('date-format')
 var test = require('tape')
 var path = require('path')
-const Template = require('../models/templateModel')
+// const Template = require('../models/templateModel')
+const TempModal = require('../models/templateModel')
+const Templates = TempModal.TemplateModal;
 const { generatePDF } = require('../services/pdfService')
 const ApplicationSetting = Master.ApplicationSettingModal;
 const SassMaster = require('../models/saasmasterModel');
-
 const ApplicationSettings = SassMaster.ApplicationSettingModal;
 const Statuss = SassMaster.StatusModal;
-const notificationModels = require('../models/notificationModel')
-
-
-
+const Productss = SassMaster.ProductModal;
+const NotifModal = require('../models/notificationModel')
+const Notification = NotifModal.NotificationModal;
+const CustomerModal = require('../models/customerModel')
+const Customers = CustomerModal.CustomerModal
 
 const addSupport = asyncHandler(async (req, res) => {
     try {
@@ -37,7 +39,7 @@ const addSupport = asyncHandler(async (req, res) => {
         let Status = Statuss(req.conn);
         let ApplicationSetting = ApplicationSettings(req.conn);
         let Supports = Support(req.conn);
-        let notificationModel = notificationModels(req.conn);
+        let notificationModel = Notification(req.conn);
         let TicketNo = await Supports.find({}, { TicketNo: 1, _id: 0 }).sort({ TicketNo: -1 }).limit(1);
         let maxTicket = 1;
         if (TicketNo.length > 0) {
@@ -117,11 +119,11 @@ const addSupport = asyncHandler(async (req, res) => {
         });
     }
 })
-
 const editSupport = asyncHandler(async (req, res) => {
     try {
+        let Supports = Support(req.conn);
 
-        var existing = await Support.findById(req.body.id);
+        var existing = await Supports.findById(req.body.id);
         if (!existing) {
             return res.status(400).json({
                 success: false,
@@ -130,7 +132,7 @@ const editSupport = asyncHandler(async (req, res) => {
 
         }
 
-        await Support.findByIdAndUpdate(req.body.id, {
+        await Supports.findByIdAndUpdate(req.body.id, {
             Customer: req.body.customer,
             TicketCode: req.body.ticketcode,
             // TicketNo: req.body.ticketNo,
@@ -153,13 +155,10 @@ const editSupport = asyncHandler(async (req, res) => {
         });
     }
 })
-
 const getAllSupport = asyncHandler(async (req, res) => {
-    try {
-        let Status = Statuss(req.conn);
-        let ApplicationSetting = ApplicationSettings(req.conn);
+    try {        
         let Supports = Support(req.conn);
-        let notificationModel = notificationModels(req.conn);
+        
         let { skip, per_page } = req.body;
         let query = [];
         query.push({
@@ -303,7 +302,12 @@ const getAllSupport = asyncHandler(async (req, res) => {
 
 const getSupportById = asyncHandler(async (req, res) => {
     try {
-        let SupportList = await Support.find({ _id: req.params.id }).populate("Customer").populate("Sales").populate("Products").populate("addedBy", "_id name email role");
+        let Supports = Support(req.conn);
+        let Customer = Customers(req.conn);
+        let Products = Productss(req.conn);
+        let users = User(req.conn);
+
+        let SupportList = await Supports.find({ _id: req.params.id }).populate("Customer").populate("Sales").populate("Products").populate("addedBy", "_id name email role");
         return res.status(200).json({
             success: true,
             data: SupportList
@@ -320,7 +324,8 @@ const getSupportById = asyncHandler(async (req, res) => {
 
 const updateStatus = asyncHandler(async (req, res) => {
     try {
-        await Support.findByIdAndUpdate(req.body.id, {
+        let Supports = Support(req.conn);
+        await Supports.findByIdAndUpdate(req.body.id, {
             Status: req.body.status
         })
         return res.status(200).json({
@@ -338,7 +343,8 @@ const updateStatus = asyncHandler(async (req, res) => {
 
 const removeSupport = asyncHandler(async (req, res) => {
     try {
-        const existSupport = await Support.findById(req.body.id);
+        let Supports = Support(req.conn);
+        const existSupport = await Supports.findById(req.body.id);
         if (!existSupport) {
             return res.status(200).json({
                 success: false,
@@ -347,7 +353,7 @@ const removeSupport = asyncHandler(async (req, res) => {
             });
         }
 
-        const newSupport = await Support.findByIdAndUpdate(req.body.id, {
+        const newSupport = await Supports.findByIdAndUpdate(req.body.id, {
             is_active: req.body.active
         });
 
@@ -368,7 +374,8 @@ const removeSupport = asyncHandler(async (req, res) => {
 
 const deleteSupport = asyncHandler(async (req, res) => {
     try {
-        await Support.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {
+        let Supports = Support(req.conn);
+        await Supports.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {
             if (err) {
                 return res.status(401).json({
                     success: false,
@@ -394,6 +401,9 @@ const deleteSupport = asyncHandler(async (req, res) => {
 
 const addNext = asyncHandler(async (req, res) => {
     try {
+        let SupportnextOn = SupportnextOns(req.conn);
+        let Supports = Support(req.conn);
+
         let supportNextOn = await SupportnextOn.create({
             supportId: req.body.supportid,
             date: req.body.date,
@@ -401,7 +411,7 @@ const addNext = asyncHandler(async (req, res) => {
             user: req.user._id
         });
 
-        let supportExisting = await Support.findByIdAndUpdate(req.body.supportid, {
+        let supportExisting = await Supports.findByIdAndUpdate(req.body.supportid, {
             NextTalk: supportNextOn._id
         });
         if (supportNextOn) {
@@ -425,6 +435,7 @@ const addNext = asyncHandler(async (req, res) => {
 });
 const editNext = asyncHandler(async (req, res) => {
     try {
+        let SupportnextOn = SupportnextOns(req.conn);
         let supportNextOn = await SupportnextOn.findByIdAndUpdate(req.body.id, {
             date: req.body.date,
             note: req.body.note,
@@ -452,6 +463,8 @@ const editNext = asyncHandler(async (req, res) => {
 });
 const getNext = asyncHandler(async (req, res) => {
     try {
+        let SupportnextOn = SupportnextOns(req.conn);
+        let users = User(req.conn);
         const next = await SupportnextOn.find({ supportId: req.params.id })
             .sort({ date: -1 })
             .populate("user");
@@ -470,12 +483,19 @@ const getNext = asyncHandler(async (req, res) => {
 });
 const Supportpdfcreate = asyncHandler(async (req, res) => {
     try {
+        let Supports = Support(req.conn);
+        let Customer = Customers(req.conn);
+        let Products = Productss(req.conn);
+        let users = User(req.conn);
+        let Template = Templates(req.conn);
+        let SupportnextOn = SupportnextOns(req.conn);
+        
         const data = await Template.findById(req.body.template_id)
         var template = path.join(__dirname, '..', 'public', 'template.html')
         var templateHtml = fs.readFileSync(template, 'utf8')
         templateHtml = templateHtml.replace('{{Data}}', data.Detail)
         var filename = template.replace('template.html', `Print.pdf`)
-        let customerList = await Support.find({ is_deleted: false, _id: req.body.id })
+        let customerList = await Supports.find({ is_deleted: false, _id: req.body.id })
             .populate("Customer").populate("Sales");
         const next = await SupportnextOn.find({ supportId: req.body.id })
             .sort({ date: -1 })

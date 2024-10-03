@@ -24,4 +24,7 @@ const templateSchema = mongoose.Schema(
   }
 )
 
-module.exports = mongoose.model('Template', templateSchema)
+// module.exports = mongoose.model('Template', templateSchema)
+module.exports = {
+  TemplateModal: (conn) => conn.model('Template', templateSchema),
+}

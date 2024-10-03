@@ -1,13 +1,18 @@
 const asyncHandler = require('express-async-handler')
 const TaskModal = require('../models/taskModel')
-const Task = TaskModal.TaskModal
-const TaskComment = TaskModal.TaskCommentModal
-const Master = require('../models/masterModel')
-const Status = Master.StatusModal;
+const Tasks = TaskModal.TaskModal
+const TaskComments = TaskModal.TaskCommentModal
+// const Master = require('../models/masterModel')
+// const Status = Master.StatusModal;
 const { sendMail } = require('../middleware/sendMail')
+const Users = require('../models/userModel')
+const SassMaster = require('../models/saasmasterModel');
+const Statuss = SassMaster.StatusModal;
 const moment = require('moment')
 const addtask = asyncHandler(async (req, res) => {
     try {
+        let Task = Tasks(req.conn);
+        let User = Users(req.conn);
         let taskadd = await Task.create({
             LeadId: req.body.LeadId||null,
             ProspectId: req.body.ProspectId||null,
@@ -26,7 +31,7 @@ const addtask = asyncHandler(async (req, res) => {
             let TaskList = await Task.findOne({ _id: taskadd._id }).populate("Assign").populate("addedBy")
             let html =
                 `<html>Hello,<br/><br/>Please take up the following task (${req.body.Name})<br/>${req.body.Description}<br/><br/>Please finish it by ${moment(req.body.EndDate).format("DD-MMM-YY")}<br/><br/>Thank you,<br/><b>${TaskList.addedBy?.name}</b></html>`;
-            sendMail(TaskList?.Assign.email, "New Task", html);
+            sendMail(TaskList?.Assign.email, "New Task", html, req);
         }
         return res.status(200).json({
             success: true,
@@ -43,6 +48,8 @@ const addtask = asyncHandler(async (req, res) => {
 });
 const addtaskcomment = asyncHandler(async (req, res) => {
     try {
+        let TaskComment = TaskComments(req.conn);
+        let Task = Tasks(req.conn);
         let taskCommentadd = await TaskComment.create({
             taskId: req.body.taskId,
             TaskComment: req.body.Taskcomment,
@@ -67,6 +74,8 @@ const addtaskcomment = asyncHandler(async (req, res) => {
 });
 const getAlltaskcomment = asyncHandler(async (req, res) => {
     try {
+        let TaskComment = TaskComments(req.conn);
+        let User = Users(req.conn);
         let CommentList = await TaskComment.find({ taskId: req.body.taskId }).populate("addedBy", "_id name").sort({ createdAt: -1 })
         return res.status(200).json({
             success: true,
@@ -82,6 +91,10 @@ const getAlltaskcomment = asyncHandler(async (req, res) => {
 })
 const edittask = asyncHandler(async (req, res) => {
     try {
+        let Task = Tasks(req.conn);
+        let User = Users(req.conn);
+        let Status = Statuss(req.conn);
+
         const oldTask = await Task.findById(req.body.id);
         await Task.findByIdAndUpdate(req.body.id, {
             Name: req.body.Name,
@@ -98,7 +111,7 @@ const edittask = asyncHandler(async (req, res) => {
             const html = `<html>Hello,<br/><br/>The status of the task (${task.Name}) has been changed to (${task.Status?.Name}).<br/><br/>Thank you,<br/><b>(${task.addedBy?.name})</b></html>`;
             task.Reporter.map((x, i) => {
                 if (x) {
-                    sendMail(x.email, "Task Status is changed", html);
+                    sendMail(x.email, "Task Status is changed", html, req);
                 }
             })
         }
@@ -118,6 +131,8 @@ const edittask = asyncHandler(async (req, res) => {
 });
 const taskreason = asyncHandler(async (req, res) => {
     try {
+        let Task = Tasks(req.conn);
+        
         await Task.findByIdAndUpdate(req.body.taskId, {
             Reason: req.body.Reason
         });
@@ -137,6 +152,7 @@ const taskreason = asyncHandler(async (req, res) => {
 
 const removetask = asyncHandler(async (req, res) => {
     try {
+        let Task = Tasks(req.conn);
         const existCustomer = await Task.findById(req.params.id);
         if (!existCustomer) {
             return res.status(200).json({
@@ -163,6 +179,10 @@ const removetask = asyncHandler(async (req, res) => {
 });
 
 const getAlltask = asyncHandler(async (req, res) => {
+    let Task = Tasks(req.conn);
+    let User = Users(req.conn);
+    let Status = Statuss(req.conn);
+
     var inboxcondition = { is_active: req.body.active, Assign: req.body.user };
     var outboxcondition = { is_active: req.body.active, addedBy: req.body.user, Assign: { $ne: req.body.user } };
     if (req.body.status) {
@@ -189,6 +209,7 @@ const getAlltask = asyncHandler(async (req, res) => {
 
 const gettaskById = asyncHandler(async (req, res) => {
     try {
+        let Task = Tasks(req.conn);        
         let TaskList = await Task.findOne({ _id: req.params.id })
 
         return res.status(200).json({
@@ -205,8 +226,8 @@ const gettaskById = asyncHandler(async (req, res) => {
 })
 
 const gettaskboardCount = asyncHandler(async (req, res) => {
-    try {
-
+    try {        
+        let Status = Statuss(req.conn);
         const Lookup = await Status.aggregate([
             {
                 '$match': {
