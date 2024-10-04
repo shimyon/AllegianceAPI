@@ -24,8 +24,8 @@ const SassMaster = require('../models/saasmasterModel');
 const ApplicationSettings = SassMaster.ApplicationSettingModal;
 const Statuss = SassMaster.StatusModal;
 const Productss = SassMaster.ProductModal;
-const NotifModal = require('../models/notificationModel')
-const Notification = NotifModal.NotificationModal;
+const Notification = require('../models/notificationModel')
+// const Notification = NotifModal.NotificationModal;
 const CustomerModal = require('../models/customerModel')
 const Customers = CustomerModal.CustomerModal
 

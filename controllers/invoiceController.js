@@ -1,22 +1,39 @@
 const asyncHandler = require('express-async-handler')
-const InvoiceModal = require('../models/invoiceModel')
+const InvModal = require('../models/invoiceModel')
 const User = require('../models/userModel')
-const notificationModel = require('../models/notificationModel')
-const Invoice = InvoiceModal.InvoiceModal
-const InvoiceProduct = InvoiceModal.InvoiceProductModal
-const Master = require('../models/masterModel')
-const ApplicationSetting = Master.ApplicationSettingModal;
+// const notificationModel = require('../models/notificationModel')
+const Notification = require('../models/notificationModel')
+// const Notification = NotifModal.NotificationModal;
+const Invoices = InvModal.InvoiceModal
+const InvoiceProducts = InvModal.InvoiceProductModal
+// const Master = require('../models/masterModel')
+// const ApplicationSetting = Master.ApplicationSettingModal;
+const SassMaster = require('../models/saasmasterModel');
+const ApplicationSettings = SassMaster.ApplicationSettingModal;
+const Products = SassMaster.ProductModal;
+const Units = SassMaster.UnitModal;
+
+const CustomerModal = require('../models/customerModel');
+const Customer = CustomerModal.CustomerModal;
+const BillingAddress = CustomerModal.BillingAddressModal;
+const ShippingAddress = CustomerModal.ShippingAddressModal;
+
 var pdf = require('html-pdf')
 var fs = require('fs')
 var converter = require('number-to-words')
 var format = require('date-format')
 var test = require('tape')
 var path = require('path')
-const Template = require('../models/templateModel')
+const Templates = require('../models/templateModel')
 const { generatePDF } = require('../services/pdfService')
 
 const addInvoice = asyncHandler(async (req, res) => {
     try {
+        let Invoice = Invoices(req.conn);
+        let InvoiceProduct = InvoiceProducts(req.conn)
+        let ApplicationSetting = ApplicationSettings(req.conn);
+        let notificationModel = Notification(req.conn);
+
         const existInvoiceCode = await Invoice.findOne({ $or: [{ InvoiceCode: req.body.InvoiceCode }] });
         if (existInvoiceCode) {
             return res.status(200).json({
@@ -149,9 +166,11 @@ const addInvoice = asyncHandler(async (req, res) => {
     }
 
 });
-
 const editInvoice = asyncHandler(async (req, res) => {
     try {
+        let Invoice = Invoices(req.conn);
+        let InvoiceProduct = InvoiceProducts(req.conn);
+
         const oldInvoice = await Invoice.findById(req.body.id);
         if (!oldInvoice) {
             return res.status(400).json({
@@ -240,6 +259,8 @@ const editInvoice = asyncHandler(async (req, res) => {
 
 const removeInvoice = asyncHandler(async (req, res) => {
     try {
+        let Invoice = Invoices(req.conn);
+
         const existCustomer = await Invoice.findById(req.params.id);
         if (!existCustomer) {
             return res.status(200).json({
@@ -264,9 +285,10 @@ const removeInvoice = asyncHandler(async (req, res) => {
     }
 
 });
-
 const getAllInvoice = asyncHandler(async (req, res) => {
     try {
+        let Invoice = Invoices(req.conn);
+
         let { skip, per_page } = req.body;
         let query = [];
         query.push({
@@ -357,6 +379,15 @@ const getAllInvoice = asyncHandler(async (req, res) => {
 })
 const Invoicepdfcreate = asyncHandler(async (req, res) => {
     try {
+        let Invoice = Invoices(req.conn);
+        let InvoiceProduct = InvoiceProducts(req.conn);
+        let ApplicationSetting = ApplicationSettings(req.conn);
+        let Customers = Customer(req.conn);
+        let Unit = Units(req.conn);
+        let Product = Products(req.conn);
+        let Users = User(req.conn);
+        let Template = Templates(req.conn);
+
         const data = await Template.findById(req.body.template_id)
         var template = path.join(__dirname, '..', 'public', 'template.html')
         var templateHtml = fs.readFileSync(template, 'utf8')
@@ -508,6 +539,14 @@ const Invoicepdfcreate = asyncHandler(async (req, res) => {
 })
 const getInvoiceById = asyncHandler(async (req, res) => {
     try {
+        let Invoice = Invoices(req.conn);
+        let Customers = Customer(req.conn);      
+        let Product = Products(req.conn);
+        let BillingAddres = BillingAddress(req.conn);
+        let ShippingAddres = ShippingAddress(req.conn);
+        let Users = User(req.conn);
+        let InvoiceProduct = InvoiceProducts(req.conn);
+
         let invoiceList = await Invoice.find({ is_deleted: false, _id: req.params.id })
             .populate("Customer")
             .populate("Products")
@@ -531,6 +570,9 @@ const getInvoiceById = asyncHandler(async (req, res) => {
 
 const deleteInvoice = asyncHandler(async (req, res) => {
     try {
+        let Invoice = Invoices(req.conn);
+        let InvoiceProduct = InvoiceProducts(req.conn);
+
         await InvoiceProduct.deleteMany({ InvoiceId: req.params.id }).lean()
 
         await Invoice.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {

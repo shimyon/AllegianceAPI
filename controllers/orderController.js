@@ -1,26 +1,42 @@
 const asyncHandler = require('express-async-handler')
 const OrderModal = require('../models/orderModel')
 const User = require('../models/userModel')
-const notificationModel = require('../models/notificationModel')
-const Order = OrderModal.OrderModal
-const OrderProduct = OrderModal.OrderProductModal
+const Notification = require('../models/notificationModel')
+const Orders = OrderModal.OrderModal
+const OrderProducts = OrderModal.OrderProductModal
 const InvoiceModal = require('../models/invoiceModel')
-const Invoice = InvoiceModal.InvoiceModal
-const InvoiceProduct = InvoiceModal.InvoiceProductModal
-const Master = require('../models/masterModel')
-const Status = Master.StatusModal;
-const ApplicationSetting = Master.ApplicationSettingModal;
+const Invoices = InvoiceModal.InvoiceModal
+const InvoiceProducts = InvoiceModal.InvoiceProductModal
+// const Master = require('../models/masterModel')
+// const Status = Master.StatusModal;
+// const ApplicationSetting = Master.ApplicationSettingModal;
+const SassMaster = require('../models/saasmasterModel');
+const ApplicationSettings = SassMaster.ApplicationSettingModal;
+const Statuss = SassMaster.StatusModal;
+const Products = SassMaster.ProductModal;
+const Units = SassMaster.UnitModal;
+const CustomerModal = require('../models/customerModel');
+const Customer = CustomerModal.CustomerModal;
+const BillingAddress = CustomerModal.BillingAddressModal;
+const ShippingAddress = CustomerModal.ShippingAddressModal;
+
 var pdf = require('html-pdf')
 var fs = require('fs')
 var converter = require('number-to-words')
 var format = require('date-format')
 var test = require('tape')
 var path = require('path')
-const Template = require('../models/templateModel')
+const Templates = require('../models/templateModel')
 const { generatePDF } = require('../services/pdfService')
 
 const addOrder = asyncHandler(async (req, res) => {
     try {
+        let Order = Orders(req.conn);
+        let OrderProduct = OrderProducts(req.conn);
+        let ApplicationSetting = ApplicationSettings(req.conn);
+        let notificationModel = Notification(req.conn);
+        let Status = Statuss(req.conn);
+
         const existOrderCode = await Order.findOne({ $or: [{ OrderCode: req.body.OrderCode }] });
         if (existOrderCode) {
             return res.status(200).json({
@@ -146,6 +162,9 @@ const addOrder = asyncHandler(async (req, res) => {
 
 const editOrder = asyncHandler(async (req, res) => {
     try {
+        let Order = Orders(req.conn);
+        let OrderProduct = OrderProducts(req.conn);
+
         const oldOrder = await Order.findById(req.body.id);
         if (!oldOrder) {
             return res.status(400).json({
@@ -223,6 +242,9 @@ const editOrder = asyncHandler(async (req, res) => {
 
 const removeOrder = asyncHandler(async (req, res) => {
     try {
+        let Order = Orders(req.conn);
+        let OrderProduct = OrderProducts(req.conn);
+
         const existCustomer = await Order.findById(req.params.id);
         if (!existCustomer) {
             return res.status(200).json({
@@ -250,6 +272,8 @@ const removeOrder = asyncHandler(async (req, res) => {
 
 const getAllOrder = asyncHandler(async (req, res) => {
     try {
+        let Order = Orders(req.conn);
+
         let { skip, per_page } = req.body;
         let query = [];
         query.push({
@@ -355,6 +379,15 @@ const getAllOrder = asyncHandler(async (req, res) => {
 
 const Orderpdfcreate = asyncHandler(async (req, res) => {
     try {
+        let Order = Orders(req.conn);
+        let OrderProduct = OrderProducts(req.conn);
+        let Customers = Customer(req.conn);   
+        let Unit = Units(req.conn);
+        let Product = Products(req.conn);     
+        let Users = User(req.conn);        
+        let ApplicationSetting = ApplicationSettings(req.conn);
+        let Template = Templates(req.conn);
+
         const data = await Template.findById(req.body.template_id)
         var template = path.join(__dirname, '..', 'public', 'template.html')
         var templateHtml = fs.readFileSync(template, 'utf8')
@@ -500,6 +533,13 @@ const Orderpdfcreate = asyncHandler(async (req, res) => {
 
 const getOrderById = asyncHandler(async (req, res) => {
     try {
+        let Order = Orders(req.conn);
+        let OrderProduct = OrderProducts(req.conn);
+        let Customers = Customer(req.conn);
+        let BillingAddresss = BillingAddress(req.conn);
+        let ShippingAddresss = ShippingAddress(req.conn);
+        let Users = User(req.conn);
+       
         let customerList = await Order.find({ is_deleted: false, _id: req.params.id })
             .populate("Customer")
             .populate("Products")
@@ -523,6 +563,8 @@ const getOrderById = asyncHandler(async (req, res) => {
 
 const changeOrderStatus = asyncHandler(async (req, res) => {
     try {
+        let Order = Orders(req.conn);
+
         const existCustomer = await Order.findById(req.body.id);
         if (!existCustomer) {
             return res.status(200).json({
@@ -549,6 +591,16 @@ const changeOrderStatus = asyncHandler(async (req, res) => {
 
 const moveToInvoice = asyncHandler(async (req, res) => {
     try {
+        let Order = Orders(req.conn);
+        let OrderProduct = OrderProducts(req.conn);
+        let Customers = Customer(req.conn);
+        let BillingAddresss = BillingAddress(req.conn);
+        let ShippingAddresss = ShippingAddress(req.conn);
+        let Users = User(req.conn);
+        let Invoice = Invoices(req.conn);
+        let InvoiceProduct = InvoiceProducts(req.conn);
+        let ApplicationSetting = ApplicationSettings(req.conn);
+
         let invoiceExisting = await Order.findById(req.params.id)
             .populate("Customer")
             .populate("Products")
@@ -660,6 +712,9 @@ const moveToInvoice = asyncHandler(async (req, res) => {
 
 const deleteOrder = asyncHandler(async (req, res) => {
     try {
+        let Order = Orders(req.conn);
+        let OrderProduct = OrderProducts(req.conn);
+
         await OrderProduct.deleteMany({ OrderId: req.params.id }).lean()
 
         await Order.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {

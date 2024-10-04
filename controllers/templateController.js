@@ -1,7 +1,6 @@
 const asyncHandler = require('express-async-handler')
 // const Template = require('../models/templateModel')
-const TempModal = require('../models/templateModel')
-const Templates = TempModal.TemplateModal;
+const Templates = require('../models/templateModel')
 
 const add = asyncHandler(async (req, res) => {
     let Template = Templates(req.conn);
