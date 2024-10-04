@@ -260,7 +260,7 @@ const addBillingAddress = asyncHandler(async (req, res) => {
             is_active: true
         });
         const existCustomer = await Customers.findById(req.body.customerId);
-        existCustomer.BillingAddres.push(newBilling);
+        existCustomer.BillingAddress.push(newBilling);
         existCustomer.save((err) => {
             if (err) throw err;
         });
@@ -356,7 +356,7 @@ const addShippingAddress = asyncHandler(async (req, res) => {
             is_active: true
         });
         const existCustomer = await Customers.findById(req.body.customerId);
-        existCustomer.ShippingAddres.push(newShipping);
+        existCustomer.ShippingAddress.push(newShipping);
         existCustomer.save((err) => {
             if (err) throw err;
         });
