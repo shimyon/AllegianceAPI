@@ -389,7 +389,6 @@ const ApplicationSettingSchema = mongoose.Schema(
         timestamps: true,
     });
 module.exports = {
-
     ProductModal: (conn) => conn.model('Products', productSchema),
     TypeModal: (conn) => conn.model('Types', typeSchema),
     SourceModal: (conn) => conn.model('Sources', sourceSchema),

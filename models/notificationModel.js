@@ -24,6 +24,5 @@ const notificationSchema = mongoose.Schema(
         timestamps: true,
     }
 )
-module.exports = {
-    NotificationModal : (conn) => conn.model("notification", notificationSchema)
-};
+
+module.exports = (conn) => conn.model('notification', notificationSchema);

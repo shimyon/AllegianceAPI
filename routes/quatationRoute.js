@@ -20,7 +20,7 @@ router.post('/getAll', protect, getAllQuatation)
 router.post('/moveToOrder/:id', protect, moveToOrder)
 router.get('/getById/:id', protect, getQuatationById)
 router.get('/deleteQuatation/:id', protect, deleteQuatation)
-router.post('/Quatationpdfcreate', Quatationpdfcreate)
+router.post('/Quatationpdfcreate',protect, Quatationpdfcreate)
 
 
 module.exports = router

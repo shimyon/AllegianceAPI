@@ -41,6 +41,7 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new Error('Name, Email, Password and Role  fields are required!')
     }
     let Users = User(req.conn)
+    let Dashboards = Dashboard(req.conn)
     //check if user exist
     const userExists = await Users.findOne({ email })
     if (userExists) {
@@ -61,7 +62,7 @@ const registerUser = asyncHandler(async (req, res) => {
         is_active: true
 
     })
-    await Dashboard.create({
+    await Dashboards.create({
         Lead: 0,
         Prospect: 0,
         Support: 0,

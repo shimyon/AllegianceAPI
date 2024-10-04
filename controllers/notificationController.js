@@ -1,11 +1,11 @@
 const { ObjectId } = require('mongodb');
 const asyncHandler = require('express-async-handler')
-const NotifModal = require('../models/notificationModel')
-const Notification = NotifModal.NotificationModal;
+const notificationconn = require('../models/notificationModel')
+const User = require('../models/userModel')
 
 const getAllNotificationByUId = asyncHandler(async (req, res) => {
     try {
-        let notificationModels = Notification(req.conn);
+        let notificationModel = notificationconn(req.conn);
         let { skip, per_page } = req.body;
         let query = [];
         if (req.body.userId) {
@@ -58,7 +58,7 @@ const getAllNotificationByUId = asyncHandler(async (req, res) => {
                 },
             }
         )
-        const notification = await notificationModels.aggregate(query).exec();
+        const notification = await notificationModel.aggregate(query).exec();
         if (notification.length == 0) {
             return res.status(200).json({
                 success: true,
@@ -81,12 +81,12 @@ const getAllNotificationByUId = asyncHandler(async (req, res) => {
 })
 const getNotification = asyncHandler(async (req, res) => {
     try {
-        let notificationModels = Notification(req.conn);
-
-        const notification = await notificationModels.find({ userId: req.body.userId })
+        let Users = User(req.conn)
+        let notificationModel = notificationconn(req.conn)
+        const notification = await notificationModel.find({ userId: req.body.userId })
             .sort({ createdAt: -1 })
             .limit(5);
-        const notificationcount = await notificationModels.find({ userId: req.body.userId, Isread: false }).count();
+        const notificationcount = await notificationModel.find({ userId: req.body.userId, Isread: false }).count();
         if (notification.length == 0) {
             return res.status(200).json({
                 success: true,
@@ -109,10 +109,9 @@ const getNotification = asyncHandler(async (req, res) => {
 })
 const setmarkasread = asyncHandler(async (req, res) => {
     try {
-        let notificationModels = Notification(req.conn);
-
+        let notificationModel = notificationconn(req.conn);
         const { id } = req.body;
-        const notification = await notificationModels.findByIdAndUpdate(id, { Isread: true });
+        const notification = await notificationModel.findByIdAndUpdate(id, { Isread: true });
 
         res.status(200).json({
             success: notification != null,
@@ -131,9 +130,8 @@ const setmarkasread = asyncHandler(async (req, res) => {
 
 const setmarkasallread = asyncHandler(async (req, res) => {
     try {
-        let notificationModels = Notification(req.conn);
-
-        const notification = await notificationModels.updateMany({ "userId": req.user._id }, {
+        let notificationModel = notificationconn(req.conn);
+        const notification = await notificationModel.updateMany({ "userId": req.user._id }, {
             Isread: true
         });
         res.status(200).json({
@@ -152,6 +150,3 @@ const setmarkasallread = asyncHandler(async (req, res) => {
 })
 
 module.exports = { getAllNotificationByUId, getNotification, setmarkasread, setmarkasallread }
-
-
-

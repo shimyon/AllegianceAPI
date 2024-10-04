@@ -26,6 +26,6 @@ router.get('/deleteSupport/:id',protect, deleteSupport)
 router.post('/addNext', protect, addNext)
 router.post('/editNext', protect, editNext)
 router.get('/getNext/:id', protect, getNext)
-router.post('/Supportpdfcreate', Supportpdfcreate)
+router.post('/Supportpdfcreate',protect, Supportpdfcreate)
 
 module.exports = router
