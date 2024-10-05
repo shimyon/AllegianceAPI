@@ -413,6 +413,7 @@ const addOrganizationUser = asyncHandler(async (req, res) => {
         let oldStatus = await MasterStatus.find({});
         let insertdataStatus = oldStatus.map(f => ({
             Name: f.Name,
+            GroupName:f.GroupName,
             Role: null,
             Assign: null,
             Assign: null,
