@@ -1,37 +1,33 @@
 const asyncHandler = require('express-async-handler')
 const ProspectModal = require('../models/prospectModel')
-const User = require('../models/userModel')
-const notificationModel = require('../models/notificationModel')
-const Prospect = ProspectModal.ProspectsModal;
-const NextOn = ProspectModal.ProNextOnModal;
-const ProspectOtherContactModal = ProspectModal.ProspectOtherContactModal;
+const Users = require('../models/userModel')
+const Notification = require('../models/notificationModel')
+const Prospects = ProspectModal.ProspectsModal;
+const NextOns = ProspectModal.ProNextOnModal;
+const ProspectOtherContactModals = ProspectModal.ProspectOtherContactModal;
 const uploadFile = require("../middleware/uploadFileMiddleware");
 const path = require("path");
 const readXlsxFile = require('read-excel-file/node')
-const Master = require('../models/masterModel')
 const TaskModal = require('../models/taskModel');
 const Task = TaskModal.TaskModal;
-const Product = Master.ProductModal;
-const Source = Master.SourceModal;
-const Country = Master.CountryModal;
-const State = Master.StateModal;
-const City = Master.CityModal;
-const CustomerModal = require('../models/customerModel')
-const Customer = CustomerModal.CustomerModal;
-const BillingAddress = CustomerModal.BillingAddressModal;
-const ShippingAddress = CustomerModal.ShippingAddressModal;
-
+const CustomerModal = require('../models/customerModel');
+const Customers = CustomerModal.CustomerModal;
+const BillingAddresss = CustomerModal.BillingAddressModal;
+const ShippingAddresss = CustomerModal.ShippingAddressModal;
 
 const SassMaster = require('../models/saasmasterModel');
-const CountryTenant = SassMaster.CountryModal;
-const StateTenant = SassMaster.StateModal;
-const CityTenant = SassMaster.CityModal;
-const RoleTenant = SassMaster.RoleModal;
-const ApplicationSettingTenant = SassMaster.ApplicationSettingModal;
-
+const Products = SassMaster.ProductModal;
+const Sources = SassMaster.SourceModal;
+const Countrys = SassMaster.CountryModal;
+const States = SassMaster.StateModal;
+const Citys = SassMaster.CityModal;
+const Roles = SassMaster.RoleModal;
+const Statuss = SassMaster.StatusModal;
 
 const addProspect = asyncHandler(async (req, res) => {
     try {
+        let Prospect = Prospects(req.conn);
+        let notificationModel = Notification(req.conn);
 
         let prospect = await Prospect.create({
             Company: req.body.company,
@@ -94,9 +90,10 @@ const addProspect = asyncHandler(async (req, res) => {
     }
 
 });
-
 const editProspect = asyncHandler(async (req, res) => {
     try {
+        let Prospect = Prospects(req.conn);
+
         const existProspect = await Prospect.findById(req.body.id);
         if (!existProspect) {
             return res.status(200).json({
@@ -147,9 +144,10 @@ const editProspect = asyncHandler(async (req, res) => {
     }
 
 });
-
 const removeProspect = asyncHandler(async (req, res) => {
     try {
+        let Prospect = Prospects(req.conn);
+
         const existProspect = await Prospect.findById(req.body.id);
         if (!existProspect) {
             return res.status(200).json({
@@ -178,17 +176,18 @@ const removeProspect = asyncHandler(async (req, res) => {
     }
 
 });
-
 const getAllProspect = asyncHandler(async (req, res) => {
-    try {
-
-
-        
-        let Country = CountryTenant(req.conn);
-        let State = StateTenant(req.conn);
-        let City = CityTenant(req.conn);
-        let Role = RoleTenant(req.conn);
-        // let Prospect = Prospects(req.conn);
+    try {        
+        let Prospect = Prospects(req.conn);
+        let Source = Sources(req.conn);
+        let Product = Products(req.conn);        
+        let ProspectOtherContactModal = ProspectOtherContactModals(req.conn);
+        let Country = Countrys(req.conn);
+        let State = States(req.conn);
+        let City = Citys(req.conn);
+        let Status = Statuss(req.conn);
+        let User = Users(req.conn);
+        let Role = Roles(req.conn);
 
         var condition = { is_active: req.body.active };
         var cDate = new Date();
@@ -289,9 +288,18 @@ const getAllProspect = asyncHandler(async (req, res) => {
     }
 
 });
-
 const getProspectById = asyncHandler(async (req, res) => {
     try {
+        let Prospect = Prospects(req.conn);
+        let Source = Sources(req.conn);
+        let Product = Products(req.conn);        
+        let ProspectOtherContactModal = ProspectOtherContactModals(req.conn);
+        let Country = Countrys(req.conn);
+        let State = States(req.conn);
+        let City = Citys(req.conn);
+        let Status = Statuss(req.conn);
+        let User = Users(req.conn);
+        let NextOn = NextOns(req.conn);
 
         let prospectList = await Prospect.find({ _id: req.params.id }).populate(
             {
@@ -317,9 +325,10 @@ const getProspectById = asyncHandler(async (req, res) => {
     }
 
 });
-
 const changeProspectStage = asyncHandler(async (req, res) => {
     try {
+        let Prospect = Prospects(req.conn);
+
         let prospect = await Prospect.findByIdAndUpdate(req.body.id, {
             Stage: req.body.stage,
             StageDate: new Date()
@@ -341,9 +350,11 @@ const changeProspectStage = asyncHandler(async (req, res) => {
     }
 
 });
-
 const addNext = asyncHandler(async (req, res) => {
     try {
+        let Prospect = Prospects(req.conn);
+        let NextOn = NextOns(req.conn);
+
         let nextOn = await NextOn.create({
             prospectId: req.body.prospectid,
             date: req.body.date,
@@ -375,6 +386,8 @@ const addNext = asyncHandler(async (req, res) => {
 });
 const editNext = asyncHandler(async (req, res) => {
     try {
+        let NextOn = NextOns(req.conn);
+
         let nextOn = await NextOn.findByIdAndUpdate(req.body.id, {
             date: req.body.date,
             note: req.body.note,
@@ -402,6 +415,9 @@ const editNext = asyncHandler(async (req, res) => {
 });
 const getNext = asyncHandler(async (req, res) => {
     try {
+        let User = Users(req.conn);
+        let NextOn = NextOns(req.conn);
+
         const next = await NextOn.find({ prospectId: req.params.id }).sort({ date: -1 }).populate("user");
 
         res.status(200).json({
@@ -419,6 +435,9 @@ const getNext = asyncHandler(async (req, res) => {
 });
 const getbyNext = asyncHandler(async (req, res) => {
     try {
+        let User = Users(req.conn);
+        let NextOn = NextOns(req.conn);
+
         const next = await NextOn.find({ _id: req.params.id }).populate("user");
 
         res.status(200).json({
@@ -436,6 +455,9 @@ const getbyNext = asyncHandler(async (req, res) => {
 });
 const addOtherContact = asyncHandler(async (req, res) => {
     try {
+        let Prospect = Prospects(req.conn);  
+        let ProspectOtherContactModal = ProspectOtherContactModals(req.conn);
+
         let prospectExist = await Prospect.findById(req.body.id);
         let nextOn = await ProspectOtherContactModal.create({
             ProspectId: req.body.id,
@@ -460,9 +482,10 @@ const addOtherContact = asyncHandler(async (req, res) => {
     }
 
 });
-
 const getOtherContact = asyncHandler(async (req, res) => {
     try {
+        let ProspectOtherContactModal = ProspectOtherContactModals(req.conn);
+        
         let otherContact = await ProspectOtherContactModal.find({ ProspectId: req.params.id });
         return res.status(200).json({
             success: true,
@@ -475,8 +498,7 @@ const getOtherContact = asyncHandler(async (req, res) => {
             msg: "Error in getting data. " + err.message
         });
     }
-})
-
+});
 const importExcel = asyncHandler(async (req, res) => {
     try {
         process.env.UPLOADFILE = "";
@@ -496,10 +518,16 @@ const importExcel = asyncHandler(async (req, res) => {
         });
 
     }
-})
-
+});
 const importFiletoDB = asyncHandler(async (req, res, fileName) => {
     try {
+        let Prospect = Prospects(req.conn);
+        let Source = Sources(req.conn);
+        let Product = Products(req.conn);
+        let Country = Countrys(req.conn);
+        let State = States(req.conn);
+        let City = Citys(req.conn);
+
         var exFile = path.join(process.env.UPLOAD_FOLDER, "uploads", fileName.replace(",", ""));
         var importData = [];
 
@@ -594,10 +622,14 @@ const importFiletoDB = asyncHandler(async (req, res, fileName) => {
 
 
     }
-})
-
+});
 const convertToCustomer = asyncHandler(async (req, res) => {
     try {
+        let Prospect = Prospects(req.conn);
+        let Customer = Customers(req.conn);
+        let BillingAddress = BillingAddresss(req.conn);
+        let ShippingAddress = ShippingAddresss(req.conn);
+        
         var pros = await Prospect.findById(req.params.id);
 
         const existCustomer = await Customer.findOne({ $or: [{ Mobile: pros.Mobile, Email: pros.Email }] });
@@ -671,9 +703,10 @@ const convertToCustomer = asyncHandler(async (req, res) => {
     }
 
 });
-
 const markAsRead = asyncHandler(async (req, res) => {
     try {
+        let Prospect = Prospects(req.conn);
+
         await Prospect.findByIdAndUpdate(req.params.id, {
             is_readed: true
         })
