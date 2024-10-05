@@ -29,11 +29,11 @@ app.options("*", cors());
 
 const connectDB = async () => {
     try {
-        await mongoose.connect(process.env.DB_URI_1).then(() => {
+        await mongoose.connect(process.env.DB_URI_1).then((req) => {
             databasestatus = "DB connected";
 
             //Load Cron Jobs
-            loadCronJob();
+            loadCronJob(req);
         }).catch((err) => {
             databasestatus = err;
         });

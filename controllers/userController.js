@@ -29,7 +29,7 @@ const Module = SaasModal.ModuleModal;
 const Role = SaasModal.RoleModal;
 const Status = SaasModal.StatusModal;
 const Type = SaasModal.TypeModal;
-const ModuleRights = SaasModal.ModuleRightModal;
+const saasModuleRights = SaasModal.ModuleRightModal;
 const ApplicationSetting = SaasModal.ApplicationSettingModal;
 const ModuleRight = require('../models/moduleRightModel')
 
@@ -315,8 +315,9 @@ const addOrganizationUser = asyncHandler(async (req, res) => {
     let Roles = Role(req.conn);
     let Statuss = Status(req.conn);
     let Types = Type(req.conn);
-    let LatestModuleRights = ModuleRights(req.conn);
-    let ApplicationSettings = ApplicationSetting(req.conn)
+    let LatestModuleRights = saasModuleRights(req.conn);
+    let ApplicationSettings = ApplicationSetting(req.conn);
+    let Dashboards = Dashboard(req.conn);
     try {
         let oldUser = await Organization.findOne({ Name: req.body.Name });
 
@@ -337,9 +338,9 @@ const addOrganizationUser = asyncHandler(async (req, res) => {
         });
 
         const applicationSetting = await ApplicationSettings
-        .create({
-            CompanyTitle: req.body.Name            
-        });
+            .create({
+                CompanyTitle: req.body.Name
+            });
 
         let oldSource = await MasterSource.find({});
         let insertdataSource = oldSource.map(f => ({
@@ -408,120 +409,7 @@ const addOrganizationUser = asyncHandler(async (req, res) => {
             Name: f.Name,
             is_active: f.is_active,
         }))
-        let newRole = await Roles.insertMany(insertdataRole);   
-        
-        
-        let oldModuleRight = await ModuleRight.find({});
-        let insertdataModuleRight = [];
-
-        newRole.forEach(nr => {
-            let correspondingOldRole = oldRole.find(or => or.Name === nr.Name);
-            if (correspondingOldRole) {
-                let filteredRoles = oldModuleRight.filter(moduleright => moduleright.role.equals(correspondingOldRole._id));
-                filteredRoles.forEach(f => {
-                    insertdataModuleRight.push({
-                        role: nr._id,
-                        moduleId: f.moduleId,
-                        read: f.read,
-                        write: f.write,
-                        delete: f.delete,
-                    });
-                });
-            }
-        })
-        let newModulerights = await LatestModuleRights.insertMany(insertdataModuleRight);
-
-
-        // newRole.forEach(nr => {
-        //     let correspondingOldRole = oldRole.find(or => or.Name === nr.Name);
-        //     if(correspondingOldRole){
-        //         let filteredModuleRight = oldModuleRight.filter(moduleRight => moduleRight.role.equals(correspondingOldRole._id));
-        //         filteredModuleRight.forEach(f => {
-        //             insertdataModuleRight.push({
-        //                 role: nr._id,
-        //                 moduleId: f.moduleId,
-        //                 read: f.read,
-        //                 write: f.write,
-        //                 delete: f.delete,
-        //             })
-        //         })
-        //     }  
-        // })
-        // let newModuleRight = await MdleRights.insertMany(insertdataModuleRight);
-
-        // newModule.forEach(nm => {
-        //     newRole.forEach(nr => {
-                
-        //         let correspondingOldRole = oldRole.find(or => or.Name === nr.Name);
-        //         let correspondingOldModule = oldModule.find(om => om.Name === nm.Name);        
-              
-        //         if (correspondingOldModule && correspondingOldRole) {
-                   
-        //             let filteredModules = oldModule.filter(module => module._id.equals(correspondingOldModule._id));
-        //             let filteredModuleRight = oldModuleRight.filter(moduleRight => moduleRight.role.equals(correspondingOldRole._id));
-                            
-        //             filteredModules.forEach(filteredModule => {
-        //                 filteredModuleRight.forEach(f => {
-        //                     insertdataModuleRight.push({
-        //                         role: nr._id,         
-        //                         moduleId: nm._id,     
-        //                         read: f.read,         
-        //                         write: f.write,
-        //                         delete: f.delete,
-        //                     });
-        //                 });
-        //             });
-        //         }
-        //     });
-        // });
-        
-        // let newModuleRight = await LatestModuleRights.insertMany(insertdataModuleRight);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        let newRole = await Roles.insertMany(insertdataRole);
         let oldStatus = await MasterStatus.find({});
         let insertdataStatus = oldStatus.map(f => ({
             Name: f.Name,
@@ -540,10 +428,28 @@ const addOrganizationUser = asyncHandler(async (req, res) => {
             is_active: f.is_active,
         }))
         let newModule = await Modules.insertMany(insertdataModule);
-
-
-        
-        
+        let oldModuleRight = await ModuleRight.find({});
+        let insertdataModuleRight = [];
+        newRole.forEach(nr => {
+            let correspondingOldRole = oldRole.find(or => or.Name === nr.Name);
+            if (correspondingOldRole) {
+                let filteredRoles = oldModuleRight.filter(moduleright => moduleright.role.equals(correspondingOldRole._id));
+                filteredRoles.forEach(f => {
+                    let correspondingOldModuleId = oldModule.find(om => om._id.toString() === f.moduleId.toString());
+                    if (correspondingOldModuleId) {
+                        let filteredModuleRight = newModule.find(nm => nm.Name === correspondingOldModuleId.Name);
+                        insertdataModuleRight.push({
+                            role: nr._id,
+                            moduleId: filteredModuleRight._id,
+                            read: f.read,
+                            write: f.write,
+                            delete: f.delete,
+                        });
+                    }
+                });
+            }
+        });
+        await LatestModuleRights.insertMany(insertdataModuleRight);
         const salt = await bcrypt.genSalt(10)
         const hashedPassword = await bcrypt.hash(req.body.password, salt)
         var roles = await Roles.findOne({ Name: { $regex: "SuperAdmin", $options: 'i' } }, { _id: 1 });
@@ -553,7 +459,17 @@ const addOrganizationUser = asyncHandler(async (req, res) => {
             email: req.body.UserEmail,
             password: hashedPassword
         });
-
+        await Dashboards.create({
+            Lead: 0,
+            Prospect: 0,
+            Support: 0,
+            Recovery: 0,
+            Product: 0,
+            Customer: 0,
+            Project: 0,
+            Order: 0,
+            UserId: newUser._id
+        });
         return res.status(200).json({
             success: true,
             message: "User added successfully",

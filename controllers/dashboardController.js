@@ -1,7 +1,7 @@
 const asyncHandler = require('express-async-handler')
 const DashboardModal = require('../models/dashboardModel')
-const Dashboard = DashboardModal.Dashboard
-const NewsFeed = DashboardModal.NewsFeed
+const Dashboards = DashboardModal.Dashboard
+const NewsFeeds = DashboardModal.NewsFeed
 const LeadModal = require('../models/leadModel')
 const Lead = LeadModal.LeadsModal;
 const ProspectModal = require('../models/prospectModel')
@@ -42,7 +42,7 @@ const addNewsFeed = asyncHandler(async (req, res) => {
 })
 const saveNewsFeed = asyncHandler(async (req, res, fileName) => {
     try {
-
+        let NewsFeed = NewsFeeds(req.conn);
         await NewsFeed.create({
             title: req.body.title,
             description: req.body.description,
@@ -86,6 +86,7 @@ const editNewsFeed = asyncHandler(async (req, res) => {
 })
 const editSave = asyncHandler(async (req, res, fileName) => {
     try {
+        let NewsFeed = NewsFeeds(req.conn);
         let existNews = await NewsFeed.findById(req.body.id);
         if (!existNews) {
             return res.status(400).json({
@@ -116,6 +117,7 @@ const editSave = asyncHandler(async (req, res, fileName) => {
 })
 const getAllNews = asyncHandler(async (req, res) => {
     try {
+        let NewsFeed = NewsFeeds(req.conn);
         let newsList = await NewsFeed.find({ is_active: req.body.active }).sort({ createdAt: -1 })
             .populate("addedBy", 'name email')
         return res.status(200).json({
@@ -132,6 +134,7 @@ const getAllNews = asyncHandler(async (req, res) => {
 })
 const getNewsById = asyncHandler(async (req, res) => {
     try {
+        let NewsFeed = NewsFeeds(req.conn);
         let newsList = await NewsFeed.find({ _id: req.params.id }).populate("addedBy", 'name email')
         return res.status(200).json({
             success: true,
@@ -147,6 +150,7 @@ const getNewsById = asyncHandler(async (req, res) => {
 })
 const removeNewsFeed = asyncHandler(async (req, res) => {
     try {
+        let NewsFeed = NewsFeeds(req.conn);
         const existNews = await NewsFeed.findById(req.params.id);
         if (!existNews) {
             return res.status(200).json({
@@ -176,6 +180,7 @@ const removeNewsFeed = asyncHandler(async (req, res) => {
 });
 const deleteNewsFeed = asyncHandler(async (req, res) => {
     try {
+        let NewsFeed = NewsFeeds(req.conn);
         await NewsFeed.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {
             if (err) {
                 return res.status(401).json({
@@ -201,7 +206,8 @@ const deleteNewsFeed = asyncHandler(async (req, res) => {
 
 const getDashboardCount = asyncHandler(async (req, res) => {
     try {
-        user = await Dashboard.findOne({ UserId: req.user._id }).populate("UserId");
+        let Dashboard = Dashboards(req.conn);
+        const user = await Dashboard.findOne({ UserId: req.user._id }).populate("UserId");
         const now = new Date();
         const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
 
@@ -218,7 +224,7 @@ const getDashboardCount = asyncHandler(async (req, res) => {
             },
             {
                 $match: {
-                     Stage: "New"
+                    Stage: "New"
                 }
             },
             {
@@ -365,7 +371,7 @@ const getDashboardCount = asyncHandler(async (req, res) => {
         const orderCountArray = [['Month', 'Count'], ...ordercount.map(item => [item.month, item.count])];
         const invoiceCountArray = [['Month', 'Count'], ...invoicecount.map(item => [item.month, item.count])];
         const quatationCountArray = [['Month', 'Count'], ...quatationcount.map(item => [item.month, item.count])];
-        
+
         return res.status(200).json({
             success: true,
             data: { user, leadCountArray, prospectCountArray, orderCountArray, invoiceCountArray, quatationCountArray }
