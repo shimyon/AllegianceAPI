@@ -33,10 +33,6 @@ const attendanceSchema = mongoose.Schema(
         timestamps: true,
     })
 
-const AttendanceModal = mongoose.model('Attendance', attendanceSchema);
-const syncIndex = async () => {
-    await AttendanceModal.syncIndexes();
+module.exports = {
+    AttendanceModal: (conn) => conn.model('Attendance', attendanceSchema)
 }
-syncIndex();
-
-module.exports = { AttendanceModal };

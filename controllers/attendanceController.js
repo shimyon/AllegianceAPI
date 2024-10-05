@@ -1,12 +1,13 @@
-const asyncHandler = require('express-async-handler')
-const AttendanceModel = require('../models/attendanceModel')
-const User = require('../models/userModel')
-const Attendance = AttendanceModel.AttendanceModal;
+const asyncHandler = require('express-async-handler');
+const AttendanceModel = require('../models/attendanceModel');
+const User = require('../models/userModel');
+const Attendances = AttendanceModel.AttendanceModal;
 const uploadFile = require("../middleware/uploadFileMiddleware");
 const moment = require('moment');
 
 const addAttendance = asyncHandler(async (req, res) => {
     try {
+        let Attendance = Attendances(req.conn);
         const newAttendance = await Attendance.create({
             UserId: req.body.UserId,
             Punchin_time: req.body.Punchin_time,
@@ -28,7 +29,7 @@ const addAttendance = asyncHandler(async (req, res) => {
 
 const editAttendance = asyncHandler(async (req, res) => {
     try {
-
+        let Attendance = Attendances(req.conn);
         var existing = await Attendance.findById(req.body.id);
         if (!existing) {
             return res.status(400).json({
@@ -57,6 +58,8 @@ const editAttendance = asyncHandler(async (req, res) => {
 
 const getAllAttendance = asyncHandler(async (req, res) => {
     try {
+        let Attendance = Attendances(req.conn);
+
         let { skip, per_page } = req.body;
         let query = [];
         query.push(
@@ -144,6 +147,9 @@ const getAllAttendance = asyncHandler(async (req, res) => {
 
 const getAttendanceById = asyncHandler(async (req, res) => {
     try {
+        let Attendance = Attendances(req.conn);
+        let Users = User(req.conn);
+
         let AttendanceList = await Attendance.find({ _id: req.params.id }).populate("UserId").populate("addedBy", "_id name email role");
         return res.status(200).json({
             success: true,
@@ -161,6 +167,8 @@ const getAttendanceById = asyncHandler(async (req, res) => {
 
 const deleteAttendanceById = asyncHandler(async (req, res) => {
     try {
+        let Attendance = Attendances(req.conn);
+
         await Attendance.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {
             if (err) {
                 return res.status(401).json({
@@ -210,6 +218,8 @@ const AppAttendance = asyncHandler(async (req, res) => {
 })
 const saveAttendance = asyncHandler(async (req, res, fileName) => {
     try {
+        let Attendance = Attendances(req.conn);
+
         const newAttendance = await Attendance.create({
             UserId: req.body.UserId,
             Punchin_time: req.body.Punchin_time,
@@ -231,6 +241,8 @@ const saveAttendance = asyncHandler(async (req, res, fileName) => {
 })
 const saveeditAttendance = asyncHandler(async (req, res, fileName) => {
     try {
+        let Attendance = Attendances(req.conn);
+
         let existNews = await Attendance.findById(req.body.id);
         if (!existNews) {
             return res.status(400).json({
@@ -258,6 +270,8 @@ const saveeditAttendance = asyncHandler(async (req, res, fileName) => {
 })
 const gettodayAttendance = asyncHandler(async (req, res) => {
     try {
+        let Attendance = Attendances(req.conn);
+
         var condition = { UserId: req.body.UserId };
         const currentMonth = new Date().getMonth() + 1;
         const currentyear = new Date().getFullYear();
