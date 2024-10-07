@@ -170,15 +170,8 @@ const prospectOtherContact = mongoose.Schema(
         timestamps: true,
     });
 
-const ProspectsModal = mongoose.model('Prospect', prospectSchema);
-const ProNextOnModal = mongoose.model('ProNextOn', proNextOnSchema);
-const ProspectOtherContactModal = mongoose.model('ProspectOtherContact', prospectOtherContact);
-
-const syncIndex = async () => {
-    await ProspectsModal.syncIndexes();
-    await ProNextOnModal.syncIndexes();
-    await ProspectOtherContactModal.syncIndexes();
+module.exports = {
+    ProspectsModal: (conn) => conn.model('Prospect', prospectSchema),
+    ProNextOnModal: (conn) => conn.model('ProNextOn', proNextOnSchema),
+    ProspectOtherContactModal: (conn) => conn.model('ProspectOtherContact', prospectOtherContact),
 }
-syncIndex();
-
-module.exports = { ProspectsModal, ProNextOnModal, ProspectOtherContactModal };

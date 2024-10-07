@@ -15,9 +15,9 @@ const RecoveryModel = require('../models/recoveryModel')
 const Recovery = RecoveryModel.RecoveryModal;
 const OrderModel = require('../models/orderModel')
 const Order = OrderModel.OrderModal;
-const DashboardCron = () => {
-    cron.schedule('0 */2 * * *', async() => {
-        await setDashboardCount();
+const DashboardCron = (req) => {
+    cron.schedule('0 */2 * * *', async(req) => {
+        await setDashboardCount(req);
     });
 }
 

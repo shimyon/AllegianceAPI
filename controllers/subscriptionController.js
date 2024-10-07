@@ -1,6 +1,9 @@
-const asyncHandler = require('express-async-handler')
-const Subscription = require('../models/subscriptionModal')
+const asyncHandler = require('express-async-handler');
+const Subscriptions = require('../models/subscriptionModal');
 const uploadFile = require("../middleware/uploadFileMiddleware");
+const CustomerModal = require('../models/customerModel');
+const Customers = CustomerModal.CustomerModal;
+const Users = require('../models/userModel');
 
 const addSubscription = asyncHandler(async (req, res) => {
     try {
@@ -25,6 +28,7 @@ const addSubscription = asyncHandler(async (req, res) => {
 
 const insertSubscription = asyncHandler(async (req, res, fileName) => {
     try {
+        let Subscription = Subscriptions(req.conn);
 
         await Subscription.create({
             Customer: req.body.customer,
@@ -75,6 +79,7 @@ const editSubscription = asyncHandler(async (req, res) => {
 
 const insertEditSubscription = asyncHandler(async (req, res, fileName) => {
     try {
+        let Subscription = Subscriptions(req.conn);
         var existing = await Subscription.findById(req.body.id);
         if (!existing) {
             return res.status(400).json({
@@ -114,6 +119,7 @@ const insertEditSubscription = asyncHandler(async (req, res, fileName) => {
 
 const getAllSubscription = asyncHandler(async (req, res) => {
     try {
+        let Subscription = Subscriptions(req.conn);
         let { skip, per_page } = req.body;
         let query = [];
         query.push({
@@ -203,6 +209,9 @@ const getAllSubscription = asyncHandler(async (req, res) => {
 
 const getSubscriptionById = asyncHandler(async (req, res) => {
     try {
+        let Subscription = Subscriptions(req.conn);
+        let Customer = Customers(req.conn);
+        let User = Users(req.conn);
         let SubscriptionList = await Subscription.find({ _id: req.params.id }).populate("Customer").populate("addedBy", "_id name email role");
         return res.status(200).json({
             success: true,
@@ -220,6 +229,7 @@ const getSubscriptionById = asyncHandler(async (req, res) => {
 
 const removeSubscription = asyncHandler(async (req, res) => {
     try {
+        let Subscription = Subscriptions(req.conn);
         const existSubscription = await Subscription.findById(req.body.id);
         if (!existSubscription) {
             return res.status(200).json({
@@ -250,6 +260,7 @@ const removeSubscription = asyncHandler(async (req, res) => {
 
 const deleteSubscription = asyncHandler(async (req, res) => {
     try {
+        let Subscription = Subscriptions(req.conn);
         await Subscription.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {
             if (err) {
                 return res.status(401).json({

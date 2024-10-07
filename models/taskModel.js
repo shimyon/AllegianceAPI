@@ -77,11 +77,15 @@ const taskCommentadd = mongoose.Schema(
       timestamps: true,
     }
 )
-const TaskModal = mongoose.model('Task', taskSchema);
-const TaskCommentModal = mongoose.model('TaskComment', taskCommentadd);
-const syncIndex = async () => {
-  await TaskModal.syncIndexes();
-  await TaskCommentModal.syncIndexes();
+// const TaskModal = mongoose.model('Task', taskSchema);
+// const TaskCommentModal = mongoose.model('TaskComment', taskCommentadd);
+// const syncIndex = async () => {
+//   await TaskModal.syncIndexes();
+//   await TaskCommentModal.syncIndexes();
+// }
+// syncIndex();
+// module.exports = { TaskModal, TaskCommentModal } ;
+module.exports = {
+  TaskModal: (conn) => conn.model('Task', taskSchema),
+  TaskCommentModal: (conn) => conn.model('TaskComment', taskCommentadd),
 }
-syncIndex();
-module.exports = { TaskModal, TaskCommentModal } ;

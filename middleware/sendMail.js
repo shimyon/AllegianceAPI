@@ -1,11 +1,13 @@
-const Master = require('../models/masterModel')
-const MailAddress = Master.MailAddressModal;
-var nodemailer = require('nodemailer');
+// const Master = require('../models/masterModel')
+// const MailAddress = Master.MailAddressModal;
+const SassMaster = require('../models/saasmasterModel');
+const MailAddresss = SassMaster.MailAddressModal;
 const fs = require('fs');
+var nodemailer = require('nodemailer');
 
 
-const sendMail = async(to, subject, html) => {
-
+const sendMail = async(to, subject, html, req) => {
+  let MailAddress = MailAddresss(req.conn);
   const mailAddress = await MailAddress.findOne({ is_default: true });
   var transporter = nodemailer.createTransport({
     service: 'gmail',

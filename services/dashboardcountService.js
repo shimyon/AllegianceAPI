@@ -1,6 +1,6 @@
 const moment = require('moment');
 const DashboardModal = require('../models/dashboardModel')
-const Dashboard = DashboardModal.Dashboard
+const Dashboards = DashboardModal.Dashboard
 const LeadModal = require('../models/leadModel')
 const Lead = LeadModal.LeadsModal;
 const Master = require('../models/masterModel')
@@ -20,14 +20,16 @@ const Order = OrderModel.OrderModal;
 
 
 
-const getcount = async () => {
+const getcount = async (req) => {
+    let Dashboard = Dashboards(req.conn);
     const newDashboardcount = await Dashboard.find().populate("UserId").lean();
 
     return newDashboardcount;
 }
 
-const setDashboardCount = async () => {
-    let newDashboardcount = await getcount();
+const setDashboardCount = async (req) => {
+    let Dashboard = Dashboards(req.conn);
+    let newDashboardcount = await getcount(req);
     var dashboardCount = {
         leadCount: 0,
         prospectCount: 0,

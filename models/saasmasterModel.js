@@ -74,7 +74,6 @@ const stateSchema = mongoose.Schema(
     {
         timestamps: true,
     });
-
 const citySchema = mongoose.Schema(
     {
         Name: {
@@ -259,6 +258,32 @@ const iconSchema = mongoose.Schema(
     {
         timestamps: true,
     });
+const moduleRightSchema = mongoose.Schema(
+    {
+        role: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Role'
+        },
+        moduleId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Module_Master'
+        },
+        read: {
+            type: Boolean,
+            default: false
+        },
+        write: {
+            type: Boolean,
+            default: false
+        },
+        delete: {
+            type: Boolean,
+            default: false
+        },
+    },
+    {
+        timestamps: true,
+    })
 const ApplicationSettingSchema = mongoose.Schema(
     {
         CompanyTitle: {
@@ -363,69 +388,21 @@ const ApplicationSettingSchema = mongoose.Schema(
     {
         timestamps: true,
     });
-const organizationSchema = mongoose.Schema(
-        {
-            Name: {
-                type: String
-            },
-            Code: {
-                type: String,
-                unique: true
-            },
-            Description: {
-                type: String
-            },
-            Website: {
-                type: String
-            },
-            Email: {
-                type: String
-            },
-            UserEmail: {
-                type: String
-            },
-            PhoneNo: {
-                type: String
-            },
-        },
-        {
-            timestamps: true,
-        });
-const ProductModal = mongoose.model('Products', productSchema);
-const TypeModal = mongoose.model('MasterTypes', typeSchema);
-const SourceModal = mongoose.model('MasterSources', sourceSchema);
-const CountryModal = mongoose.model('MasterCountry', countrySchema);
-const StateModal = mongoose.model('MasterStates', stateSchema);
-const CityModal = mongoose.model('MasterCity', citySchema);
-const UnitModal = mongoose.model('MasterUnits', unitSchema);
-const IconModal = mongoose.model('MasterIcon', iconSchema);
-const CategoryModal = mongoose.model('Category', categorySchema);
-const SubCategoryModal = mongoose.model('SubCategory', subCategorySchema);
-const ModuleModal = mongoose.model('MasterModule_Master', ModuleSchema);
-const RoleModal = mongoose.model('MasterRole', RoleSchema);
-const StatusModal = mongoose.model('MasterStatus', statusSchema);
-const MailAddressModal = mongoose.model('MailAddress', MailAddressSchema);
-const ApplicationSettingModal = mongoose.model('ApplicationSetting', ApplicationSettingSchema);
-const OrganizationModal = mongoose.model('Organization', organizationSchema);
-
-const syncIndex = async () => {
-    await ProductModal.syncIndexes();
-    await TypeModal.syncIndexes();
-    await SourceModal.syncIndexes();
-    await CountryModal.syncIndexes();
-    await StateModal.syncIndexes();
-    await CityModal.syncIndexes();
-    await UnitModal.syncIndexes();
-    await IconModal.syncIndexes();
-    await CategoryModal.syncIndexes();
-    await SubCategoryModal.syncIndexes();
-    await ModuleModal.syncIndexes();
-    await RoleModal.syncIndexes();
-    await StatusModal.syncIndexes();
-    await MailAddressModal.syncIndexes();
-    await ApplicationSettingModal.syncIndexes();
-    await OrganizationModal.syncIndexes();
+module.exports = {
+    ProductModal: (conn) => conn.model('Products', productSchema),
+    TypeModal: (conn) => conn.model('Types', typeSchema),
+    SourceModal: (conn) => conn.model('Sources', sourceSchema),
+    CountryModal: (conn) => conn.model('Country', countrySchema),
+    StateModal: (conn) => conn.model('States', stateSchema),
+    CityModal: (conn) => conn.model('City', citySchema),
+    UnitModal: (conn) => conn.model('Units', unitSchema),
+    CategoryModal: (conn) => conn.model('Category', categorySchema),
+    SubCategoryModal: (conn) => conn.model('SubCategory', subCategorySchema),
+    IconModal: (conn) => conn.model('Icon', iconSchema),
+    ModuleModal: (conn) => conn.model('Module_Master', ModuleSchema),
+    RoleModal: (conn) => conn.model('Role', RoleSchema),
+    StatusModal: (conn) => conn.model('Status', statusSchema),
+    MailAddressModal: (conn) => conn.model('MailAddress', MailAddressSchema),
+    ModuleRightModal: (conn) => conn.model('ModuleRights', moduleRightSchema),
+    ApplicationSettingModal: (conn) => conn.model('ApplicationSetting', ApplicationSettingSchema)
 }
-syncIndex();
-
-module.exports = { OrganizationModal,ProductModal, TypeModal, CountryModal, StateModal, CityModal, SourceModal, UnitModal, IconModal, CategoryModal, SubCategoryModal, ModuleModal, RoleModal, StatusModal, MailAddressModal, ApplicationSettingModal };

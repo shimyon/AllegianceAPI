@@ -1,9 +1,11 @@
 const { ObjectId } = require('mongodb');
 const asyncHandler = require('express-async-handler')
-const notificationModel = require('../models/notificationModel')
+const notificationconn = require('../models/notificationModel')
+const User = require('../models/userModel')
 
 const getAllNotificationByUId = asyncHandler(async (req, res) => {
     try {
+        let notificationModel = notificationconn(req.conn);
         let { skip, per_page } = req.body;
         let query = [];
         if (req.body.userId) {
@@ -79,6 +81,8 @@ const getAllNotificationByUId = asyncHandler(async (req, res) => {
 })
 const getNotification = asyncHandler(async (req, res) => {
     try {
+        let Users = User(req.conn)
+        let notificationModel = notificationconn(req.conn)
         const notification = await notificationModel.find({ userId: req.body.userId })
             .sort({ createdAt: -1 })
             .limit(5);
@@ -105,6 +109,7 @@ const getNotification = asyncHandler(async (req, res) => {
 })
 const setmarkasread = asyncHandler(async (req, res) => {
     try {
+        let notificationModel = notificationconn(req.conn);
         const { id } = req.body;
         const notification = await notificationModel.findByIdAndUpdate(id, { Isread: true });
 
@@ -125,6 +130,7 @@ const setmarkasread = asyncHandler(async (req, res) => {
 
 const setmarkasallread = asyncHandler(async (req, res) => {
     try {
+        let notificationModel = notificationconn(req.conn);
         const notification = await notificationModel.updateMany({ "userId": req.user._id }, {
             Isread: true
         });
@@ -144,6 +150,3 @@ const setmarkasallread = asyncHandler(async (req, res) => {
 })
 
 module.exports = { getAllNotificationByUId, getNotification, setmarkasread, setmarkasallread }
-
-
-

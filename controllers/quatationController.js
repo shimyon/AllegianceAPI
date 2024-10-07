@@ -1,28 +1,45 @@
 const asyncHandler = require('express-async-handler')
 const QuatationModal = require('../models/quatationModel')
 const User = require('../models/userModel')
-const notificationModel = require('../models/notificationModel')
-const Quatation = QuatationModal.QuatationModal
-const QuatationProduct = QuatationModal.QuatationProductModal
+// const notificationModel = require('../models/notificationModel')
+const Notification = require('../models/notificationModel')
+// const Notification = NotifModal.NotificationModal;
+const Quatations = QuatationModal.QuatationModal
+const QuatationProducts = QuatationModal.QuatationProductModal
 const OrderModal = require('../models/orderModel')
-const Order = OrderModal.OrderModal
-const OrderProduct = OrderModal.OrderProductModal
-const Master = require('../models/masterModel')
-const Status = Master.StatusModal;
-const ApplicationSetting = Master.ApplicationSettingModal;
+const Orders = OrderModal.OrderModal
+const OrderProducts = OrderModal.OrderProductModal
+// const Master = require('../models/masterModel')
+// const Status = Master.StatusModal;
+// const ApplicationSetting = Master.ApplicationSettingModal;
+const SassMaster = require('../models/saasmasterModel');
+const ApplicationSettings = SassMaster.ApplicationSettingModal;
+const Statuss = SassMaster.StatusModal;
+const Products = SassMaster.ProductModal;
+const Units = SassMaster.UnitModal;
+const CustomerModal = require('../models/customerModel');
+const Customer = CustomerModal.CustomerModal;
+const BillingAddress = CustomerModal.BillingAddressModal;
+const ShippingAddress = CustomerModal.ShippingAddressModal;
+
 var pdf = require('html-pdf')
 var fs = require('fs')
 var converter = require('number-to-words')
 var format = require('date-format')
 var test = require('tape')
 var path = require('path')
-const Template = require('../models/templateModel')
+const Templates = require('../models/templateModel')
 const { generatePDF } = require('../services/pdfService')
 const LeadModal = require('../models/leadModel')
 const Lead = LeadModal.LeadsModal;
 const Icon = Master.IconModal;
 const addQuatation = asyncHandler(async (req, res) => {
     try {
+        let Quatation = Quatations(req.conn);
+        let QuatationProduct = QuatationProducts(req.conn);
+        let ApplicationSetting = ApplicationSettings(req.conn);
+        let notificationModel = Notification(req.conn);
+
         const existQuatationCode = await Quatation.findOne({ $or: [{ QuatationCode: req.body.QuatationCode }] });
         if (existQuatationCode) {
             return res.status(200).json({
@@ -152,6 +169,9 @@ const addQuatation = asyncHandler(async (req, res) => {
 
 const editQuatation = asyncHandler(async (req, res) => {
     try {
+        let Quatation = Quatations(req.conn);
+        let QuatationProduct = QuatationProducts(req.conn); 
+
         const oldQuatation = await Quatation.findById(req.body.id);
         if (!oldQuatation) {
             return res.status(400).json({
@@ -233,6 +253,8 @@ const editQuatation = asyncHandler(async (req, res) => {
 
 const removeQuatation = asyncHandler(async (req, res) => {
     try {
+        let Quatation = Quatations(req.conn);        
+
         const existQuatation = await Quatation.findById(req.params.id);
         if (!existQuatation) {
             return res.status(200).json({
@@ -260,6 +282,8 @@ const removeQuatation = asyncHandler(async (req, res) => {
 
 const getAllQuatation = asyncHandler(async (req, res) => {
     try {
+        let Quatation = Quatations(req.conn);
+
         let { skip, per_page } = req.body;
         let query = [];
         query.push({
@@ -351,6 +375,13 @@ const getAllQuatation = asyncHandler(async (req, res) => {
 
 const getQuatationById = asyncHandler(async (req, res) => {
     try {
+        let Quatation = Quatations(req.conn);
+        let QuatationProduct = QuatationProducts(req.conn);
+        let Customers = Customer(req.conn);
+        let BillingAddresss = BillingAddress(req.conn);
+        let ShippingAddresss = ShippingAddress(req.conn)
+        let Users = User(req.conn);
+
         let QuatationList = await Quatation.find({ _id: req.params.id })
             .populate("Customer")
             .populate("Products")
@@ -374,6 +405,17 @@ const getQuatationById = asyncHandler(async (req, res) => {
 
 const moveToOrder = asyncHandler(async (req, res) => {
     try {
+        let Quatation = Quatations(req.conn);
+        let QuatationProduct = QuatationProducts(req.conn);
+        let Customers = Customer(req.conn);
+        let BillingAddresss = BillingAddress(req.conn);
+        let ShippingAddresss = ShippingAddress(req.conn);
+        let Users = User(req.conn);
+        let ApplicationSetting = ApplicationSettings(req.conn);
+        let Status = Statuss(req.conn);
+        let Order = Orders(req.conn);
+        let OrderProduct = OrderProducts(req.conn);
+
         let quatationExisting = await Quatation.findById(req.params.id).populate("Customer")
             .populate("Products")
             .populate("ShippingAddress")
@@ -487,6 +529,15 @@ const moveToOrder = asyncHandler(async (req, res) => {
 
 const Quatationpdfcreate = asyncHandler(async (req, res) => {
     try {
+        let Quatation = Quatations(req.conn);
+        let QuatationProduct = QuatationProducts(req.conn);
+        let Customers = Customer(req.conn);
+        let Unit = Units(req.conn);
+        let Product = Products(req.conn);        
+        let Users = User(req.conn);
+        let ApplicationSetting = ApplicationSettings(req.conn);
+        let Template = Templates(req.conn);
+
         const data = await Template.findById(req.body.template_id)
         var template = path.join(__dirname, '..', 'public', 'template.html')
         var templateHtml = fs.readFileSync(template, 'utf8')
@@ -651,6 +702,9 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
 
 const deleteQuatation = asyncHandler(async (req, res) => {
     try {
+        let Quatation = Quatations(req.conn);
+        let QuatationProduct = QuatationProducts(req.conn);
+
         await QuatationProduct.deleteMany({ QuatationId: req.params.id }).lean()
 
         await Quatation.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {

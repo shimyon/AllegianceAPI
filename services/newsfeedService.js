@@ -1,5 +1,5 @@
 const DashboardModal = require('../models/dashboardModel');
-const NewsFeed = DashboardModal.NewsFeed;
+const NewsFeeds = DashboardModal.NewsFeed;
 const moment = require('moment');
 const scrapeIt = require('scrape-it');
 const path = require('path');
@@ -21,8 +21,10 @@ const downloadImage = async (uri, filename) => {
     });
 }
 
-const updateNewsFeed = async () => {
+const updateNewsFeed = async (req) => {
     try {
+        
+        let NewsFeed = NewsFeeds(req.conn);
         // Promise interface
         scrapeIt("https://www.allegianceindia.in/latest-updates/1", {
             artical: "article:eq(0) .update-list",

@@ -1,9 +1,13 @@
 const asyncHandler = require('express-async-handler')
 const ContractModel = require('../models/contractModel')
-const Contract = ContractModel.ContractModal;
-const Process = ContractModel.ContractProcess;
+const Contracts = ContractModel.ContractModal;
+const Processs = ContractModel.ContractProcess;
 const SubProcess = ContractModel.ContractSubProcess;
-const DailyStatus = ContractModel.ProcessDailyStatus;
+const DailyStatuss = ContractModel.ProcessDailyStatus;
+const Users = require('../models/userModel')
+const CustomerModal = require('../models/customerModel')
+const Customers = CustomerModal.CustomerModal
+
 const uploadFile = require("../middleware/uploadFileMiddleware");
 
 const addContract = asyncHandler(async (req, res) => {
@@ -30,6 +34,7 @@ const addContract = asyncHandler(async (req, res) => {
 
 const insertContract = asyncHandler(async (req, res, fileName) => {
     try {
+        let Contract = Contracts(req.conn);
         let contractNo = await Contract.find({}, { ContractNo: 1, _id: 0 }).sort({ ContractNo: -1 }).limit(1);
         let maxcontractNo = 1;
         if (contractNo.length > 0) {
@@ -86,6 +91,7 @@ const editContract = asyncHandler(async (req, res) => {
 
 const insertEditContract = asyncHandler(async (req, res, fileName) => {
     try {
+        let Contract = Contracts(req.conn);
         var existing = await Contract.findById(req.body.id);
         if (!existing) {
             return res.status(400).json({
@@ -127,6 +133,11 @@ const insertEditContract = asyncHandler(async (req, res, fileName) => {
 
 const getAllContract = asyncHandler(async (req, res) => {
     try {
+        let Contract = Contracts(req.conn);
+        let User = Users(req.conn)
+        let Customer = Customers(req.conn);
+        let Process = Processs(req.conn);
+
         let ContractList = await Contract.find({ is_active: req.body.active }).populate("Process").populate("executive").populate("Customer").populate("addedBy", "_id name email role")
         return res.status(200).json({
             success: true,
@@ -144,6 +155,11 @@ const getAllContract = asyncHandler(async (req, res) => {
 
 const getContractById = asyncHandler(async (req, res) => {
     try {
+        let Contract = Contracts(req.conn);      
+        let User = Users(req.conn)
+        let Customer = Customers(req.conn);
+        let Process = Processs(req.conn);
+
         let ContractList = await Contract.find({ _id: req.params.id }).populate("Process").populate("executive").populate("Customer").populate("addedBy", "_id name email role");
         return res.status(200).json({
             success: true,
@@ -161,6 +177,9 @@ const getContractById = asyncHandler(async (req, res) => {
 
 const addProcess = asyncHandler(async (req, res) => {
     try {
+        let Contract = Contracts(req.conn);
+        let Process = Processs(req.conn);
+
         var oldContract = await Contract.findById(req.body.contractId);
         if (!oldContract) {
             return res.status(400).json({
@@ -196,6 +215,8 @@ const addProcess = asyncHandler(async (req, res) => {
 
 const editProcess = asyncHandler(async (req, res) => {
     try {
+        let Process = Processs(req.conn);
+
         var oldProcess = Process.findById(req.body.id);
         if (!oldProcess) {
             return res.status(400).json({
@@ -225,6 +246,13 @@ const editProcess = asyncHandler(async (req, res) => {
 
 const getAllProcess = asyncHandler(async (req, res) => {
     try {
+        let User = Users(req.conn)
+        let Customer = Customers(req.conn);
+        let Process = Processs(req.conn);
+        let SubProcesss = SubProcess(req.conn);
+        let DailyStatus = DailyStatuss(req.conn);
+
+
         let ProcessList = await Process.find({ contractId: req.body.contractId }).populate({
             path: 'subProcess',
             populate: [{ path: "dailyStatus" }, { path: "executive" }, { path: "addedBy" }]
@@ -245,6 +273,10 @@ const getAllProcess = asyncHandler(async (req, res) => {
 
 const getProcessById = asyncHandler(async (req, res) => {
     try {
+        let User = Users(req.conn);        
+        let Process = Processs(req.conn);
+        let SubProcesss = SubProcess(req.conn);
+
         let ProcessList = await Process.find({ _id: req.body.processId }).populate({
             path: 'subProcess',
             populate: [{ path: "dailyStatus" }, { path: "executive" }, { path: "addedBy" }]
@@ -265,6 +297,7 @@ const getProcessById = asyncHandler(async (req, res) => {
 
 const removeProcess = asyncHandler(async (req, res) => {
     try {
+        let Process = Processs(req.conn);
         const existProcess = await Process.findById(req.params.id);
         if (!existProcess) {
             return res.status(200).json({
@@ -301,6 +334,7 @@ const removeProcess = asyncHandler(async (req, res) => {
 
 const removeContract = asyncHandler(async (req, res) => {
     try {
+        let Contract = Contracts(req.conn);
         const existContract = await Contract.findById(req.body.id);
         if (!existContract) {
             return res.status(200).json({
@@ -331,7 +365,13 @@ const removeContract = asyncHandler(async (req, res) => {
 
 const addDailyStatus = asyncHandler(async (req, res) => {
     try {
-        let oldSubProcess = await SubProcess.findById(req.body.subProcessId);
+          
+        let Process = Processs(req.conn);
+        let SubProcesss = SubProcess(req.conn);
+        let Contract = Contracts(req.conn);
+        let DailyStatus = DailyStatuss(req.conn);
+
+        let oldSubProcess = await SubProcesss.findById(req.body.subProcessId);
         let oldProcess = await Process.findById(oldSubProcess.processId);
 
         if (!oldSubProcess) {
@@ -353,7 +393,7 @@ const addDailyStatus = asyncHandler(async (req, res) => {
             if (err) throw err;
         });
 
-        let exProcess = await SubProcess.find({ processId: oldSubProcess.processId });
+        let exProcess = await SubProcesss.find({ processId: oldSubProcess.processId });
         let tProgress = 0;
         let cProgress = 0;
         let percent1 = 0;
@@ -399,7 +439,10 @@ const addDailyStatus = asyncHandler(async (req, res) => {
 });
 
 const addSubProcess = asyncHandler(async (req, res) => {
-    try {
+    try {      
+        let Process = Processs(req.conn);
+        let SubProcesss = SubProcess(req.conn);       
+
         var oldProcess = await Process.findById(req.body.processId);
         if (!oldProcess._id) {
             return res.status(400).json({
@@ -407,7 +450,7 @@ const addSubProcess = asyncHandler(async (req, res) => {
                 msg: "Process not found. "
             });
         }
-        var newSubProcess = await SubProcess.create({
+        var newSubProcess = await SubProcesss.create({
             processId: req.body.processId,
             Name: req.body.name,
             executive: req.body.executive,
@@ -435,14 +478,16 @@ const addSubProcess = asyncHandler(async (req, res) => {
 
 const editSubProcess = asyncHandler(async (req, res) => {
     try {
-        var oldProcess = SubProcess.findById(req.body.id);
+        let SubProcesss = SubProcess(req.conn);
+
+        var oldProcess = SubProcesss.findById(req.body.id);
         if (!oldProcess) {
             return res.status(400).json({
                 success: false,
                 msg: "Sub Process not exist"
             });
         }
-        await SubProcess.findByIdAndUpdate(req.body.id, {
+        await SubProcesss.findByIdAndUpdate(req.body.id, {
             executive: req.body.executive,
             Name: req.body.name,
             note: req.body.note,
@@ -464,7 +509,11 @@ const editSubProcess = asyncHandler(async (req, res) => {
 
 const getSubAllProcess = asyncHandler(async (req, res) => {
     try {
-        let ProcessList = await SubProcess.find({ processId: req.body.processId }).populate("dailyStatus").populate("executive").populate("addedBy", "_id name email role")
+        let User = Users(req.conn);   
+        let SubProcesss = SubProcess(req.conn);
+        let DailyStatus = DailyStatuss(req.conn);
+
+        let ProcessList = await SubProcesss.find({ processId: req.body.processId }).populate("dailyStatus").populate("executive").populate("addedBy", "_id name email role")
         return res.status(200).json({
             success: true,
             data: ProcessList
@@ -481,7 +530,11 @@ const getSubAllProcess = asyncHandler(async (req, res) => {
 
 const getSubProcessById = asyncHandler(async (req, res) => {
     try {
-        let ProcessList = await SubProcess.find({ _id: req.body.subProcessId }).populate("dailyStatus").populate("addedBy", "_id name email role");
+        let User = Users(req.conn); 
+        let SubProcesss = SubProcess(req.conn);       
+        let DailyStatus = DailyStatuss(req.conn);
+
+        let ProcessList = await SubProcesss.find({ _id: req.body.subProcessId }).populate("dailyStatus").populate("addedBy", "_id name email role");
         return res.status(200).json({
             success: true,
             data: ProcessList
@@ -497,8 +550,10 @@ const getSubProcessById = asyncHandler(async (req, res) => {
 });
 
 const removeSubProcess = asyncHandler(async (req, res) => {
-    try {
-        const existProcess = await SubProcess.findById(req.params.id);
+    try {        
+        let SubProcesss = SubProcess(req.conn);       
+
+        const existProcess = await SubProcesss.findById(req.params.id);
         if (!existProcess) {
             return res.status(200).json({
                 success: false,
@@ -507,7 +562,7 @@ const removeSubProcess = asyncHandler(async (req, res) => {
             });
         }
 
-        await SubProcess.remove({ _id: req.params.id }, function (err) {
+        await SubProcesss.remove({ _id: req.params.id }, function (err) {
             if (!err) {
 
                 return res.status(200).json({
@@ -534,6 +589,9 @@ const removeSubProcess = asyncHandler(async (req, res) => {
 
 const getAllDailyStatus = asyncHandler(async (req, res) => {
     try {
+        let User = Users(req.conn);     
+        let DailyStatus = DailyStatuss(req.conn);
+
         let StatusList = await DailyStatus.find({ subProcessId: req.params.id }).populate("addedBy", "_id name email role").sort({ createdAt: -1 })
         return res.status(200).json({
             success: true,

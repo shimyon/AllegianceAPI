@@ -1,10 +1,13 @@
-const asyncHandler = require('express-async-handler')
-const RecoveryModel = require('../models/recoveryModel')
-const Recovery = RecoveryModel.RecoveryModal;
+const asyncHandler = require('express-async-handler');
+const RecoveryModel = require('../models/recoveryModel');
+const Recoverys = RecoveryModel.RecoveryModal;
 const User = require('../models/userModel')
-const notificationModel = require('../models/notificationModel')
+const CustomerModal = require('../models/customerModel');
+const Customer = CustomerModal.CustomerModal;
+const notificationModel = require('../models/notificationModel');
 const addRecovery = asyncHandler(async (req, res) => {
     try {
+        let Recovery = Recoverys(req.conn);       
         let recoveryNo = await Recovery.find({}, { RecoveryNo: 1, _id: 0 }).sort({ RecoveryNo: -1 }).limit(1);
         let maxRecovery = 1;
         if (recoveryNo.length > 0) {
@@ -51,6 +54,7 @@ const addRecovery = asyncHandler(async (req, res) => {
 
 const editRecovery = asyncHandler(async (req, res) => {
     try {
+        let Recovery = Recoverys(req.conn);
         var existing = await Recovery.findById(req.body.id);
         if (!existing) {
             return res.status(400).json({
@@ -82,6 +86,7 @@ const editRecovery = asyncHandler(async (req, res) => {
 
 const complateRecovery = asyncHandler(async (req, res) => {
     try {
+        let Recovery = Recoverys(req.conn);
         var existing = await Recovery.findById(req.params.id);
         if (!existing) {
             return res.status(400).json({
@@ -107,6 +112,7 @@ const complateRecovery = asyncHandler(async (req, res) => {
 
 const getAllRecovery = asyncHandler(async (req, res) => {
     try {
+        let Recovery = Recoverys(req.conn);
         let { skip, per_page } = req.body;
         let query = [];
         query.push({
@@ -204,6 +210,9 @@ const getAllRecovery = asyncHandler(async (req, res) => {
 
 const getRecoveryById = asyncHandler(async (req, res) => {
     try {
+        let Recovery = Recoverys(req.conn);
+        let Customers = Customer(req.conn);
+        let Users = User(req.conn);
         let RecoveryList = await Recovery.find({ _id: req.params.id }).populate("Customer").populate("addedBy", "_id name email role");
         return res.status(200).json({
             success: true,
@@ -221,6 +230,7 @@ const getRecoveryById = asyncHandler(async (req, res) => {
 
 const removeRecovery = asyncHandler(async (req, res) => {
     try {
+        let Recovery = Recoverys(req.conn);
         const existRecovery = await Recovery.findById(req.body.id);
         if (!existRecovery) {
             return res.status(200).json({
@@ -251,6 +261,7 @@ const removeRecovery = asyncHandler(async (req, res) => {
 
 const deleteRecovery = asyncHandler(async (req, res) => {
     try {
+        let Recovery = Recoverys(req.conn);
         await Recovery.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {
             if (err) {
                 return res.status(401).json({

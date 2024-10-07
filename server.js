@@ -3,6 +3,7 @@ const colors = require('colors')
 const dotenv = require('dotenv').config()
 const bodyParser = require('body-parser')
 const { errorHandler } = require('./middleware/errorMiddleware')
+const close_conn = require("./middleware/close");
 // const connectDB = require ('./config/db')
 const port = process.env.port || 5000
 const mongoose = require('mongoose');
@@ -16,7 +17,10 @@ let databasestatus = "In-Progress";
 // connectDB()
 
 const app = express()
-
+app.use((req, res, next) => {
+    res.on("finish", () => close_conn(req));
+    return next();
+  });
 app.use(cors({ origin: '*' }));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -25,11 +29,11 @@ app.options("*", cors());
 
 const connectDB = async () => {
     try {
-        await mongoose.connect(process.env.MONGO_URI).then(() => {
+        await mongoose.connect(process.env.DB_URI_1).then((req) => {
             databasestatus = "DB connected";
 
             //Load Cron Jobs
-            loadCronJob();
+            loadCronJob(req);
         }).catch((err) => {
             databasestatus = err;
         });
