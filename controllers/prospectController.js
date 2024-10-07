@@ -197,6 +197,9 @@ const getAllProspect = asyncHandler(async (req, res) => {
         if (req.body.source) {
             condition.Source = req.body.source;
         }
+        if (req.body.filtername) {
+            condition.Company = { $regex: req.body.filtername, $options: "i" };
+        }
         //unread prospect
         if (req.body.unread == true) {
             condition.is_readed = false;
