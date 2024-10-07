@@ -117,6 +117,9 @@ const prospectSchema = mongoose.Schema(
             type: Boolean,
             default: false
         },
+        LastOpen: {
+            type: Date
+        },
         addedBy: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User'

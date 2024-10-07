@@ -1,4 +1,4 @@
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
 //mongoose.set('strictQuery', false)
 
 const taskSchema = mongoose.Schema(
@@ -52,7 +52,7 @@ const taskSchema = mongoose.Schema(
   },
   ProspectId:{
      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Prospects'
+      ref: 'Prospect'
   }
   },
   {

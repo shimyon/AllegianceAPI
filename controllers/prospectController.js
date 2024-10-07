@@ -197,6 +197,9 @@ const getAllProspect = asyncHandler(async (req, res) => {
         if (req.body.source) {
             condition.Source = req.body.source;
         }
+        if (req.body.filtername) {
+            condition.Company = { $regex: req.body.filtername, $options: "i" };
+        }
         //unread prospect
         if (req.body.unread == true) {
             condition.is_readed = false;
@@ -219,7 +222,7 @@ const getAllProspect = asyncHandler(async (req, res) => {
                     path: "user",
                     select: "_id name email role"
                 }
-            }).populate("Product").populate("OtherContact").populate("Country").populate("State").populate("City").populate("Sales").populate("Stage").populate("Source").populate("addedBy", "_id name email role").sort({ createdAt: -1 })
+            }).populate("Product").populate("OtherContact").populate("Country").populate("State").populate("City").populate("Sales").populate("Stage").populate("Source").populate("addedBy", "_id name email role").sort({ LastOpen: -1, createdAt: -1 })
             .exec((err, result) => {
                 if (err) {
                     return res.status(400).json({
@@ -287,6 +290,24 @@ const getAllProspect = asyncHandler(async (req, res) => {
         });
     }
 
+});
+const lastStatus = asyncHandler(async (req, res) => {
+    try {
+        let Prospect = Prospects(req.conn);
+
+        await Prospect.findByIdAndUpdate(req.params.id, {
+            LastOpen: new Date()
+        });
+        return res.status(200).json({
+            success: true,
+            msg: "Last Open updated",
+        }).end();
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in process. " + err.message
+        });
+    }
 });
 const getProspectById = asyncHandler(async (req, res) => {
     try {
@@ -727,6 +748,7 @@ module.exports = {
     addProspect,
     editProspect,
     getAllProspect,
+    lastStatus,
     getProspectById,
     addNext,
     editNext,
