@@ -3,21 +3,23 @@ const DashboardModal = require('../models/dashboardModel')
 const Dashboards = DashboardModal.Dashboard
 const NewsFeeds = DashboardModal.NewsFeed
 const LeadModal = require('../models/leadModel')
-const Lead = LeadModal.LeadsModal;
+const Leads = LeadModal.LeadsModal;
 const ProspectModal = require('../models/prospectModel')
-const Prospect = ProspectModal.ProspectsModal;
+const Prospects = ProspectModal.ProspectsModal;
 const OrderModal = require('../models/orderModel')
-const Order = OrderModal.OrderModal
+const Orders = OrderModal.OrderModal
 const InvoiceModal = require('../models/invoiceModel')
-const Invoice = InvoiceModal.InvoiceModal
+const Invoices = InvoiceModal.InvoiceModal
 const QuatationModal = require('../models/quatationModel')
-const Quatation = QuatationModal.QuatationModal
+const Quatations = QuatationModal.QuatationModal
 const ContractModel = require('../models/contractModel')
 const Contract = ContractModel.ContractModal;
 const SupportModel = require('../models/supportModel')
 const Support = SupportModel.SupportModal;
 const uploadFile = require("../middleware/uploadFileMiddleware");
 const moment = require('moment');
+const Users = require('../models/userModel');
+
 
 
 const addNewsFeed = asyncHandler(async (req, res) => {
@@ -118,6 +120,7 @@ const editSave = asyncHandler(async (req, res, fileName) => {
 const getAllNews = asyncHandler(async (req, res) => {
     try {
         let NewsFeed = NewsFeeds(req.conn);
+        let User = Users(req.conn);
         let newsList = await NewsFeed.find({ is_active: req.body.active }).sort({ createdAt: -1 })
             .populate("addedBy", 'name email')
         return res.status(200).json({
@@ -135,6 +138,8 @@ const getAllNews = asyncHandler(async (req, res) => {
 const getNewsById = asyncHandler(async (req, res) => {
     try {
         let NewsFeed = NewsFeeds(req.conn);
+        let User = Users(req.conn);
+
         let newsList = await NewsFeed.find({ _id: req.params.id }).populate("addedBy", 'name email')
         return res.status(200).json({
             success: true,
@@ -207,6 +212,13 @@ const deleteNewsFeed = asyncHandler(async (req, res) => {
 const getDashboardCount = asyncHandler(async (req, res) => {
     try {
         let Dashboard = Dashboards(req.conn);
+        let User = Users(req.conn);
+        let Lead = Leads(req.conn);
+        let Prospect = Prospects(req.conn);
+        let Order = Orders(req.conn);
+        let Invoice = Invoices(req.conn);
+        let Quatation = Quatations(req.conn);
+
         const user = await Dashboard.findOne({ UserId: req.user._id }).populate("UserId");
         const now = new Date();
         const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
