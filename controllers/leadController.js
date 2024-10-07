@@ -1,29 +1,32 @@
 const asyncHandler = require('express-async-handler')
 const { ObjectId } = require('mongodb');
 const LeadModal = require('../models/leadModel')
-const User = require('../models/userModel')
-const notificationModel = require('../models/notificationModel')
-const Lead = LeadModal.LeadsModal;
-const NextOn = LeadModal.NextOnModal;
-const LeadOtherContact = LeadModal.LeadOtherContact;
-const Master = require('../models/masterModel')
-const Product = Master.ProductModal;
-const Source = Master.SourceModal;
-const Status = Master.StatusModal;
-const Country = Master.CountryModal;
-const State = Master.StateModal;
-const City = Master.CityModal;
+const Users = require('../models/userModel')
+const notificationModels = require('../models/notificationModel')
+const Leads = LeadModal.LeadsModal;
+const NextOns = LeadModal.NextOnModal;
+const LeadOtherContacts = LeadModal.LeadOtherContact;
+const SassMaster = require('../models/saasmasterModel');
+const Sources = SassMaster.SourceModal;
+const Countrys = SassMaster.CountryModal;
+const States = SassMaster.StateModal;
+const Citys = SassMaster.CityModal;
+const Icons = SassMaster.IconModal;
+const Products = SassMaster.ProductModal;
+const Statuss = SassMaster.StatusModal;
 const ProspectModal = require('../models/prospectModel')
-const Prospect = ProspectModal.ProspectsModal;
-const ProNextOn = ProspectModal.ProNextOnModal;
+const Prospects = ProspectModal.ProspectsModal;
+const ProNextOns = ProspectModal.ProNextOnModal;
 const TaskModal = require('../models/taskModel');
-const Task = TaskModal.TaskModal;
+const Tasks = TaskModal.TaskModal;
 const uploadFile = require("../middleware/uploadFileMiddleware");
 const readXlsxFile = require('read-excel-file/node')
 const path = require("path");
 
 const addLead = asyncHandler(async (req, res) => {
     try {
+        let Lead = Leads(req.conn);
+        let notificationModel = notificationModels(req.conn);
         const newLead = await Lead.create({
             Company: req.body.company,
             Title: req.body.title,
@@ -88,9 +91,9 @@ const addLead = asyncHandler(async (req, res) => {
     }
 
 });
-
 const editLead = asyncHandler(async (req, res) => {
-    try {
+    try {        
+        let Lead = Leads(req.conn);
         const existLead = await Lead.findById(req.body.id);
         if (!existLead) {
             return res.status(200).json({
@@ -138,9 +141,9 @@ const editLead = asyncHandler(async (req, res) => {
     }
 
 });
-
 const removeLead = asyncHandler(async (req, res) => {
     try {
+        let Lead = Leads(req.conn);
         const existLead = await Lead.findById(req.body.id);
         if (!existLead) {
             return res.status(200).json({
@@ -172,6 +175,7 @@ const removeLead = asyncHandler(async (req, res) => {
 
 const getAllLead = asyncHandler(async (req, res) => {
     try {
+        let Lead = Leads(req.conn);
         let { skip, per_page } = req.body;
         let query = [];
         query.push({
@@ -384,6 +388,19 @@ const getAllLead = asyncHandler(async (req, res) => {
 
 const getLeadById = asyncHandler(async (req, res) => {
     try {
+        let Lead = Leads(req.conn);
+        let Task = Tasks(req.conn);
+        let Source = Sources(req.conn);
+        let Country = Countrys(req.conn);
+        let State = States(req.conn);
+        let City = Citys(req.conn);
+        let Icon = Icons(req.conn);
+        let Product = Products(req.conn);
+        let User = Users(req.conn);
+        let OtherContact = LeadOtherContacts(req.conn);    
+        let NextTalk = NextOns(req.conn);      
+        let Status = Statuss(req.conn);
+
         let leadList = await Lead.find({ Stage: "New", _id: req.params.id }).populate("Source").populate("Country").populate("State").populate("City").populate("Icon").populate("OtherContact").populate("Product").populate("Sales").populate("NextTalk").populate("addedBy");
         let tasklist = await Task.find({ is_active: true, LeadId: req.params.id }).populate("Status").populate("Assign");
         return res.status(200).json({
@@ -402,6 +419,9 @@ const getLeadById = asyncHandler(async (req, res) => {
 
 const addNext = asyncHandler(async (req, res) => {
     try {
+        let NextOn = NextOns(req.conn); 
+        let Lead = Leads(req.conn);            
+
         let nextOn = await NextOn.create({
             leadId: req.body.leadid,
             date: req.body.date,
@@ -433,6 +453,8 @@ const addNext = asyncHandler(async (req, res) => {
 });
 const editNext = asyncHandler(async (req, res) => {
     try {
+        let NextOn = NextOns(req.conn); 
+
         let nextOn = await NextOn.findByIdAndUpdate(req.body.id, {
             date: req.body.date,
             note: req.body.note,
@@ -460,6 +482,8 @@ const editNext = asyncHandler(async (req, res) => {
 });
 const getNext = asyncHandler(async (req, res) => {
     try {
+        let NextOn = NextOns(req.conn); 
+        let User = Users(req.conn);
         const next = await NextOn.find({ leadId: req.params.id }).sort({ date: -1 }).populate("user");
 
         res.status(200).json({
@@ -478,6 +502,9 @@ const getNext = asyncHandler(async (req, res) => {
 
 const addOtherContact = asyncHandler(async (req, res) => {
     try {
+        let Lead = Leads(req.conn);
+        let LeadOtherContact = LeadOtherContacts(req.conn);    
+
         let leadExist = await Lead.findById(req.body.id);
         let nextOn = await LeadOtherContact.create({
             LeadId: req.body.id,
@@ -504,7 +531,9 @@ const addOtherContact = asyncHandler(async (req, res) => {
 });
 
 const getOtherContact = asyncHandler(async (req, res) => {
-    try {
+    try {       
+        let LeadOtherContact = LeadOtherContacts(req.conn);  
+
         let otherContact = await LeadOtherContact.find({ LeadId: req.params.id });
         return res.status(200).json({
             success: true,
@@ -521,6 +550,13 @@ const getOtherContact = asyncHandler(async (req, res) => {
 
 const moveToProspect = asyncHandler(async (req, res) => {
     try {
+        let Lead = Leads(req.conn);
+        let Status = Statuss(req.conn);
+        let NextOn = NextOns(req.conn);  
+        let Prospect = Prospects(req.conn);       
+        let ProNextOn = ProNextOns(req.conn);
+        let notificationModel = notificationModels(req.conn);        
+
         let leadExisting = await Lead.findById(req.params.id);
         if (leadExisting.Stage == "Prospect") {
             return res.status(400).json({
@@ -629,6 +665,13 @@ const importExcel = asyncHandler(async (req, res) => {
 
 const importFiletoDB = asyncHandler(async (req, res, fileName) => {
     try {
+        let Lead = Leads(req.conn);        
+        let Source = Sources(req.conn);
+        let Product = Products(req.conn);
+        let Country = Countrys(req.conn);
+        let State = States(req.conn);
+        let City = Citys(req.conn);
+
         var exFile = path.join(process.env.UPLOAD_FOLDER, "uploads", fileName.replace(",", ""));
         var importData = [];
 
@@ -728,6 +771,8 @@ const importFiletoDB = asyncHandler(async (req, res, fileName) => {
 
 const setAsFavorite = asyncHandler(async (req, res) => {
     try {
+        let Lead = Leads(req.conn);
+
         let leadExisting = await Lead.findByIdAndUpdate(req.body.id, {
             is_favorite: req.body.favorite
         });

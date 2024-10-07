@@ -9,12 +9,11 @@ const uploadFile = require("../middleware/uploadFileMiddleware");
 const path = require("path");
 const readXlsxFile = require('read-excel-file/node')
 const TaskModal = require('../models/taskModel');
-const Task = TaskModal.TaskModal;
+const Tasks = TaskModal.TaskModal;
 const CustomerModal = require('../models/customerModel');
 const Customers = CustomerModal.CustomerModal;
 const BillingAddresss = CustomerModal.BillingAddressModal;
 const ShippingAddresss = CustomerModal.ShippingAddressModal;
-
 const SassMaster = require('../models/saasmasterModel');
 const Products = SassMaster.ProductModal;
 const Sources = SassMaster.SourceModal;
@@ -188,6 +187,7 @@ const getAllProspect = asyncHandler(async (req, res) => {
         let Status = Statuss(req.conn);
         let User = Users(req.conn);
         let Role = Roles(req.conn);
+        let NextOnss = NextOns(req.conn);
 
         var condition = { is_active: req.body.active };
         var cDate = new Date();
@@ -300,7 +300,7 @@ const getProspectById = asyncHandler(async (req, res) => {
         let Status = Statuss(req.conn);
         let User = Users(req.conn);
         let NextOn = NextOns(req.conn);
-
+        let Task = Tasks(req.conn);
         let prospectList = await Prospect.find({ _id: req.params.id }).populate(
             {
                 path: "NextTalk",

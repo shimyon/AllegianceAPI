@@ -156,16 +156,8 @@ const leadOtherContact = mongoose.Schema(
     {
         timestamps: true,
     });
-
-const LeadsModal = mongoose.model('Leads', leadSchema);
-const NextOnModal = mongoose.model('NextOn', nextOnSchema);
-const LeadOtherContact = mongoose.model('LeadOtherContact', leadOtherContact);
-
-const syncIndex = async () => {
-    await LeadsModal.syncIndexes();
-    await NextOnModal.syncIndexes();
-    await LeadOtherContact.syncIndexes();
+module.exports = {
+    LeadsModal: (conn) => conn.model('Leads', leadSchema),
+    NextOnModal: (conn) => conn.model('NextOn', nextOnSchema),
+    LeadOtherContact: (conn) => conn.model('LeadOtherContact', leadOtherContact),
 }
-syncIndex();
-
-module.exports = { LeadsModal, NextOnModal, LeadOtherContact };
