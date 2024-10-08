@@ -2,26 +2,26 @@ const moment = require('moment');
 const DashboardModal = require('../models/dashboardModel')
 const Dashboards = DashboardModal.Dashboard
 const LeadModal = require('../models/leadModel')
-const Lead = LeadModal.LeadsModal;
-const Master = require('../models/masterModel')
-const Product = Master.ProductModal;
+const Leads = LeadModal.LeadsModal;
+const SassMaster = require('../models/saasmasterModel');
+const Products = SassMaster.ProductModal;
 const CustomerModal = require('../models/customerModel')
-const Customer = CustomerModal.CustomerModal
+const Customers = CustomerModal.CustomerModal
 const ProspectModal = require('../models/prospectModel')
-const Prospect = ProspectModal.ProspectsModal;
+const Prospects = ProspectModal.ProspectsModal;
 const ContractModel = require('../models/contractModel')
-const Contract = ContractModel.ContractModal;
+const Contracts = ContractModel.ContractModal;
 const SupportModel = require('../models/supportModel')
-const Support = SupportModel.SupportModal;
+const Supports = SupportModel.SupportModal;
 const RecoveryModel = require('../models/recoveryModel')
-const Recovery = RecoveryModel.RecoveryModal;
+const Recoverys = RecoveryModel.RecoveryModal;
 const OrderModel = require('../models/orderModel')
-const Order = OrderModel.OrderModal;
-
-
+const Orders = OrderModel.OrderModal;
+const Users = require('../models/userModel')
 
 const getcount = async (req) => {
     let Dashboard = Dashboards(req.conn);
+    let User = Users(req.conn);
     const newDashboardcount = await Dashboard.find().populate("UserId").lean();
 
     return newDashboardcount;
@@ -29,6 +29,15 @@ const getcount = async (req) => {
 
 const setDashboardCount = async (req) => {
     let Dashboard = Dashboards(req.conn);
+    let Lead = Leads(req.conn);
+    let Prospect = Prospects(req.conn);
+    let Contract = Contracts(req.conn);
+    let Support = Supports(req.conn);
+    let Recovery = Recoverys(req.conn);
+    let Order = Orders(req.conn);
+    let Product = Products(req.conn);
+    let Customer = Customers(req.conn);
+
     let newDashboardcount = await getcount(req);
     var dashboardCount = {
         leadCount: 0,

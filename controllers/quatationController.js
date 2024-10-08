@@ -17,6 +17,12 @@ const ApplicationSettings = SassMaster.ApplicationSettingModal;
 const Statuss = SassMaster.StatusModal;
 const Products = SassMaster.ProductModal;
 const Units = SassMaster.UnitModal;
+const Countrys = SassMaster.CountryModal;
+const States = SassMaster.StateModal;
+const Citys = SassMaster.CityModal;
+const Icons = SassMaster.IconModal;
+const LeadModal = require('../models/leadModel');
+const Leads = LeadModal.LeadsModal;
 const CustomerModal = require('../models/customerModel');
 const Customer = CustomerModal.CustomerModal;
 const BillingAddress = CustomerModal.BillingAddressModal;
@@ -729,6 +735,65 @@ const deleteQuatation = asyncHandler(async (req, res) => {
 
 });
 
+const duplicateLead = asyncHandler(async (req, res) => {
+    let Quatation = Quatations(req.conn);
+    let Customers = Customer(req.conn);
+    let Country = Countrys(req.conn);
+    let State = States(req.conn);
+    let City = Citys(req.conn);
+    let Icon = Icons(req.conn);
+    let Lead = Leads(req.conn);
+
+    const { quotationId } = req.body;
+
+    const quotation = await Quatation.findById(quotationId)
+    .populate({
+        path: 'Customer',
+        populate: [
+            { path: 'Country' },
+            { path: 'State' },
+            { path: 'City' }
+        ]
+    });    
+      
+    if (!quotation || !quotation.Customer) {
+        return res.status(404).json({ message: 'Quotation or Customer not found' });
+    } 
+
+    const icon = await Icon.findOne({ Name: 'Quotation' });
+    const iconId = icon ? icon._id : null;
+
+    const leadData = {
+        Company: quotation.Customer.Company,
+        GSTNo: quotation.Customer.GSTNo,
+        Title: quotation.Customer.Title,
+        FirstName: quotation.Customer.FirstName,
+        LastName: quotation.Customer.LastName,
+        Designation: quotation.Customer.Designation,
+        Mobile: quotation.Customer.Mobile,
+        Email: quotation.Customer.Email,
+        Address: quotation.Customer.Address,
+        Icon: iconId,
+        Stage: "New",
+        is_active: quotation.Customer.is_active,
+        Notes: quotation.Customer.Notes,
+        LeadSince: new Date(),
+        StageDate: new Date(),
+        City: quotation.Customer.City?._id || null, 
+        State: quotation.Customer.State?._id || null, 
+        Country: quotation.Customer.Country?._id || null, 
+        addedBy: req.user._id
+    };
+
+    const newLead = await Lead.create(leadData);
+    return res.status(200).json({
+        success: true,
+        msg: "Lead Added",
+        data: newLead
+    });
+});
+
+
 module.exports = {
     addQuatation,
     editQuatation,
@@ -737,5 +802,6 @@ module.exports = {
     getQuatationById,
     moveToOrder,
     Quatationpdfcreate,
-    deleteQuatation
+    deleteQuatation,
+    duplicateLead
 }

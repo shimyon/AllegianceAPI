@@ -9,7 +9,8 @@ const {
     getQuatationById,
     moveToOrder,
     Quatationpdfcreate,
-    deleteQuatation
+    deleteQuatation,
+    duplicateLead
 } = require('../controllers/quatationController')
 const { protect } = require('../middleware/authMiddleware')
 
@@ -20,6 +21,7 @@ router.post('/getAll', protect, getAllQuatation)
 router.post('/moveToOrder/:id', protect, moveToOrder)
 router.get('/getById/:id', protect, getQuatationById)
 router.get('/deleteQuatation/:id', protect, deleteQuatation)
+router.post('/duplicateLead', protect,  duplicateLead)
 router.post('/Quatationpdfcreate',protect, Quatationpdfcreate)
 
 
