@@ -676,7 +676,7 @@ const convertToCustomer = asyncHandler(async (req, res) => {
 const markAsRead = asyncHandler(async (req, res) => {
     try {
         await Prospect.findByIdAndUpdate(req.params.id, {
-            is_readed: true
+            is_readed: req.body.is_readed
         })
         return res.status(200).json({
             success: true,
