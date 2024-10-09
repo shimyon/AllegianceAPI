@@ -32,6 +32,7 @@ const Type = SaasModal.TypeModal;
 const saasModuleRights = SaasModal.ModuleRightModal;
 const ApplicationSetting = SaasModal.ApplicationSettingModal;
 const ModuleRight = require('../models/moduleRightModel')
+const uploadFile = require("../middleware/uploadFileMiddleware");
 
 const registerUser = asyncHandler(async (req, res) => {
     const { name, email, password, role } = req.body
@@ -304,6 +305,27 @@ const forgotPassword = asyncHandler(async (req, res) => {
     }
 })
 const addOrganizationUser = asyncHandler(async (req, res) => {
+    try {
+        process.env.UPLOADFILE = "";
+        await uploadFile(req, res, function (err) {
+            if (err) {
+                return ("Error uploading file.");
+            } else {
+                editSave(req, res, process.env.UPLOADFILE)
+            }
+        })
+
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in editing data. " + err.message,
+            data: null,
+        });
+
+    }
+})
+
+const editSave = asyncHandler(async (req, res, fileName) => {
     let Users = User(req.conn);
     let Sources = Source(req.conn);
     let States = State(req.conn);
@@ -327,6 +349,7 @@ const addOrganizationUser = asyncHandler(async (req, res) => {
                 message: "Same Organization already exist.",
             });
         }
+        fileName = fileName.replace(",", "");
         const organization = await Organization.create({
             Name: req.body.Name,
             Description: req.body.Description,
@@ -335,11 +358,13 @@ const addOrganizationUser = asyncHandler(async (req, res) => {
             UserEmail: req.body.UserEmail,
             Code: req.body.Code,
             PhoneNo: req.body.PhoneNo,
+            CompanyLogo: fileName,
         });
 
         const applicationSetting = await ApplicationSettings
             .create({
-                CompanyTitle: req.body.Name
+                CompanyTitle: req.body.Name,
+                CompanyLogo: fileName,
             });
 
         let oldSource = await MasterSource.find({});
@@ -413,7 +438,7 @@ const addOrganizationUser = asyncHandler(async (req, res) => {
         let oldStatus = await MasterStatus.find({});
         let insertdataStatus = oldStatus.map(f => ({
             Name: f.Name,
-            GroupName:f.GroupName,
+            GroupName: f.GroupName,
             Role: null,
             Assign: null,
             Assign: null,
@@ -491,6 +516,7 @@ const checkOrganization = asyncHandler(async (req, res) => {
                 success: true,
                 _id: OrganizationExists.id,
                 DB_NAME: OrganizationExists.Name,
+                CompanyLogo: OrganizationExists.CompanyLogo,
             }).end();
         }
         else {
