@@ -365,6 +365,8 @@ const editSave = asyncHandler(async (req, res, fileName) => {
             .create({
                 CompanyTitle: req.body.Name,
                 CompanyLogo: fileName,
+                OfficeEmail: req.body.Email,
+                OfficePhone1: req.body.PhoneNo
             });
 
         let oldSource = await MasterSource.find({});
@@ -496,6 +498,36 @@ const editSave = asyncHandler(async (req, res, fileName) => {
             Order: 0,
             UserId: newUser._id
         });
+
+        if (organization) {
+            let html =
+                `<html>
+            Dear ${newUser.name},<br/><br/>
+            We are excited to inform you that your organization <b>${organization.Name}</b> has been successfully created!<br/><br/>
+            You can now manage your organization and take advantage of all our features. <br/> Below are your account details:<br/><br/>
+            <b>User Name:</b> ${newUser.name}<br/>
+            <b>User Email:</b> ${organization.Email}<br/><br/>
+            If you have any questions or need assistance, feel free to contact our support team.<br/><br/>
+            Best regards,<br/>
+            <b>Team Emoiss</b>
+        </html>`;
+            sendMail(organization.Email, "Organization Created Successfully", html, req);
+        }
+        if (newUser) {
+            let html =
+                `<html>
+            Dear ${newUser.name},<br/><br/>
+            We are excited to inform you that your organization <b>${organization.Name}</b> has been successfully created!<br/><br/>
+            You can now manage your organization and take advantage of all our features.<br/> Below are your account details:<br/><br/>
+            <b>User Name:</b> ${newUser.name}<br/>
+            <b>User Email:</b> ${newUser.email}<br/><br/>
+            If you have any questions or need assistance, feel free to contact our support team.<br/><br/>
+            Best regards,<br/>
+            <b>Team Emoiss</b>
+        </html>`;
+            sendMail(newUser.email, "Organization Created Successfully", html, req);
+        }
+
         return res.status(200).json({
             success: true,
             message: "User added successfully",
