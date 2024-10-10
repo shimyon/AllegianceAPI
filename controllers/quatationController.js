@@ -495,6 +495,7 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
         let applicationSetting = await ApplicationSetting.findOne();
         let customerList = await Quatation.find({ is_deleted: false, _id: req.body.id })
             .populate("Customer")
+            .populate("QuatationName")
             .populate({
                 path: 'Products',
                 populate: [
@@ -525,7 +526,7 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
         templateHtml = templateHtml.replace('{{token.accno}}', applicationSetting.AccNo || '')
         templateHtml = templateHtml.replace('{{token.OfficePhone2}}', applicationSetting.OfficePhone2 || '')
         templateHtml = templateHtml.replace('{{token.OfficeAddress}}', applicationSetting.OfficeAddress?.replace(/(\r\n|\n|\r)/gm, "<br>") || '')
-        templateHtml = templateHtml.replace('{{token.QuatationName}}', customerList[0].QuatationName || '')
+        templateHtml = templateHtml.replace('{{token.QuatationName}}', customerList[0].QuatationName?.Name || '')
         templateHtml = templateHtml.replace('{{token.QuatationNo}}', customerList[0].QuatationCode || '')
         templateHtml = templateHtml.replace('{{token.CustomerNo}}', customerList[0].Customer?.CustomerCode || '')
         templateHtml = templateHtml.replace('{{token.date}}', format('dd-MM-yyyy', customerList[0].QuatationDate))

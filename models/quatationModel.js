@@ -10,7 +10,8 @@ const quatationSchema = mongoose.Schema(
             type: String,
         },
         QuatationName: {
-            type: String
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'QuatationName'
         },
         Descriptionofwork: {
             type: String

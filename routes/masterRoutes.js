@@ -20,6 +20,12 @@ const {
     getUnits,
     getUnitById,
     deleteUnit,
+    addQuatationName,
+    editQuatationName,
+    changeQuatationNameStatus,
+    getQuatationNames,
+    getQuatationNameById,
+    deleteQuatationName,
     addCategory,
     editCategory,
     changeCategoryStatus,
@@ -143,6 +149,13 @@ router.post('/changeUnitStatus', protect, changeUnitStatus)
 router.post('/getUnit', protect, getUnits)
 router.get('/unit/:id', protect, getUnitById)
 router.get('/deleteUnit/:id', protect, deleteUnit)
+
+router.post('/addQuatationName', protect, addQuatationName)
+router.post('/editQuatationName', protect, editQuatationName)
+router.post('/changeQuatationNameStatus', protect, changeQuatationNameStatus)
+router.post('/getQuatationName', protect, getQuatationNames)
+router.get('/QuatationName/:id', protect, getQuatationNameById)
+router.get('/deleteQuatationName/:id', protect, deleteQuatationName)
 
 router.post('/addCategory', protect, addCategory)
 router.post('/editCategory', protect, editCategory)

@@ -105,7 +105,7 @@ const sourceSchema = mongoose.Schema(
     {
         timestamps: true,
     });
-const unitSchema = mongoose.Schema(
+const quatationNameSchema = mongoose.Schema(
     {
         Name: {
             type: String
@@ -117,6 +117,18 @@ const unitSchema = mongoose.Schema(
     {
         timestamps: true,
     });
+    const unitSchema = mongoose.Schema(
+        {
+            Name: {
+                type: String
+            },
+            is_active: {
+                type: Boolean
+            }
+        },
+        {
+            timestamps: true,
+        });
 const categorySchema = mongoose.Schema(
     {
         Name: {
@@ -370,6 +382,7 @@ const CountryModal = mongoose.model('Country', countrySchema);
 const StateModal = mongoose.model('States', stateSchema);
 const CityModal = mongoose.model('City', citySchema);
 const UnitModal = mongoose.model('Units', unitSchema);
+const QuatationNameModal = mongoose.model('QuatationName', quatationNameSchema);
 const IconModal = mongoose.model('Icon', iconSchema);
 const CategoryModal = mongoose.model('Category', categorySchema);
 const SubCategoryModal = mongoose.model('SubCategory', subCategorySchema);
@@ -387,6 +400,7 @@ const syncIndex = async () => {
     await StateModal.syncIndexes();
     await CityModal.syncIndexes();
     await UnitModal.syncIndexes();
+    await QuatationNameModal.syncIndexes();
     await IconModal.syncIndexes();
     await CategoryModal.syncIndexes();
     await SubCategoryModal.syncIndexes();
@@ -398,4 +412,4 @@ const syncIndex = async () => {
 }
 syncIndex();
 
-module.exports = { ProductModal, TypeModal, CountryModal, StateModal, CityModal, SourceModal, UnitModal, IconModal, CategoryModal, SubCategoryModal, ModuleModal, RoleModal, StatusModal, MailAddressModal, ApplicationSettingModal };
+module.exports = { ProductModal, TypeModal, CountryModal, StateModal, CityModal, SourceModal, UnitModal, QuatationNameModal,IconModal, CategoryModal, SubCategoryModal, ModuleModal, RoleModal, StatusModal, MailAddressModal, ApplicationSettingModal };

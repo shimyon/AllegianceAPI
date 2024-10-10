@@ -12,7 +12,13 @@ const DashboardSchema = mongoose.Schema(
         Prospect: {
             type: Number
         },
-        Support: {
+        Quatation: {
+            type: Number
+        },
+        Order: {
+            type: Number
+        },
+        Invoice: {
             type: Number
         },
         Recovery: {
@@ -21,7 +27,7 @@ const DashboardSchema = mongoose.Schema(
         Project: {
             type: Number
         },
-        Order: {
+        Support: {
             type: Number
         },
         Product: {
