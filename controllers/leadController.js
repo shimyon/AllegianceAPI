@@ -587,17 +587,37 @@ const moveToProspect = asyncHandler(async (req, res) => {
             if (insertProspectNext.length > 0) {
                 const savedNotification = await ProNextOn.insertMany(insertProspectNext);
                 let prospectExisting = await Prospect.findByIdAndUpdate(interaction._id, {
-                        NextTalk: savedNotification[0]._id
-                    });
+                    NextTalk: savedNotification[0]._id
+                });
             }
-            let date = new Date();
-            const savedNotification = await notificationModel.create({
-                description: `lead(${interaction.Company}) Moved to prospect`,
-                date: date,
-                link: "Prospects",
-                userId: interaction.Sales._id,
-                Isread: false
-            });
+            const Tasks = await Task.find({ LeadId: req.params.id }).sort({ date: -1 });
+            let insertProspectTask = Tasks.map(f => ({
+                ProspectId: interaction._id,
+                Name: f.Name,
+                Description: f.Description,
+                Status: f.Status,
+                Assign: f.Assign,
+                Reporter: f.Reporter,
+                Priority: f.Priority,
+                StartDate: f.StartDate,
+                EndDate: f.EndDate,
+                is_active: true,
+                addedBy: req.user._id
+            }));
+
+            if (insertProspectTask.length > 0) {
+                const insertedTasks = await Task.insertMany(insertProspectTask);              
+            }
+            if (interaction.Sales) {
+                let date = new Date();
+                const savedNotification = await notificationModel.create({
+                    description: `lead(${interaction.Company}) Moved to prospect`,
+                    date: date,
+                    link: "Prospects",
+                    userId: interaction.Sales._id,
+                    Isread: false
+                });
+            }
             // let resuser = await User.find({ is_active: true, role: 'SuperAdmin' });
             // let insertdata = resuser.map(f => ({
             //     description: `lead(${interaction.Company}) Moved to prospect`,
