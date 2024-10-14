@@ -547,10 +547,6 @@ const moveToProspect = asyncHandler(async (req, res) => {
                 msg: "Lead already moved to prospect. "
             });
         }
-        await Lead.findByIdAndUpdate(req.params.id, {
-            Stage: "Prospect",
-            StageDate: new Date()
-        });
 
         let status = await Status.find({ GroupName: "Prospects" }).lean();
         let interaction = await Prospect.create({
@@ -562,21 +558,28 @@ const moveToProspect = asyncHandler(async (req, res) => {
             Address: leadExisting.Address,
             Mobile: leadExisting.Mobile,
             Email: leadExisting.Email,
-            City: leadExisting.City,
-            State: leadExisting.State,
-            Country: leadExisting.Country,
-            Product: leadExisting.Product,
+            Website:null,
+            City: leadExisting.City || null,
+            State: leadExisting.State || null,
+            Country: leadExisting.Country || null,
+            Product: leadExisting.Product || null,
             Notes: leadExisting.Notes,
-            Sales: leadExisting.Sales,
-            Source: leadExisting.Source,
-            Requirements: leadExisting.Requirements,
-            CustomerRefrence: leadExisting.CustomerRefrence,
+            ProspectAmount: 0,
+            OrderTarget: null,
+            Sales: leadExisting.Sales || null,
             addedBy: req.user._id,
-            Stage: status[0],
+            Stage: status[0]._id,
             StageDate: new Date(),
+            Requirements: leadExisting.Requirements,
+            Source:leadExisting.Source,
+            CustomerRefrence: leadExisting.CustomerRefrence,
             is_active: true
         });
         if (interaction) {
+            await Lead.findByIdAndUpdate(req.params.id, {
+                Stage: "Prospect",
+                StageDate: new Date()
+            });
             const next = await NextOn.find({ leadId: req.params.id }).sort({ date: -1 });
             let insertProspectNext = next.map(f => ({
                 prospectId: interaction._id,
@@ -585,36 +588,36 @@ const moveToProspect = asyncHandler(async (req, res) => {
                 user: req.user._id
             }));
             if (insertProspectNext.length > 0) {
-                const savedNotification = await ProNextOn.insertMany(insertProspectNext);
+                const savednext = await ProNextOn.insertMany(insertProspectNext);
                 let prospectExisting = await Prospect.findByIdAndUpdate(interaction._id, {
-                    NextTalk: savedNotification[0]._id
+                    NextTalk: savednext[0]._id
                 });
             }
-            const Tasks = await Task.find({ LeadId: req.params.id }).sort({ date: -1 });
-            let insertProspectTask = Tasks.map(f => ({
+            const tasklist = await Task.find({ LeadId: req.params.id });
+            let insertProspecttask = tasklist.map(f => ({
+                LeadId: null,
                 ProspectId: interaction._id,
                 Name: f.Name,
                 Description: f.Description,
-                Status: f.Status,
-                Assign: f.Assign,
-                Reporter: f.Reporter,
+                Status: f.Status || null,
+                Assign: f.Assign || null,
+                Reporter: f.Reporter || null,
                 Priority: f.Priority,
                 StartDate: f.StartDate,
                 EndDate: f.EndDate,
-                is_active: true,
+                is_active: f.is_active,
                 addedBy: req.user._id
             }));
-
-            if (insertProspectTask.length > 0) {
-                const insertedTasks = await Task.insertMany(insertProspectTask);              
+            if (insertProspecttask.length > 0) {
+                const savedProspecttask = await Task.insertMany(insertProspecttask);
             }
             if (interaction.Sales) {
-                let date = new Date();
+            let date = new Date();
                 const savedNotification = await notificationModel.create({
                     description: `lead(${interaction.Company}) Moved to prospect`,
                     date: date,
                     link: "Prospects",
-                    userId: interaction.Sales._id,
+                    userId: interaction.Sales,
                     Isread: false
                 });
             }
