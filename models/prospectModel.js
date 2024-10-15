@@ -103,6 +103,14 @@ const prospectSchema = mongoose.Schema(
             type: Boolean,
             default: false
         },
+        is_quatation: {
+            type: Boolean,
+            default: false
+        },
+        is_project: {
+            type: Boolean,
+            default: false
+        },
         is_readed: {
             type: Boolean,
             default: false

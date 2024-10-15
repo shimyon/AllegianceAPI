@@ -20,6 +20,12 @@ const CustomerModal = require('../models/customerModel')
 const Customer = CustomerModal.CustomerModal;
 const BillingAddress = CustomerModal.BillingAddressModal;
 const ShippingAddress = CustomerModal.ShippingAddressModal;
+const QuatationModal = require('../models/quatationModel')
+const Quatation = QuatationModal.QuatationModal
+const QuatationProduct = QuatationModal.QuatationProductModal
+const Status = Master.StatusModal;
+const ContractModel = require('../models/contractModel')
+const Contract = ContractModel.ContractModal;
 
 const addProspect = asyncHandler(async (req, res) => {
     try {
@@ -610,12 +616,10 @@ const convertToCustomer = asyncHandler(async (req, res) => {
             });
         }
         let customerNo = await Customer.find({}, { CustomerNo: 1, _id: 0 }).sort({ CustomerNo: -1 }).limit(1);
-        let maxCustomer = 1;
-        if (customerNo.length > 0) {
-            maxCustomer = customerNo[0].CustomerNo + 1;
-        }
+        let maxCustomer = customerNo.length > 0 ? customerNo[0].CustomerNo + 1 : 1;
+
         const newCustomer = await Customer.create({
-            CustomerNo: maxCustomer || 1,
+            CustomerNo: maxCustomer,
             CustomerCode: maxCustomer,
             Company: pros.Company,
             Address: pros.Address,
@@ -652,17 +656,15 @@ const convertToCustomer = asyncHandler(async (req, res) => {
                 is_active: true,
                 is_default: true
             });
-            const existCustomer = await Customer.findById(newCustomer._id);
-            existCustomer.BillingAddress.push(newBilling);
-            existCustomer.ShippingAddress.push(newShipping);
-            existCustomer.save((err) => {
-                if (err) throw err;
-            });
+          
+            newCustomer.BillingAddress = [newBilling._id]; 
+            newCustomer.ShippingAddress = [newShipping._id];
+            await newCustomer.save();
             const newProspect = await Prospect.findByIdAndUpdate(req.params.id, {
                 is_customer: true
             });
+            return res.status(200).json(newCustomer).end();
         }
-        return res.status(200).json(newCustomer).end();
     } catch (err) {
         return res.status(400).json({
             success: false,
@@ -670,7 +672,149 @@ const convertToCustomer = asyncHandler(async (req, res) => {
             data: null,
         });
     }
+});
 
+const convertToQuotation = asyncHandler(async (req, res) => {
+    try {
+        const pros = await Prospect.findById(req.params.id);
+        let newCustomer = await convertToCustomer(req, res);
+
+        const customerId = newCustomer._id;
+
+        let quatationNo = await Quatation.find({}, { QuatationNo: 1, _id: 0 }).sort({ QuatationNo: -1 }).limit(1);
+        let maxQuatation = 1;
+        // if (quatationNo.length > 0) {
+        //     maxQuatation = quatationNo[0].QuatationNo + 1;
+        // }
+        if (quatationNo && quatationNo.length > 0) {
+            maxQuatation = quatationNo[0].QuatationNo + 1;
+        }
+        let status = await Status.find({ GroupName: "Quatations" }).lean();
+        let currentDate = new Date();
+        let validDate = new Date();
+        validDate.setDate(currentDate.getDate() + 7);
+
+        const newQuatation = await Quatation.create({
+            QuatationNo: maxQuatation,
+            QuatationCode: maxQuatation,
+            Customer: customerId ,
+            QuatationName: null,
+            Descriptionofwork: null,           
+            ShippingAddress: newCustomer.ShippingAddress[0] || null,
+            BillingAddress:  newCustomer.BillingAddress[0] || null,
+            Status: status[0],
+            Stage: "New",
+            Sales: pros.Sales || null,
+            addedBy: req.user._id,
+            BeforeTaxPrice: 0,
+            CGST: 0,
+            SGST: 0,
+            TermsAndCondition: null,
+            OtherChargeName: null,
+            OtherCharge: 0,
+            Discount: 0,
+            TotalTax: 0,
+            AfterTaxPrice: 0,
+            FinalPrice: 0,
+            RoundOff: 0,
+            Amount: pros.ProspectAmount,
+            QuatationDate: currentDate,
+            ValidDate: validDate,
+            Note: pros.Notes,
+            is_deleted: false
+        });  
+
+        const prQuatation = await QuatationProduct.create({
+            QuatationId: newQuatation._id.toString(),  
+            Product: pros.Product || [], 
+            Quantity: 0,  
+            Unit: null,  
+            Price: 0,     
+            CGST: 0,
+            SGST: 0,
+            TotalAmount: 0,   
+            FinalAmount: 0,   
+            Note: pros.note  
+        });
+        newQuatation.Products.push(prQuatation);
+
+        if (newQuatation) {         
+            if (newQuatation.Sales) {
+                let date = new Date();
+                const savedNotification = await notificationModel.create({
+                    description: `Quatation(${newQuatation.QuatationCode}) entry has been created`,
+                    date: date,
+                    link: "Quotes",
+                    userId: newQuatation.Sales,
+                    Isread: false
+                });
+            }
+
+            const existQuatation = await Quatation.findById(newQuatation._id);
+            existQuatation.save((err) => {
+                if (err) throw err;
+            });
+
+            const newProspect = await Prospect.findByIdAndUpdate(req.params.id, {
+                is_quatation: true
+            });
+            return res.status(200).json(newQuatation).end();
+        }
+
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in creating Quotation. " + err.message,
+            data: null,
+        });
+    }
+})
+
+const convertToProject = asyncHandler(async (req, res) => {
+    try {
+        const pros = await Prospect.findById(req.params.id);
+        let newCustomer = await convertToCustomer(req, res);
+        const customerId = newCustomer._id;
+
+        let contractNo = await Contract.find({}, { ContractNo: 1, _id: 0 }).sort({ ContractNo: -1 }).limit(1);
+        let maxcontractNo = 1;
+        if (contractNo.length > 0) {
+            maxcontractNo = contractNo[0].ContractNo + 1;
+        }
+        const newContract = await Contract.create({
+            Customer: customerId,
+            Name: null,
+            ContractNo: maxcontractNo,
+            executive: null,
+            StartDate: new Date(),
+            ExpiryDate: null,
+            Type: null,
+            Item: null,
+            Description: null,
+            ContractCharges: 0,
+            RenewalCharges: 0,
+            Files: null,
+            is_active: true,
+            addedBy: req.user._id,
+        });
+        if(newContract){
+            const existContract = await Contract.findById(newContract._id);
+            existContract.save((err) => {
+                if (err) throw err;
+            });
+
+            const newProspect = await Prospect.findByIdAndUpdate(req.params.id, {
+                is_project: true
+            });
+            return res.status(200).json(newContract).end();
+        }
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in creating Contract. " + err.message,
+            data: null,
+        });
+    }
 });
 
 const markAsRead = asyncHandler(async (req, res) => {
@@ -707,5 +851,7 @@ module.exports = {
     getOtherContact,
     importExcel,
     convertToCustomer,
+    convertToQuotation,
+    convertToProject,
     markAsRead
 }
