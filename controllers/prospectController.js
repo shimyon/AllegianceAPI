@@ -656,14 +656,19 @@ const convertToCustomer = asyncHandler(async (req, res) => {
                 is_active: true,
                 is_default: true
             });
-          
+            // const existCustomer = await Customer.findById(newCustomer._id);
+            // existCustomer.BillingAddress.push(newBilling);
+            // existCustomer.ShippingAddress.push(newShipping);
+            // existCustomer.save((err) => {
+            //     if (err) throw err;
+            // });
             newCustomer.BillingAddress = [newBilling._id]; 
             newCustomer.ShippingAddress = [newShipping._id];
             await newCustomer.save();
             const newProspect = await Prospect.findByIdAndUpdate(req.params.id, {
                 is_customer: true
             });
-            return res.status(200).json(newCustomer).end();
+            return newCustomer;
         }
     } catch (err) {
         return res.status(400).json({
@@ -724,19 +729,41 @@ const convertToQuotation = asyncHandler(async (req, res) => {
             is_deleted: false
         });  
 
-        const prQuatation = await QuatationProduct.create({
-            QuatationId: newQuatation._id.toString(),  
-            Product: pros.Product || [], 
-            Quantity: 0,  
-            Unit: null,  
-            Price: 0,     
-            CGST: 0,
-            SGST: 0,
-            TotalAmount: 0,   
-            FinalAmount: 0,   
-            Note: pros.note  
-        });
-        newQuatation.Products.push(prQuatation);
+        // const prQuatation = await QuatationProduct.create({
+        //     QuatationId: newQuatation._id.toString(),  
+        //     Product: pros.Product || [], 
+        //     Quantity: 0,  
+        //     Unit: null,  
+        //     Price: 0,     
+        //     CGST: 0,
+        //     SGST: 0,
+        //     TotalAmount: 0,   
+        //     FinalAmount: 0,   
+        //     Note: pros.note  
+        // });
+        // newQuatation.Products.push(prQuatation);
+
+      
+        // if (pros.Product) {
+        //     const productId = pros.Product; 
+            
+        //     const quatationProduct = await QuatationProduct.create({
+        //         QuatationId: newQuatation._id,  
+        //         Product: productId,  
+        //         Quantity: 0,  
+        //         Unit: null, 
+        //         Price: 0,  
+        //         CGST: 0,
+        //         SGST: 0,
+        //         TotalAmount: 0,  
+        //         FinalAmount: 0,  
+        //         Note: pros.Notes 
+        //     });
+        
+        //     newQuatation.Products.push(quatationProduct._id);
+        //     await newQuatation.save();
+        // }
+
 
         if (newQuatation) {         
             if (newQuatation.Sales) {
