@@ -21,7 +21,6 @@ const customerSchema = mongoose.Schema(
         },
         FirstName: {
             type: String,
-            required: [true, 'Please add First Name']
         },
         LastName: {
             type: String,

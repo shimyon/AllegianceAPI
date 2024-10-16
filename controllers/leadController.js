@@ -4,8 +4,6 @@ const LeadModal = require('../models/leadModel')
 const User = require('../models/userModel')
 const notificationModel = require('../models/notificationModel')
 const Lead = LeadModal.LeadsModal;
-const NextOn = LeadModal.NextOnModal;
-const LeadOtherContact = LeadModal.LeadOtherContact;
 const Master = require('../models/masterModel')
 const Product = Master.ProductModal;
 const Source = Master.SourceModal;
@@ -15,7 +13,9 @@ const State = Master.StateModal;
 const City = Master.CityModal;
 const ProspectModal = require('../models/prospectModel')
 const Prospect = ProspectModal.ProspectsModal;
-const ProNextOn = ProspectModal.ProNextOnModal;
+const nextoncontactModel = require('../models/nextoncontactModel')
+const NextOn = nextoncontactModel.NextOnModal;
+const OtherContact = nextoncontactModel.OtherContact;
 const TaskModal = require('../models/taskModel');
 const Task = TaskModal.TaskModal;
 const uploadFile = require("../middleware/uploadFileMiddleware");
@@ -49,6 +49,7 @@ const addLead = asyncHandler(async (req, res) => {
             Sales: req.body.sales || null,
             addedBy: req.user._id,
             Stage: "New",
+            Status: req.body.status,
             LeadSince: new Date(),
             StageDate: new Date(),
             is_active: true
@@ -120,6 +121,7 @@ const editLead = asyncHandler(async (req, res) => {
             CustomerRefrence: req.body.CustomerRefrence,
             Sales: req.body.sales || null,
             Notes: req.body.notes,
+            Status: req.body.status,
             InCharge: req.body.incharge,
             is_active: true
         });
@@ -314,35 +316,23 @@ const getAllLead = asyncHandler(async (req, res) => {
                 },
             },
             {
+                '$lookup': {
+                    'from': 'status',
+                    'localField': 'Status',
+                    'foreignField': '_id',
+                    'as': 'Status'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$Status',
+                    preserveNullAndEmptyArrays: true
+                },
+            },
+            {
                 $sort: { createdAt: -1 }
             }
         );
-
-        // if (req.body.month) {
-        //     if (req.body.month == "this") {
-        //         const currentMonth = new Date().getMonth() + 1;
-        //         query.push({
-        //             $match: {
-        //                 $expr: {
-        //                     $eq: [{ $month: "$LeadSince" }, currentMonth]
-        //                 }
-        //             }
-        //         });
-        //     }
-        //     if (req.body.month == "last") {
-        //         let currentMonth = new Date().getMonth();
-        //         if (currentMonth == 0) {
-        //             currentMonth = currentMonth + 12;
-        //         }
-        //         query.push({
-        //             $match: {
-        //                 $expr: {
-        //                     $eq: [{ $month: "$LeadSince" }, currentMonth]
-        //                 }
-        //             }
-        //         });
-        //     }
-        // }
         query.push(
             {
                 $facet: {
@@ -403,7 +393,7 @@ const getAllLead = asyncHandler(async (req, res) => {
 
 const getLeadById = asyncHandler(async (req, res) => {
     try {
-        let leadList = await Lead.find({ Stage: "New", _id: req.params.id }).populate("Source").populate("Country").populate("State").populate("City").populate("Icon").populate("OtherContact").populate("Product").populate("Sales").populate("NextTalk").populate("addedBy");
+        let leadList = await Lead.find({ Stage: "New", _id: req.params.id }).populate("Source").populate("Status").populate("Country").populate("State").populate("City").populate("Icon").populate("OtherContact").populate("Product").populate("Sales").populate("NextTalk").populate("addedBy");
         let tasklist = await Task.find({ is_active: true, LeadId: req.params.id }).populate("Status").populate("Assign");
         return res.status(200).json({
             success: true,
@@ -423,6 +413,7 @@ const addNext = asyncHandler(async (req, res) => {
     try {
         let nextOn = await NextOn.create({
             leadId: req.body.leadid,
+            prospectId: null,
             date: req.body.date,
             note: req.body.note,
             user: req.user._id
@@ -498,8 +489,9 @@ const getNext = asyncHandler(async (req, res) => {
 const addOtherContact = asyncHandler(async (req, res) => {
     try {
         let leadExist = await Lead.findById(req.body.id);
-        let nextOn = await LeadOtherContact.create({
+        let nextOn = await OtherContact.create({
             LeadId: req.body.id,
+            ProspectId: null,
             Name: req.body.name,
             Mobile: req.body.mobile,
             Email: req.body.email
@@ -524,7 +516,7 @@ const addOtherContact = asyncHandler(async (req, res) => {
 
 const getOtherContact = asyncHandler(async (req, res) => {
     try {
-        let otherContact = await LeadOtherContact.find({ LeadId: req.params.id });
+        let otherContact = await OtherContact.find({ LeadId: req.params.id });
         return res.status(200).json({
             success: true,
             msg: "Success",
@@ -573,7 +565,8 @@ const moveToProspect = asyncHandler(async (req, res) => {
             Requirements: leadExisting.Requirements,
             Source:leadExisting.Source,
             CustomerRefrence: leadExisting.CustomerRefrence,
-            is_active: true
+            is_active: true,
+            Customer:null
         });
         if (interaction) {
             await Lead.findByIdAndUpdate(req.params.id, {
@@ -582,13 +575,14 @@ const moveToProspect = asyncHandler(async (req, res) => {
             });
             const next = await NextOn.find({ leadId: req.params.id }).sort({ date: -1 });
             let insertProspectNext = next.map(f => ({
+                leadId: null,
                 prospectId: interaction._id,
                 date: f.date,
                 note: f.note,
                 user: req.user._id
             }));
             if (insertProspectNext.length > 0) {
-                const savednext = await ProNextOn.insertMany(insertProspectNext);
+                const savednext = await NextOn.insertMany(insertProspectNext);
                 let prospectExisting = await Prospect.findByIdAndUpdate(interaction._id, {
                     NextTalk: savednext[0]._id
                 });

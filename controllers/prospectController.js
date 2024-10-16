@@ -3,8 +3,9 @@ const ProspectModal = require('../models/prospectModel')
 const User = require('../models/userModel')
 const notificationModel = require('../models/notificationModel')
 const Prospect = ProspectModal.ProspectsModal;
-const NextOn = ProspectModal.ProNextOnModal;
-const ProspectOtherContactModal = ProspectModal.ProspectOtherContactModal;
+const nextoncontactModel = require('../models/nextoncontactModel')
+const NextOn = nextoncontactModel.NextOnModal;
+const OtherContact = nextoncontactModel.OtherContact;
 const uploadFile = require("../middleware/uploadFileMiddleware");
 const path = require("path");
 const readXlsxFile = require('read-excel-file/node')
@@ -16,10 +17,16 @@ const Source = Master.SourceModal;
 const Country = Master.CountryModal;
 const State = Master.StateModal;
 const City = Master.CityModal;
+const Status = Master.StatusModal;
 const CustomerModal = require('../models/customerModel')
 const Customer = CustomerModal.CustomerModal;
 const BillingAddress = CustomerModal.BillingAddressModal;
 const ShippingAddress = CustomerModal.ShippingAddressModal;
+const QuatationModal = require('../models/quatationModel')
+const Quatation = QuatationModal.QuatationModal
+const QuatationProduct = QuatationModal.QuatationProductModal
+const ContractModel = require('../models/contractModel')
+const Contract = ContractModel.ContractModal;
 
 const addProspect = asyncHandler(async (req, res) => {
     try {
@@ -34,9 +41,9 @@ const addProspect = asyncHandler(async (req, res) => {
             Mobile: req.body.mobile,
             Email: req.body.email,
             Website: req.body.website,
-            City: req.body.city||null,
-            State: req.body.state||null,
-            Country: req.body.country||null,
+            City: req.body.city || null,
+            State: req.body.state || null,
+            Country: req.body.country || null,
             Product: req.body.product || null,
             Notes: req.body.notes,
             ProspectAmount: req.body.prospectAmount,
@@ -48,7 +55,8 @@ const addProspect = asyncHandler(async (req, res) => {
             Source: req.body.source || null,
             CustomerRefrence: req.body.CustomerRefrence,
             StageDate: new Date(),
-            is_active: true
+            is_active: true,
+            Customer: null
         });
         if (prospect) {
             let date = new Date();
@@ -107,9 +115,9 @@ const editProspect = asyncHandler(async (req, res) => {
             Mobile: req.body.mobile,
             Email: req.body.email,
             Website: req.body.website,
-            City: req.body.city||null,
-            State: req.body.state||null,
-            Country: req.body.country||null,
+            City: req.body.city || null,
+            State: req.body.state || null,
+            Country: req.body.country || null,
             Product: req.body.product || null,
             Notes: req.body.notes,
             ProspectAmount: req.body.prospectAmount,
@@ -347,6 +355,7 @@ const addNext = asyncHandler(async (req, res) => {
     try {
         let nextOn = await NextOn.create({
             prospectId: req.body.prospectid,
+            leadId: null,
             date: req.body.date,
             note: req.body.note,
             user: req.user._id
@@ -438,8 +447,9 @@ const getbyNext = asyncHandler(async (req, res) => {
 const addOtherContact = asyncHandler(async (req, res) => {
     try {
         let prospectExist = await Prospect.findById(req.body.id);
-        let nextOn = await ProspectOtherContactModal.create({
+        let nextOn = await OtherContact.create({
             ProspectId: req.body.id,
+            LeadId: null,
             Name: req.body.name,
             Mobile: req.body.mobile,
             Email: req.body.email
@@ -464,7 +474,7 @@ const addOtherContact = asyncHandler(async (req, res) => {
 
 const getOtherContact = asyncHandler(async (req, res) => {
     try {
-        let otherContact = await ProspectOtherContactModal.find({ ProspectId: req.params.id });
+        let otherContact = await OtherContact.find({ ProspectId: req.params.id });
         return res.status(200).json({
             success: true,
             msg: "Success",
@@ -625,9 +635,9 @@ const convertToCustomer = asyncHandler(async (req, res) => {
             LastName: pros.LastName,
             Mobile: pros.Mobile,
             Email: pros.Email,
-            City: pros.City||null,
-            State: pros.State||null,
-            Country: pros.Country||null,
+            City: pros.City || null,
+            State: pros.State || null,
+            Country: pros.Country || null,
             addedBy: req.user._id,
             Notes: pros.Notes,
             is_active: true
@@ -636,18 +646,18 @@ const convertToCustomer = asyncHandler(async (req, res) => {
             const newBilling = await BillingAddress.create({
                 Customer: newCustomer._id,
                 Address: pros.Address,
-                City: pros.City||null,
-                State: pros.State||null,
-                Country: pros.Country||null,
+                City: pros.City || null,
+                State: pros.State || null,
+                Country: pros.Country || null,
                 is_active: true,
                 is_default: true
             });
             const newShipping = await ShippingAddress.create({
                 Customer: newCustomer._id,
                 Address: pros.Address,
-                City: pros.City||null,
-                State: pros.State||null,
-                Country: pros.Country||null,
+                City: pros.City || null,
+                State: pros.State || null,
+                Country: pros.Country || null,
                 addedBy: req.user._id,
                 is_active: true,
                 is_default: true
@@ -659,10 +669,15 @@ const convertToCustomer = asyncHandler(async (req, res) => {
                 if (err) throw err;
             });
             const newProspect = await Prospect.findByIdAndUpdate(req.params.id, {
-                is_customer: true
+                is_customer: true,
+                Customer: newCustomer._id
             });
         }
-        return res.status(200).json(newCustomer).end();
+        return res.status(200).json({
+            success: true,
+            msg: "New Customer Created.",
+            data: newCustomer,
+        });
     } catch (err) {
         return res.status(400).json({
             success: false,
@@ -670,9 +685,269 @@ const convertToCustomer = asyncHandler(async (req, res) => {
             data: null,
         });
     }
-
 });
+const convertToQuotation = asyncHandler(async (req, res) => {
+    try {
+        var pros = await Prospect.findById(req.params.id);
+        var customerid;
+        if (pros.is_customer == false) {
+            const existCustomer = await Customer.findOne({ $or: [{ Mobile: pros.Mobile, Email: pros.Email }] });
+            if (existCustomer) {
+                return res.status(200).json({
+                    success: false,
+                    msg: "Customer already exist with same mobile or email.",
+                    data: null,
+                });
+            }
+            let customerNo = await Customer.find({}, { CustomerNo: 1, _id: 0 }).sort({ CustomerNo: -1 }).limit(1);
+            let maxCustomer = 1;
+            if (customerNo.length > 0) {
+                maxCustomer = customerNo[0].CustomerNo + 1;
+            }
+            const newCustomer = await Customer.create({
+                CustomerNo: maxCustomer || 1,
+                CustomerCode: maxCustomer,
+                Company: pros.Company,
+                Address: pros.Address,
+                Title: pros.Title,
+                GSTNo: pros.GSTNo,
+                FirstName: pros.FirstName,
+                LastName: pros.LastName,
+                Mobile: pros.Mobile,
+                Email: pros.Email,
+                City: pros.City || null,
+                State: pros.State || null,
+                Country: pros.Country || null,
+                addedBy: req.user._id,
+                Notes: pros.Notes,
+                is_active: true
+            });
+            if (newCustomer) {
+                const newBilling = await BillingAddress.create({
+                    Customer: newCustomer._id,
+                    Address: pros.Address,
+                    City: pros.City || null,
+                    State: pros.State || null,
+                    Country: pros.Country || null,
+                    is_active: true,
+                    is_default: true
+                });
+                const newShipping = await ShippingAddress.create({
+                    Customer: newCustomer._id,
+                    Address: pros.Address,
+                    City: pros.City || null,
+                    State: pros.State || null,
+                    Country: pros.Country || null,
+                    addedBy: req.user._id,
+                    is_active: true,
+                    is_default: true
+                });
+                const existCustomer = await Customer.findById(newCustomer._id);
+                existCustomer.BillingAddress.push(newBilling);
+                existCustomer.ShippingAddress.push(newShipping);
+                existCustomer.save((err) => {
+                    if (err) throw err;
+                });
+                const newProspect = await Prospect.findByIdAndUpdate(req.params.id, {
+                    is_customer: true,
+                    Customer: newCustomer._id
+                });
+            }
+            customerid = newCustomer._id;
+        }
+        else {
+            customerid = pros.Customer
+        }
+        if (customerid) {
+        let quatationNo = await Quatation.find({}, { QuatationNo: 1, _id: 0 }).sort({ QuatationNo: -1 }).limit(1);
+        let maxQuatation = 1;
+        if (quatationNo.length > 0) {
+            maxQuatation = quatationNo[0].QuatationNo + 1;
+        }
+        let code = "";
+        const currentDate = new Date();
+        const currentYear = currentDate.getFullYear();
+        let financialYearStart, financialYearEnd;
+        if (currentDate.getMonth() >= 3) {
+            financialYearStart = currentYear;
+            financialYearEnd = currentYear + 1;
+        } else {
+            financialYearStart = currentYear - 1;
+            financialYearEnd = currentYear;
+        }
+            code = maxQuatation + `/${financialYearStart}-${financialYearEnd}`;
+            let validDate = new Date();
+            validDate.setDate(currentDate.getDate() + 7);
+        const newQuatation = await Quatation.create({
+            QuatationNo: maxQuatation,
+            QuatationCode: code,
+            Customer: customerid,
+            QuatationName: null,
+            Descriptionofwork: null,
+            ShippingAddress: null,
+            BillingAddress: null,
+            Status: "New",
+            Stage: "New",
+            Sales: pros.sales,
+            addedBy: req.user._id,
+            BeforeTaxPrice:null,
+            CGST:null,
+            SGST: null,
+            TermsAndCondition:null,
+            OtherChargeName:null,
+            OtherCharge: null,
+            Discount:null,
+            TotalTax: null,
+            AfterTaxPrice: null,
+            FinalPrice:null,
+            RoundOff: null,
+            Amount: null,
+            QuatationDate: new Date(),
+            ValidDate: validDate,
+            Note: null,
+            is_deleted: false
+        });
 
+        const prQuatation = await QuatationProduct.create({
+            QuatationId: newQuatation._id.toString(),
+            Product: pros.Product,
+            Quantity: null,
+            Unit: null,
+            Price: null,
+            CGST: null,
+            SGST: null,
+            TotalAmount: null,
+            FinalAmount: null,
+            Note:null,
+        });
+            newQuatation.Products[0]=prQuatation;
+
+        newQuatation.save((err) => {
+            if (err) throw err;
+        });
+            return res.status(200).json({
+                success: true,
+                msg: "Quatation Added",
+            }).end();
+        }
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in creating Quotation. " + err.message,
+            data: null,
+        });
+    }
+});
+const convertToProject = asyncHandler(async (req, res) => {
+    try {
+        var pros = await Prospect.findById(req.params.id);
+        var customerid;
+        if (pros.is_customer == false) {
+            const existCustomer = await Customer.findOne({ $or: [{ Mobile: pros.Mobile, Email: pros.Email }] });
+            if (existCustomer) {
+                return res.status(200).json({
+                    success: false,
+                    msg: "Customer already exist with same mobile or email.",
+                    data: null,
+                });
+            }
+            let customerNo = await Customer.find({}, { CustomerNo: 1, _id: 0 }).sort({ CustomerNo: -1 }).limit(1);
+            let maxCustomer = 1;
+            if (customerNo.length > 0) {
+                maxCustomer = customerNo[0].CustomerNo + 1;
+            }
+            const newCustomer = await Customer.create({
+                CustomerNo: maxCustomer || 1,
+                CustomerCode: maxCustomer,
+                Company: pros.Company,
+                Address: pros.Address,
+                Title: pros.Title,
+                GSTNo: pros.GSTNo,
+                FirstName: pros.FirstName,
+                LastName: pros.LastName,
+                Mobile: pros.Mobile,
+                Email: pros.Email,
+                City: pros.City || null,
+                State: pros.State || null,
+                Country: pros.Country || null,
+                addedBy: req.user._id,
+                Notes: pros.Notes,
+                is_active: true
+            });
+            if (newCustomer) {
+                const newBilling = await BillingAddress.create({
+                    Customer: newCustomer._id,
+                    Address: pros.Address,
+                    City: pros.City || null,
+                    State: pros.State || null,
+                    Country: pros.Country || null,
+                    is_active: true,
+                    is_default: true
+                });
+                const newShipping = await ShippingAddress.create({
+                    Customer: newCustomer._id,
+                    Address: pros.Address,
+                    City: pros.City || null,
+                    State: pros.State || null,
+                    Country: pros.Country || null,
+                    addedBy: req.user._id,
+                    is_active: true,
+                    is_default: true
+                });
+                const existCustomer = await Customer.findById(newCustomer._id);
+                existCustomer.BillingAddress.push(newBilling);
+                existCustomer.ShippingAddress.push(newShipping);
+                existCustomer.save((err) => {
+                    if (err) throw err;
+                });
+                const newProspect = await Prospect.findByIdAndUpdate(req.params.id, {
+                    is_customer: true,
+                    Customer: newCustomer._id
+                });
+            }
+            customerid = newCustomer._id;
+        }
+        else {
+            customerid = pros.Customer
+        }
+        if (customerid) {
+            let contractNo = await Contract.find({}, { ContractNo: 1, _id: 0 }).sort({ ContractNo: -1 }).limit(1);
+            let maxcontractNo = 1;
+            if (contractNo.length > 0) {
+                maxcontractNo = contractNo[0].ContractNo + 1;
+            }
+            const newproject = await Contract.create({
+                Customer: customerid,
+                Name: null,
+                ContractNo: maxcontractNo,
+                executive: pros.Sales,
+                StartDate: null,
+                ExpiryDate: null,
+                Type: null,
+                Item: null,
+                Description: null,
+                ContractCharges: 0,
+                RenewalCharges: 0,
+                Files: null,
+                is_active: true,
+                addedBy: req.user._id,
+            });
+            if (newproject) {
+                return res.status(200).json({
+                    success: true,
+                    msg: "New Project Created.",
+                    data: newproject,
+                });
+            }
+        }
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in creating Contract. " + err.message,
+            data: null,
+        });
+    }
+});
 const markAsRead = asyncHandler(async (req, res) => {
     try {
         await Prospect.findByIdAndUpdate(req.params.id, {
@@ -707,5 +982,7 @@ module.exports = {
     getOtherContact,
     importExcel,
     convertToCustomer,
+    convertToQuotation,
+    convertToProject,
     markAsRead
 }

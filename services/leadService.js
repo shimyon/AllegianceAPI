@@ -1,6 +1,7 @@
 const LeadModal = require('../models/leadModel')
 const Lead = LeadModal.LeadsModal;
-const NextOn = LeadModal.NextOnModal;
+const nextoncontactModel = require('../models/nextoncontactModel')
+const NextOn = nextoncontactModel.NextOnModal;
 const moment = require('moment')
 
 const getleadAction = async () => {

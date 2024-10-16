@@ -100,7 +100,7 @@ const leadSchema = mongoose.Schema(
         },
         OtherContact: [{
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'LeadOtherContact'
+            ref: 'OtherContact'
         }],
         is_favorite: {
             type: Boolean,
@@ -116,56 +116,11 @@ const leadSchema = mongoose.Schema(
     }
 )
 
-const nextOnSchema = mongoose.Schema(
-    {
-        leadId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Leads'
-        },
-        date: {
-            type: Date
-        },
-        note: {
-            type: String
-        },
-        user: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User'
-        },
-    },
-    {
-        timestamps: true,
-    });
-
-const leadOtherContact = mongoose.Schema(
-    {
-        LeadId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Leads'
-        },
-        Name: {
-            type: String
-        },
-        Mobile: {
-            type: Number
-        },
-        Email: {
-            type: String
-        }
-    },
-    {
-        timestamps: true,
-    });
-
 const LeadsModal = mongoose.model('Leads', leadSchema);
-const NextOnModal = mongoose.model('NextOn', nextOnSchema);
-const LeadOtherContact = mongoose.model('LeadOtherContact', leadOtherContact);
 
 const syncIndex = async () => {
     await LeadsModal.syncIndexes();
-    await NextOnModal.syncIndexes();
-    await LeadOtherContact.syncIndexes();
 }
 syncIndex();
 
-module.exports = { LeadsModal, NextOnModal, LeadOtherContact };
+module.exports = { LeadsModal,};
