@@ -44,10 +44,6 @@ const recoverySchema = mongoose.Schema(
         timestamps: true,
     })
 
-const RecoveryModal = mongoose.model('Recovery', recoverySchema);
-const syncIndex = async () => {
-    await RecoveryModal.syncIndexes();
+module.exports = {
+    RecoveryModal: (conn) => conn.model('Recovery', recoverySchema)
 }
-syncIndex();
-
-module.exports = { RecoveryModal };

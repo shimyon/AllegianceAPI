@@ -140,13 +140,18 @@ const orderProductSchema = mongoose.Schema(
         timestamps: true,
     })
 
-const OrderModal = mongoose.model('Orders', orderSchema);
-const OrderProductModal = mongoose.model('OrderProduct', orderProductSchema);
+// const OrderModal = mongoose.model('Orders', orderSchema);
+// const OrderProductModal = mongoose.model('OrderProduct', orderProductSchema);
 
-const syncIndex = async () => {
-    await OrderModal.syncIndexes();
-    await OrderProductModal.syncIndexes();
+// const syncIndex = async () => {
+//     await OrderModal.syncIndexes();
+//     await OrderProductModal.syncIndexes();
+// }
+// syncIndex();
+
+// module.exports = { OrderModal, OrderProductModal };
+
+module.exports = {
+    OrderModal: (conn) => conn.model('Orders', orderSchema),
+    OrderProductModal: (conn) => conn.model('OrderProduct', orderProductSchema),
 }
-syncIndex();
-
-module.exports = { OrderModal, OrderProductModal };

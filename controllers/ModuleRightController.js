@@ -1,9 +1,13 @@
 const asyncHandler = require('express-async-handler')
-const moduleRight = require('../models/moduleRightModel');
-const { ModuleModal } = require('../models/masterModel');
+// const moduleRight = require('../models/moduleRightModel');
+// const { ModuleModal } = require('../models/masterModel');
+const SaasModal = require('../models/saasmasterModel');
+const ModuleModals = SaasModal.ModuleModal;
+const moduleRights = SaasModal.ModuleRightModal;
 
 const AddModuleRight = asyncHandler(async (req, res) => {
     try {
+        let moduleRight = moduleRights(req.conn);
         let oldModule = await moduleRight.findOne({ role: req.body.role, moduleId: req.body.moduleId });
         if (oldModule) {
             let newmoduleRight = await moduleRight.findByIdAndUpdate(oldModule.id, {
@@ -40,6 +44,8 @@ const AddModuleRight = asyncHandler(async (req, res) => {
 })
 const AddGroupRight = asyncHandler(async (req, res) => {
     try {
+        let ModuleModal = ModuleModals(req.conn);
+        let moduleRight = moduleRights(req.conn);
         let oldgroupModule = 0;
         let oldroleModule = await ModuleModal.findOne({ Name: req.body.groupname });
         let oldgrouprole1Module = await moduleRight.findOne({ role: req.body.role, moduleId: oldroleModule.id });
@@ -71,6 +77,9 @@ const AddGroupRight = asyncHandler(async (req, res) => {
 })
 const GetModuleRightByRole = asyncHandler(async (req, res) => {
     try {
+        
+        let ModuleModal = ModuleModals(req.conn);
+        let moduleRight = moduleRights(req.conn);
         let modules = await ModuleModal.find({}).lean();
         let moduleRightList = await moduleRight.find({ role: req.params.role }).lean();
         let modulerights = [];

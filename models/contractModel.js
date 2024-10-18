@@ -160,17 +160,23 @@ const processDailyStatusSchema = mongoose.Schema({
     timestamps: true,
 })
 
-const ContractModal = mongoose.model('Contracts', contractSchema);
-const ContractProcess = mongoose.model('ContractProcess', contractProcessSchema);
-const ContractSubProcess = mongoose.model('ContractSubProcess', contractSubProcessSchema);
-const ProcessDailyStatus = mongoose.model('ProcessDailyStatus', processDailyStatusSchema);
+// const ContractModal = mongoose.model('Contracts', contractSchema);
+// const ContractProcess = mongoose.model('ContractProcess', contractProcessSchema);
+// const ContractSubProcess = mongoose.model('ContractSubProcess', contractSubProcessSchema);
+// const ProcessDailyStatus = mongoose.model('ProcessDailyStatus', processDailyStatusSchema);
 
-const syncIndex = async () => {
-    await ContractModal.syncIndexes();
-    await ContractProcess.syncIndexes();
-    await ProcessDailyStatus.syncIndexes();
-    await ContractSubProcess.syncIndexes();
+// const syncIndex = async () => {
+//     await ContractModal.syncIndexes();
+//     await ContractProcess.syncIndexes();
+//     await ProcessDailyStatus.syncIndexes();
+//     await ContractSubProcess.syncIndexes();
+// }
+// syncIndex();
+
+// module.exports = { ContractModal, ContractProcess, ProcessDailyStatus, ContractSubProcess };
+module.exports = {
+    ContractModal: (conn) => conn.model('Contracts', contractSchema),
+    ContractProcess: (conn) => conn.model('ContractProcess', contractProcessSchema),
+    ContractSubProcess: (conn) => conn.model('ContractSubProcess', contractSubProcessSchema),
+    ProcessDailyStatus: (conn) => conn.model('ProcessDailyStatus', processDailyStatusSchema)
 }
-syncIndex();
-
-module.exports = { ContractModal, ContractProcess, ProcessDailyStatus, ContractSubProcess };

@@ -73,13 +73,7 @@ const newsFeedSchema = mongoose.Schema(
     }
 )
 
-const NewsFeed = mongoose.model('NewsFeed', newsFeedSchema);
-const Dashboard = mongoose.model('Dashboard', DashboardSchema);
-
-const syncIndex = async () => {
-    await NewsFeed.syncIndexes();
-    await Dashboard.syncIndexes();
+module.exports = {
+    NewsFeed: (conn) => conn.model('NewsFeed', newsFeedSchema),
+    Dashboard: (conn) => conn.model('Dashboard', DashboardSchema)
 }
-syncIndex();
-
-module.exports = { NewsFeed, Dashboard };

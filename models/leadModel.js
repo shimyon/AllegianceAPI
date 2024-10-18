@@ -116,11 +116,7 @@ const leadSchema = mongoose.Schema(
     }
 )
 
-const LeadsModal = mongoose.model('Leads', leadSchema);
-
-const syncIndex = async () => {
-    await LeadsModal.syncIndexes();
+module.exports = {
+    LeadsModal: (conn) => conn.model('Leads', leadSchema),
 }
-syncIndex();
 
-module.exports = { LeadsModal,};

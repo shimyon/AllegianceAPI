@@ -139,13 +139,18 @@ const quatationProductSchema = mongoose.Schema(
         timestamps: true,
     })
 
-const QuatationModal = mongoose.model('Quatations', quatationSchema);
-const QuatationProductModal = mongoose.model('QuatationProduct', quatationProductSchema);
+// const QuatationModal = mongoose.model('Quatations', quatationSchema);
+// const QuatationProductModal = mongoose.model('QuatationProduct', quatationProductSchema);
 
-const syncIndex = async () => {
-    await QuatationModal.syncIndexes();
-    await QuatationProductModal.syncIndexes();
+// const syncIndex = async () => {
+//     await QuatationModal.syncIndexes();
+//     await QuatationProductModal.syncIndexes();
+// }
+// syncIndex();
+
+// module.exports = { QuatationModal, QuatationProductModal };
+
+module.exports = {
+    QuatationModal: (conn) => conn.model('Quatations', quatationSchema),
+    QuatationProductModal: (conn) => conn.model('QuatationProduct', quatationProductSchema)
 }
-syncIndex();
-
-module.exports = { QuatationModal, QuatationProductModal };

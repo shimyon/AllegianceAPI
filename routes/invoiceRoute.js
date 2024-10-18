@@ -18,6 +18,6 @@ router.post('/remove/:id', protect, removeInvoice)
 router.post('/getAll', protect, getAllInvoice)
 router.get('/deleteInvoice/:id', protect, deleteInvoice)
 router.get('/getById/:id', protect, getInvoiceById)
-router.post('/Invoicepdfcreate', Invoicepdfcreate)
+router.post('/Invoicepdfcreate',protect, Invoicepdfcreate)
 
 module.exports = router

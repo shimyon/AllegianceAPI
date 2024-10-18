@@ -22,6 +22,6 @@ router.post('/changeOrderStatus', protect, changeOrderStatus)
 router.post('/getAll', protect, getAllOrder)
 router.get('/getById/:id', protect, getOrderById)
 router.post('/moveToInvoice/:id', protect, moveToInvoice)
-router.post('/Orderpdfcreate', Orderpdfcreate)
+router.post('/Orderpdfcreate',protect, Orderpdfcreate)
 
 module.exports = router

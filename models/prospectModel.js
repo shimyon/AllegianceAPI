@@ -133,11 +133,6 @@ const prospectSchema = mongoose.Schema(
         timestamps: true,
     });
 
-const ProspectsModal = mongoose.model('Prospect', prospectSchema);
-
-const syncIndex = async () => {
-    await ProspectsModal.syncIndexes();
+module.exports = {
+    ProspectsModal: (conn) => conn.model('Prospect', prospectSchema),
 }
-syncIndex();
-
-module.exports = { ProspectsModal};

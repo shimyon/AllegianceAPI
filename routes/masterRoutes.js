@@ -97,7 +97,7 @@ const {
     addApplicationSetting
 } = require('../controllers/masterController')
 const { protect } = require('../middleware/authMiddleware')
-
+// const db_middleware = require('../middleware/establish');
 router.get('/getApplicationSetting', protect, getApplicationSetting)
 router.post('/addApplicationSetting', protect, addApplicationSetting)
 
