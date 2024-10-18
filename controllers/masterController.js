@@ -1680,7 +1680,7 @@ const getStatus = asyncHandler(async (req, res) => {
         condition.GroupName = req.body.GroupName
     }
     try {
-        let Statuss = await Status.find(condition);
+        let Statuss = await Status.find(condition).sort({ GroupName: 1 });
 
         response.success = true;
         response.data = Statuss;
