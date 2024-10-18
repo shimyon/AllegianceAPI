@@ -8,13 +8,13 @@ const path = require("path");
 const readXlsxFile = require('read-excel-file/node')
 const TaskModal = require('../models/taskModel');
 const QuatationModal = require('../models/quatationModel')
-const Quatation = QuatationModal.QuatationModal
-const QuatationProduct = QuatationModal.QuatationProductModal
+const Quatations = QuatationModal.QuatationModal
+const QuatationProducts = QuatationModal.QuatationProductModal
 const ContractModel = require('../models/contractModel')
-const Contract = ContractModel.ContractModal;
+const Contracts = ContractModel.ContractModal;
 const nextoncontactModel = require('../models/nextoncontactModel')
-const NextOn = nextoncontactModel.NextOnModal;
-const OtherContact = nextoncontactModel.OtherContact;
+const NextOns = nextoncontactModel.NextOnModal;
+const OtherContactModals = nextoncontactModel.OtherContact;
 const Tasks = TaskModal.TaskModal;
 const CustomerModal = require('../models/customerModel');
 const Customers = CustomerModal.CustomerModal;
@@ -187,7 +187,7 @@ const getAllProspect = asyncHandler(async (req, res) => {
         let Prospect = Prospects(req.conn);
         let Source = Sources(req.conn);
         let Product = Products(req.conn);        
-        let ProspectOtherContactModal = ProspectOtherContactModals(req.conn);
+        let ProspectOtherContactModal = OtherContactModals(req.conn);
         let Country = Countrys(req.conn);
         let State = States(req.conn);
         let City = Citys(req.conn);
@@ -300,6 +300,8 @@ const getAllProspect = asyncHandler(async (req, res) => {
 });
 const lastStatus = asyncHandler(async (req, res) => {
     try {
+             
+        let Prospect = Prospects(req.conn);
         await Prospect.findByIdAndUpdate(req.params.id, {
             LastOpen: new Date()
         });
@@ -320,7 +322,7 @@ const getProspectById = asyncHandler(async (req, res) => {
         let Prospect = Prospects(req.conn);
         let Source = Sources(req.conn);
         let Product = Products(req.conn);        
-        let ProspectOtherContactModal = ProspectOtherContactModals(req.conn);
+        let ProspectOtherContactModal = OtherContactModals(req.conn);
         let Country = Countrys(req.conn);
         let State = States(req.conn);
         let City = Citys(req.conn);
@@ -484,10 +486,10 @@ const getbyNext = asyncHandler(async (req, res) => {
 const addOtherContact = asyncHandler(async (req, res) => {
     try {
         let Prospect = Prospects(req.conn);  
-        let ProspectOtherContactModal = ProspectOtherContactModals(req.conn);
+        let ProspectOtherContactModal = OtherContactModals(req.conn);
 
         let prospectExist = await Prospect.findById(req.body.id);
-        let nextOn = await OtherContact.create({
+        let nextOn = await ProspectOtherContactModal.create({
             ProspectId: req.body.id,
             LeadId: null,
             Name: req.body.name,
@@ -513,7 +515,7 @@ const addOtherContact = asyncHandler(async (req, res) => {
 });
 const getOtherContact = asyncHandler(async (req, res) => {
     try {
-        let ProspectOtherContactModal = OtherContact(req.conn);
+        let ProspectOtherContactModal = OtherContactModal(req.conn);
         
         let otherContact = await ProspectOtherContactModal.find({ ProspectId: req.params.id });
         return res.status(200).json({
@@ -739,6 +741,12 @@ const convertToCustomer = asyncHandler(async (req, res) => {
 
 const convertToQuotation = asyncHandler(async (req, res) => {
     try {
+        let Prospect = Prospects(req.conn);
+        let Customer = Customers(req.conn);
+        let BillingAddress = BillingAddresss(req.conn);
+        let ShippingAddress = ShippingAddresss(req.conn);
+        let Quatation = Quatations(req.conn);
+        let QuatationProduct = QuatationProducts(req.conn);
         var pros = await Prospect.findById(req.params.id);
         var customerid;
         if (pros.is_customer == false) {
@@ -891,6 +899,11 @@ const convertToQuotation = asyncHandler(async (req, res) => {
 });
 const convertToProject = asyncHandler(async (req, res) => {
     try {
+        let Prospect = Prospects(req.conn);
+        let Customer = Customers(req.conn);
+        let BillingAddress = BillingAddresss(req.conn);
+        let ShippingAddress = ShippingAddresss(req.conn);
+        let Contract = Contracts(req.conn);
         var pros = await Prospect.findById(req.params.id);
         var customerid;
         if (pros.is_customer == false) {

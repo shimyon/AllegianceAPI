@@ -5,8 +5,8 @@ const Users = require('../models/userModel')
 const notificationModels = require('../models/notificationModel')
 const Leads = LeadModal.LeadsModal;
 const nextoncontactModel = require('../models/nextoncontactModel')
-const NextOn = nextoncontactModel.NextOnModal;
-const OtherContact = nextoncontactModel.OtherContact;
+const NextOns = nextoncontactModel.NextOnModal;
+const leadOtherContact = nextoncontactModel.OtherContact;
 const SassMaster = require('../models/saasmasterModel');
 const Sources = SassMaster.SourceModal;
 const Countrys = SassMaster.CountryModal;
@@ -16,6 +16,7 @@ const Icons = SassMaster.IconModal;
 const Products = SassMaster.ProductModal;
 const Statuss = SassMaster.StatusModal;
 const ProspectModal = require('../models/prospectModel')
+const Prospects = ProspectModal.ProspectsModal;
 const TaskModal = require('../models/taskModel');
 const Tasks = TaskModal.TaskModal;
 const uploadFile = require("../middleware/uploadFileMiddleware");
@@ -405,7 +406,7 @@ const getLeadById = asyncHandler(async (req, res) => {
         let Icon = Icons(req.conn);
         let Product = Products(req.conn);
         let User = Users(req.conn);
-        let OtherContact = LeadOtherContacts(req.conn);    
+        let OtherContact = leadOtherContact(req.conn);    
         let NextTalk = NextOns(req.conn);      
         let Status = Statuss(req.conn);
 
@@ -513,7 +514,7 @@ const getNext = asyncHandler(async (req, res) => {
 const addOtherContact = asyncHandler(async (req, res) => {
     try {
         let Lead = Leads(req.conn);
-        let LeadOtherContact = LeadOtherContacts(req.conn);    
+        let OtherContact = leadOtherContact(req.conn);    
 
         let leadExist = await Lead.findById(req.body.id);
         let nextOn = await OtherContact.create({
@@ -543,9 +544,9 @@ const addOtherContact = asyncHandler(async (req, res) => {
 
 const getOtherContact = asyncHandler(async (req, res) => {
     try {       
-        let LeadOtherContact = OtherContact(req.conn);  
+        let OtherContact = leadOtherContact(req.conn);  
 
-        let otherContact = await LeadOtherContact.find({ LeadId: req.params.id });
+        let otherContact = await OtherContact.find({ LeadId: req.params.id });
         return res.status(200).json({
             success: true,
             msg: "Success",
@@ -563,9 +564,9 @@ const moveToProspect = asyncHandler(async (req, res) => {
     try {
         let Lead = Leads(req.conn);
         let Status = Statuss(req.conn);
-        let NextOn = NextOns(req.conn);  
-        let Prospect = Prospects(req.conn);       
-        let ProNextOn = ProNextOns(req.conn);
+        let NextOn = NextOns(req.conn); 
+        let Task = Tasks(req.conn); 
+        let Prospect = Prospects(req.conn);
         let notificationModel = notificationModels(req.conn);        
 
         let leadExisting = await Lead.findById(req.params.id);

@@ -50,13 +50,7 @@ const OtherContactSchema = mongoose.Schema(
         timestamps: true,
     });
 
-const NextOnModal = mongoose.model('NextOn', nextOnSchema);
-const OtherContact = mongoose.model('OtherContact', OtherContactSchema);
-
-const syncIndex = async () => {
-    await NextOnModal.syncIndexes();
-    await OtherContact.syncIndexes();
-}
-syncIndex();
-
-module.exports = { NextOnModal, OtherContact };
+module.exports = {
+    NextOnModal: (conn) => conn.model('NextOn', nextOnSchema),
+    OtherContact: (conn) => conn.model('OtherContact', OtherContactSchema),
+};
