@@ -251,7 +251,7 @@ const getProcessById = asyncHandler(async (req, res) => {
             path: 'subProcess',
             populate: [{ path: "dailyStatus" }, { path: "executive" }, { path: "addedBy" }]
         }).populate("addedBy", "_id name email role");
-        let tasklist = await Task.find({ is_active: true, ProcessId: req.params.id }).populate("Status").populate("Assign");
+        let tasklist = await Task.find({ is_active: true, ProcessId:  req.body.processId }).populate("Status").populate("Assign");
         return res.status(200).json({
             success: true,
             data:{ ProcessList, tasklist}
@@ -485,7 +485,7 @@ const getSubAllProcess = asyncHandler(async (req, res) => {
 const getSubProcessById = asyncHandler(async (req, res) => {
     try {
         let ProcessList = await SubProcess.find({ _id: req.body.subProcessId }).populate("dailyStatus").populate("addedBy", "_id name email role");
-        let tasklist = await Task.find({ is_active: true, SubProcessId: req.params.id }).populate("Status").populate("Assign");
+        let tasklist = await Task.find({ is_active: true, SubProcessId: req.body.subProcessId }).populate("Status").populate("Assign");
         
         return res.status(200).json({
             success: true,
