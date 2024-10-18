@@ -71,7 +71,7 @@ const prospectSchema = mongoose.Schema(
         NextTalk: {
             //this will use for appointment
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'ProNextOn',
+            ref: 'NextOn',
             default: null
         },
         Requirements: {
@@ -93,7 +93,7 @@ const prospectSchema = mongoose.Schema(
         },
         OtherContact: [{
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'ProspectOtherContact'
+            ref: 'OtherContact'
         }],
         is_active: {
             type: Boolean,
@@ -102,6 +102,10 @@ const prospectSchema = mongoose.Schema(
         is_customer: {
             type: Boolean,
             default: false
+        },
+        Customer: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Customers'
         },
         is_readed: {
             type: Boolean,
@@ -129,49 +133,6 @@ const prospectSchema = mongoose.Schema(
         timestamps: true,
     });
 
-const proNextOnSchema = mongoose.Schema(
-    {
-        prospectId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Prospect'
-        },
-        date: {
-            type: Date
-        },
-        note: {
-            type: String
-        },
-        user: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User'
-        },
-    },
-    {
-        timestamps: true,
-    });
-
-const prospectOtherContact = mongoose.Schema(
-    {
-        ProspectId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Prospect'
-        },
-        Name: {
-            type: String
-        },
-        Mobile: {
-            type: Number
-        },
-        Email: {
-            type: String
-        }
-    },
-    {
-        timestamps: true,
-    });
-
 module.exports = {
     ProspectsModal: (conn) => conn.model('Prospect', prospectSchema),
-    ProNextOnModal: (conn) => conn.model('ProNextOn', proNextOnSchema),
-    ProspectOtherContactModal: (conn) => conn.model('ProspectOtherContact', prospectOtherContact),
 }

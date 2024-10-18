@@ -17,7 +17,10 @@ const RecoveryModel = require('../models/recoveryModel')
 const Recovery = RecoveryModel.RecoveryModal;
 const OrderModel = require('../models/orderModel')
 const Order = OrderModel.OrderModal;
-
+const QuatationModel = require('../models/quatationModel')
+const Quatation = QuatationModel.QuatationModal;
+const InvoiceModel = require('../models/invoiceModel')
+const Invoice = InvoiceModel.InvoiceModal;
 
 
 const getcount = async (req) => {
@@ -31,35 +34,41 @@ const setDashboardCount = async (req) => {
     let Dashboard = Dashboards(req.conn);
     let newDashboardcount = await getcount(req);
     var dashboardCount = {
-        leadCount: 0,
-        prospectCount: 0,
-        processCount: 0,
-        supportCount: 0,
-        orderCount: 0,
-        recoveryCount: 0,
-        productCount: 0,
-        customerCount: 0,
+        LeadCount: 0,
+        ProspectCount: 0,
+        QuatationCount: 0,
+        OrderCount: 0,
+        InvoiceCount: 0,
+        RecoveryCount: 0,
+        ProjectCount: 0,
+        SupportCount: 0,
+        ProductCount: 0,
+        CustomerCount: 0,
     };
     for (const elements in newDashboardcount) {
         if (Object.hasOwnProperty.call(newDashboardcount, elements)) {
             const element = newDashboardcount[elements];
-                dashboardCount.leadCount = await Lead.find({ is_active: true, Stage: "New" }).count({});
-                dashboardCount.prospectCount = await Prospect.find({ is_active: true }).count({});
-                dashboardCount.processCount = await Contract.find({ is_active: true }).count({});
-                dashboardCount.supportCount = await Support.find({ is_active: true }).count({});
-                dashboardCount.recoveryCount = await Recovery.find({ is_active: true }).count({});
-                dashboardCount.orderCount = await Order.find({ is_active: true }).count({});
-                dashboardCount.productCount = await Product.find({ is_active: true}).count({});
-                dashboardCount.customerCount = await Customer.find({ is_active: true }).count({});
+            dashboardCount.LeadCount = await Lead.find({ is_active: true, Stage: "New" }).count({});
+            dashboardCount.ProspectCount = await Prospect.find({ is_active: true }).count({});
+            dashboardCount.QuatationCount = await Quatation.find({ is_active: true }).count({});
+            dashboardCount.OrderCount = await Order.find({ is_active: true }).count({});
+            dashboardCount.InvoiceCount = await Invoice.find({ is_active: true }).count({});
+            dashboardCount.RecoveryCount = await Recovery.find({ is_active: true }).count({});
+            dashboardCount.ProjectCount = await Contract.find({ is_active: true }).count({});
+            dashboardCount.SupportCount = await Support.find({ is_active: true }).count({});
+            dashboardCount.ProductCount = await Product.find({ is_active: true }).count({});
+            dashboardCount.CustomerCount = await Customer.find({ is_active: true }).count({});
             let user = await Dashboard.findByIdAndUpdate(element._id, {
-                Lead: dashboardCount.leadCount,
-                Prospect: dashboardCount.prospectCount,
-                Support: dashboardCount.supportCount,
-                Recovery: dashboardCount.recoveryCount,
-                Project: dashboardCount.processCount,
-                Order: dashboardCount.orderCount,
-                Product: dashboardCount.productCount,
-                Customer: dashboardCount.customerCount,
+                Lead: dashboardCount.LeadCount,
+                Prospect: dashboardCount.ProspectCount,
+                Quatation: dashboardCount.QuatationCount,
+                Order: dashboardCount.OrderCount,
+                Invoice: dashboardCount.InvoiceCount,
+                Recovery: dashboardCount.RecoveryCount,
+                Project: dashboardCount.ProjectCount,
+                Support: dashboardCount.SupportCount,
+                Product: dashboardCount.ProductCount,
+                Customer: dashboardCount.CustomerCount,
             });
             user = await Dashboard.findOne({ _id: element._id });
             console.log(user)

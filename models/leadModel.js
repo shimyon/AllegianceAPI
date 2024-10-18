@@ -100,7 +100,7 @@ const leadSchema = mongoose.Schema(
         },
         OtherContact: [{
             type: mongoose.Schema.Types.ObjectId,
-            ref: 'LeadOtherContact'
+            ref: 'OtherContact'
         }],
         is_favorite: {
             type: Boolean,
@@ -116,48 +116,7 @@ const leadSchema = mongoose.Schema(
     }
 )
 
-const nextOnSchema = mongoose.Schema(
-    {
-        leadId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Leads'
-        },
-        date: {
-            type: Date
-        },
-        note: {
-            type: String
-        },
-        user: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'User'
-        },
-    },
-    {
-        timestamps: true,
-    });
-
-const leadOtherContact = mongoose.Schema(
-    {
-        LeadId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Leads'
-        },
-        Name: {
-            type: String
-        },
-        Mobile: {
-            type: Number
-        },
-        Email: {
-            type: String
-        }
-    },
-    {
-        timestamps: true,
-    });
 module.exports = {
     LeadsModal: (conn) => conn.model('Leads', leadSchema),
-    NextOnModal: (conn) => conn.model('NextOn', nextOnSchema),
-    LeadOtherContact: (conn) => conn.model('LeadOtherContact', leadOtherContact),
 }
+
