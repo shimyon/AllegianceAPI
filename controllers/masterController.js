@@ -974,10 +974,10 @@ const getUnitById = asyncHandler(async (req, res) => {
 
     try {
         let Unit = Units(req.conn);
-        let Units = await Unit.findOne({ is_active: true, _id: req.params.id });
+        let units = await Unit.findOne({ is_active: true, _id: req.params.id });
 
         response.success = true;
-        response.data = Units;
+        response.data = units;
         return res.status(200).json(response);
     }
     catch (err) {
@@ -1553,8 +1553,10 @@ const addRole = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let moduleRight =  ModuleRights(req.conn);
+        
         let Role = Roles(req.conn);
+        let Module = Modules(req.conn);
+        let moduleRight =  ModuleRights(req.conn);
         let oldRole = await Role.findOne({ Name: req.body.name });
 
         if (oldRole) {

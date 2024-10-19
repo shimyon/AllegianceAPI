@@ -32,6 +32,7 @@ const Type = SaasModal.TypeModal;
 const saasModuleRights = SaasModal.ModuleRightModal;
 const ApplicationSetting = SaasModal.ApplicationSettingModal;
 const ModuleRight = require('../models/moduleRightModel')
+const uploadFile = require("../middleware/uploadFileMiddleware");
 
 const registerUser = asyncHandler(async (req, res) => {
     const { name, email, password, role } = req.body
@@ -306,6 +307,27 @@ const forgotPassword = asyncHandler(async (req, res) => {
     }
 })
 const addOrganizationUser = asyncHandler(async (req, res) => {
+    try {
+        process.env.UPLOADFILE = "";
+        await uploadFile(req, res, function (err) {
+            if (err) {
+                return ("Error uploading file.");
+            } else {
+                editSave(req, res, process.env.UPLOADFILE)
+            }
+        })
+
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in editing data. " + err.message,
+            data: null,
+        });
+
+    }
+})
+
+const editSave = asyncHandler(async (req, res, fileName) => {
     let Users = User(req.conn);
     let Sources = Source(req.conn);
     let States = State(req.conn);
@@ -329,6 +351,7 @@ const addOrganizationUser = asyncHandler(async (req, res) => {
                 message: "Same Organization already exist.",
             });
         }
+        fileName = fileName.replace(",", "");
         const organization = await Organization.create({
             Name: req.body.Name,
             Description: req.body.Description,
@@ -337,11 +360,15 @@ const addOrganizationUser = asyncHandler(async (req, res) => {
             UserEmail: req.body.UserEmail,
             Code: req.body.Code,
             PhoneNo: req.body.PhoneNo,
+            CompanyLogo: fileName,
         });
 
         const applicationSetting = await ApplicationSettings
             .create({
-                CompanyTitle: req.body.Name
+                CompanyTitle: req.body.Name,
+                CompanyLogo: fileName,
+                OfficeEmail: req.body.Email,
+                OfficePhone1: req.body.PhoneNo
             });
 
         let oldSource = await MasterSource.find({});
@@ -415,7 +442,7 @@ const addOrganizationUser = asyncHandler(async (req, res) => {
         let oldStatus = await MasterStatus.find({});
         let insertdataStatus = oldStatus.map(f => ({
             Name: f.Name,
-            GroupName:f.GroupName,
+            GroupName: f.GroupName,
             Role: null,
             Assign: null,
             Assign: null,
@@ -473,6 +500,36 @@ const addOrganizationUser = asyncHandler(async (req, res) => {
             Order: 0,
             UserId: newUser._id
         });
+
+        if (organization) {
+            let html =
+                `<html>
+            Dear ${newUser.name},<br/><br/>
+            We are excited to inform you that your organization <b>${organization.Name}</b> has been successfully created!<br/><br/>
+            You can now manage your organization and take advantage of all our features. <br/> Below are your account details:<br/><br/>
+            <b>User Name:</b> ${newUser.name}<br/>
+            <b>User Email:</b> ${organization.Email}<br/><br/>
+            If you have any questions or need assistance, feel free to contact our support team.<br/><br/>
+            Best regards,<br/>
+            <b>Team Emoiss</b>
+        </html>`;
+            sendMail(organization.Email, "Organization Created Successfully", html, req);
+        }
+        if (newUser) {
+            let html =
+                `<html>
+            Dear ${newUser.name},<br/><br/>
+            We are excited to inform you that your organization <b>${organization.Name}</b> has been successfully created!<br/><br/>
+            You can now manage your organization and take advantage of all our features.<br/> Below are your account details:<br/><br/>
+            <b>User Name:</b> ${newUser.name}<br/>
+            <b>User Email:</b> ${newUser.email}<br/><br/>
+            If you have any questions or need assistance, feel free to contact our support team.<br/><br/>
+            Best regards,<br/>
+            <b>Team Emoiss</b>
+        </html>`;
+            sendMail(newUser.email, "Organization Created Successfully", html, req);
+        }
+
         return res.status(200).json({
             success: true,
             message: "User added successfully",
@@ -493,6 +550,7 @@ const checkOrganization = asyncHandler(async (req, res) => {
                 success: true,
                 _id: OrganizationExists.id,
                 DB_NAME: OrganizationExists.Name,
+                CompanyLogo: OrganizationExists.CompanyLogo,
             }).end();
         }
         else {
