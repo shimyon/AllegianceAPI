@@ -36,7 +36,9 @@ var test = require('tape')
 var path = require('path')
 const Templates = require('../models/templateModel')
 const { generatePDF } = require('../services/pdfService')
-
+const LeadModal = require('../models/leadModel')
+const Lead = LeadModal.LeadsModal;
+const Icon = Master.IconModal;
 const addQuatation = asyncHandler(async (req, res) => {
     try {
         let Quatation = Quatations(req.conn);
@@ -550,6 +552,7 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
         let applicationSetting = await ApplicationSetting.findOne();
         let customerList = await Quatation.find({ is_deleted: false, _id: req.body.id })
             .populate("Customer")
+            .populate("QuatationName")
             .populate({
                 path: 'Products',
                 populate: [
@@ -580,7 +583,7 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
         templateHtml = templateHtml.replace('{{token.accno}}', applicationSetting.AccNo || '')
         templateHtml = templateHtml.replace('{{token.OfficePhone2}}', applicationSetting.OfficePhone2 || '')
         templateHtml = templateHtml.replace('{{token.OfficeAddress}}', applicationSetting.OfficeAddress?.replace(/(\r\n|\n|\r)/gm, "<br>") || '')
-        templateHtml = templateHtml.replace('{{token.QuatationName}}', customerList[0].QuatationName || '')
+        templateHtml = templateHtml.replace('{{token.QuatationName}}', customerList[0].QuatationName?.Name || '')
         templateHtml = templateHtml.replace('{{token.QuatationNo}}', customerList[0].QuatationCode || '')
         templateHtml = templateHtml.replace('{{token.CustomerNo}}', customerList[0].Customer?.CustomerCode || '')
         templateHtml = templateHtml.replace('{{token.date}}', format('dd-MM-yyyy', customerList[0].QuatationDate))
@@ -743,7 +746,6 @@ const duplicateLead = asyncHandler(async (req, res) => {
     let City = Citys(req.conn);
     let Icon = Icons(req.conn);
     let Lead = Leads(req.conn);
-
     const { quotationId } = req.body;
 
     const quotation = await Quatation.findById(quotationId)
@@ -792,7 +794,6 @@ const duplicateLead = asyncHandler(async (req, res) => {
         data: newLead
     });
 });
-
 
 module.exports = {
     addQuatation,

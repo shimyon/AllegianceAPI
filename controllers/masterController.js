@@ -1,4 +1,5 @@
 const asyncHandler = require('express-async-handler')
+
 const SassMaster = require('../models/saasmasterModel');
 // const Master = require('../models/masterModel')
 // const Product = Master.ProductModal;
@@ -1011,6 +1012,130 @@ const deleteUnit = asyncHandler(async (req, res) => {
 
 });
 
+const addQuatationName = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let oldQuatationName = await QuatationName.findOne({ Name: req.body.name });
+
+        if (oldQuatationName) {
+            response.message = "QuatationName with same name already exist.";
+            return res.status(400).json(response);
+        }
+
+        let newQuatationName = await QuatationName.create({
+            Name: req.body.name,
+            is_active: true,
+        });
+
+        response.success = true;
+        response.message = "QuatationName added successfully";
+        response.data = newQuatationName;
+        return res.status(200).json(response);
+    } catch (err) {
+        response.message = "Error in adding QuatationName. " + err.message;
+        return res.status(400).json(response);
+    }
+
+});
+const editQuatationName = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let oldQuatationName = QuatationName.findById(req.body.id);
+
+        if (!oldQuatationName) {
+            response.message = "QuatationName not found.";
+            return res.status(400).json(response);
+        }
+
+        let newQuatationName = await QuatationName.findByIdAndUpdate(req.body.id, {
+            Name: req.body.name
+        });
+
+        response.success = true;
+        response.message = "QuatationName added successfully";
+        response.data = newQuatationName;
+        return res.status(200).json(response);
+    } catch (err) {
+        response.message = "Error in updating QuatationName. " + err.message;
+        return res.status(400).json(response);
+    }
+
+});
+const changeQuatationNameStatus = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let newQuatationName = await QuatationName.findByIdAndUpdate(req.body.id, {
+            is_active: req.body.active
+        });
+
+        response.success = true;
+        response.message = "QuatationName status updated successfully";
+        return res.status(200).json(response);
+    }
+    catch (err) {
+        response.message = "Error in updating QuatationName. " + err.message;
+        return res.status(400).json(response);
+    }
+
+})
+const getQuatationNames = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let QuatationNames = await QuatationName.find({ is_active: req.body.active });
+
+        response.success = true;
+        response.data = QuatationNames;
+        return res.status(200).json(response);
+    }
+    catch (err) {
+        response.message = "Error in getting QuatationName. " + err.message;
+        return res.status(400).json(response);
+    }
+})
+const getQuatationNameById = asyncHandler(async (req, res) => {
+    let response = new Response();
+
+    try {
+        let QuatationNames = await QuatationName.findOne({ is_active: true, _id: req.params.id });
+
+        response.success = true;
+        response.data = QuatationNames;
+        return res.status(200).json(response);
+    }
+    catch (err) {
+        response.message = "Error in getting QuatationName by id. " + err.message;
+        return res.status(400).json(response);
+    }
+})
+const deleteQuatationName = asyncHandler(async (req, res) => {
+    try {
+        await QuatationName.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {
+            if (err) {
+                return res.status(401).json({
+                    success: false,
+                    msg: err
+                }).end();
+            } else {
+                return res.status(200).json({
+                    success: true,
+                    msg: "QuatationName removed. ",
+                }).end();
+            }
+        });
+
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in removing QuatationName. " + err.message,
+            data: null,
+        });
+    }
+
+});
 
 const addIcon = asyncHandler(async (req, res) => {
     let response = new Response();
@@ -2124,6 +2249,12 @@ module.exports = {
     getUnits,
     getUnitById,
     deleteUnit,
+    addQuatationName,
+    editQuatationName,
+    changeQuatationNameStatus,
+    getQuatationNames,
+    getQuatationNameById,
+    deleteQuatationName,
     addCategory,
     editCategory,
     changeCategoryStatus,

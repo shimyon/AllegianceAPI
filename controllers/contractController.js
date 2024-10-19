@@ -3,6 +3,8 @@ const ContractModel = require('../models/contractModel')
 const Contracts = ContractModel.ContractModal;
 const Processs = ContractModel.ContractProcess;
 const SubProcess = ContractModel.ContractSubProcess;
+const TaskModal = require('../models/taskModel');
+const Task = TaskModal.TaskModal;
 const DailyStatuss = ContractModel.ProcessDailyStatus;
 const Users = require('../models/userModel')
 const CustomerModal = require('../models/customerModel')
@@ -282,9 +284,10 @@ const getProcessById = asyncHandler(async (req, res) => {
             path: 'subProcess',
             populate: [{ path: "dailyStatus" }, { path: "executive" }, { path: "addedBy" }]
         }).populate("addedBy", "_id name email role");
+        let tasklist = await Task.find({ is_active: true, ProcessId:  req.body.processId }).populate("Status").populate("Assign");
         return res.status(200).json({
             success: true,
-            data: ProcessList
+            data:{ ProcessList, tasklist}
         }).end();
     } catch (err) {
         return res.status(400).json({
@@ -536,9 +539,10 @@ const getSubProcessById = asyncHandler(async (req, res) => {
         let DailyStatus = DailyStatuss(req.conn);
 
         let ProcessList = await SubProcesss.find({ _id: req.body.subProcessId }).populate("dailyStatus").populate("addedBy", "_id name email role");
+
         return res.status(200).json({
             success: true,
-            data: ProcessList
+            data: {ProcessList, tasklist}
         }).end();
     } catch (err) {
         return res.status(400).json({

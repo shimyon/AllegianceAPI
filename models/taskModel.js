@@ -49,11 +49,19 @@ const taskSchema = mongoose.Schema(
     LeadId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Leads'
-  },
-  ProspectId:{
-     type: mongoose.Schema.Types.ObjectId,
+    },
+    ProspectId: {
+      type: mongoose.Schema.Types.ObjectId,
       ref: 'Prospect'
-  }
+    },
+    ProcessId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'ContractProcess'
+    },
+    SubProcessId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'ContractSubProcess'
+    }
   },
   {
     timestamps: true,
@@ -73,18 +81,10 @@ const taskCommentadd = mongoose.Schema(
       ref: 'User'
     },
   },
-    {
-      timestamps: true,
-    }
+  {
+    timestamps: true,
+  }
 )
-// const TaskModal = mongoose.model('Task', taskSchema);
-// const TaskCommentModal = mongoose.model('TaskComment', taskCommentadd);
-// const syncIndex = async () => {
-//   await TaskModal.syncIndexes();
-//   await TaskCommentModal.syncIndexes();
-// }
-// syncIndex();
-// module.exports = { TaskModal, TaskCommentModal } ;
 module.exports = {
   TaskModal: (conn) => conn.model('Task', taskSchema),
   TaskCommentModal: (conn) => conn.model('TaskComment', taskCommentadd),

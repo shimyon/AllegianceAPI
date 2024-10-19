@@ -1,6 +1,7 @@
 const ProspectModal = require('../models/prospectModel')
-const Prospects = ProspectModal.LeadsModal;
-const NextOns = ProspectModal.ProNextOnModal;
+const Prospects = ProspectModal.ProspectsModal;
+const nextoncontactModel = require('../models/nextoncontactModel')
+constNextOnsNextOn = nextoncontactModel.NextOnModal;
 const moment = require('moment')
 
 const getprospectAction = async () => {

@@ -75,7 +75,33 @@ const addCustomer = asyncHandler(async (req, res) => {
             Notes: req.body.notes,
             is_active: true
         });
-
+        if (newCustomer) {
+            const newBilling = await BillingAddress.create({
+                Customer: newCustomer._id,
+                Address: req.body.address,
+                City: req.body.city||null,
+                State: req.body.state||null,
+                Country: req.body.country||null,
+                is_active: true,
+                is_default: true
+            });
+            const newShipping = await ShippingAddress.create({
+                Customer: newCustomer._id,
+                Address: req.body.address,
+                City: req.body.city||null,
+                State: req.body.state||null,
+                Country: req.body.country||null,
+                addedBy: req.user._id,
+                is_active: true,
+                is_default: true
+            });
+            const existCustomer = await Customer.findById(newCustomer._id);
+            existCustomer.BillingAddress.push(newBilling);
+            existCustomer.ShippingAddress.push(newShipping);
+            existCustomer.save((err) => {
+                if (err) throw err;
+            });
+        }
         return res.status(200).json(newCustomer).end();
     } catch (err) {
         return res.status(400).json({

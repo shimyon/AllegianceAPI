@@ -105,7 +105,7 @@ const sourceSchema = mongoose.Schema(
     {
         timestamps: true,
     });
-const unitSchema = mongoose.Schema(
+const quatationNameSchema = mongoose.Schema(
     {
         Name: {
             type: String
@@ -117,6 +117,18 @@ const unitSchema = mongoose.Schema(
     {
         timestamps: true,
     });
+    const unitSchema = mongoose.Schema(
+        {
+            Name: {
+                type: String
+            },
+            is_active: {
+                type: Boolean
+            }
+        },
+        {
+            timestamps: true,
+        });
 const categorySchema = mongoose.Schema(
     {
         Name: {
@@ -395,6 +407,7 @@ const organizationSchema = mongoose.Schema(
             timestamps: true,
         });
 const ProductModal = mongoose.model('Products', productSchema);
+
 const TypeModal = mongoose.model('MasterTypes', typeSchema);
 const SourceModal = mongoose.model('MasterSources', sourceSchema);
 const CountryModal = mongoose.model('MasterCountry', countrySchema);
@@ -402,6 +415,7 @@ const StateModal = mongoose.model('MasterStates', stateSchema);
 const CityModal = mongoose.model('MasterCity', citySchema);
 const UnitModal = mongoose.model('MasterUnits', unitSchema);
 const IconModal = mongoose.model('MasterIcon', iconSchema);
+
 const CategoryModal = mongoose.model('Category', categorySchema);
 const SubCategoryModal = mongoose.model('SubCategory', subCategorySchema);
 const ModuleModal = mongoose.model('MasterModule_Master', ModuleSchema);
@@ -419,6 +433,7 @@ const syncIndex = async () => {
     await StateModal.syncIndexes();
     await CityModal.syncIndexes();
     await UnitModal.syncIndexes();
+    await QuatationNameModal.syncIndexes();
     await IconModal.syncIndexes();
     await CategoryModal.syncIndexes();
     await SubCategoryModal.syncIndexes();

@@ -66,12 +66,14 @@ const registerUser = asyncHandler(async (req, res) => {
     await Dashboards.create({
         Lead: 0,
         Prospect: 0,
-        Support: 0,
+        Quatation: 0,
+        Order: 0,
+        Invoice: 0,
         Recovery: 0,
+        Project: 0,
+        Support: 0,
         Product: 0,
         Customer: 0,
-        Project: 0,
-        Order: 0,
         UserId: user.id
     });
     if (user) {

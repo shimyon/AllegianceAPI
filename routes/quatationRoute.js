@@ -24,5 +24,4 @@ router.get('/deleteQuatation/:id', protect, deleteQuatation)
 router.post('/duplicateLead', protect,  duplicateLead)
 router.post('/Quatationpdfcreate',protect, Quatationpdfcreate)
 
-
 module.exports = router

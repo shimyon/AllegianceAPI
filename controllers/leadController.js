@@ -4,8 +4,9 @@ const LeadModal = require('../models/leadModel')
 const Users = require('../models/userModel')
 const notificationModels = require('../models/notificationModel')
 const Leads = LeadModal.LeadsModal;
-const NextOns = LeadModal.NextOnModal;
-const LeadOtherContacts = LeadModal.LeadOtherContact;
+const nextoncontactModel = require('../models/nextoncontactModel')
+const NextOns = nextoncontactModel.NextOnModal;
+const leadOtherContact = nextoncontactModel.OtherContact;
 const SassMaster = require('../models/saasmasterModel');
 const Sources = SassMaster.SourceModal;
 const Countrys = SassMaster.CountryModal;
@@ -16,7 +17,6 @@ const Products = SassMaster.ProductModal;
 const Statuss = SassMaster.StatusModal;
 const ProspectModal = require('../models/prospectModel')
 const Prospects = ProspectModal.ProspectsModal;
-const ProNextOns = ProspectModal.ProNextOnModal;
 const TaskModal = require('../models/taskModel');
 const Tasks = TaskModal.TaskModal;
 const uploadFile = require("../middleware/uploadFileMiddleware");
@@ -52,6 +52,7 @@ const addLead = asyncHandler(async (req, res) => {
             Sales: req.body.sales || null,
             addedBy: req.user._id,
             Stage: "New",
+            Status: req.body.status,
             LeadSince: new Date(),
             StageDate: new Date(),
             is_active: true
@@ -123,6 +124,7 @@ const editLead = asyncHandler(async (req, res) => {
             CustomerRefrence: req.body.CustomerRefrence,
             Sales: req.body.sales || null,
             Notes: req.body.notes,
+            Status: req.body.status,
             InCharge: req.body.incharge,
             is_active: true
         });
@@ -176,7 +178,7 @@ const removeLead = asyncHandler(async (req, res) => {
 const getAllLead = asyncHandler(async (req, res) => {
     try {
         let Lead = Leads(req.conn);
-        let { skip, per_page } = req.body;
+        let { skip, per_page, startdate, enddate } = req.body;
         let query = [];
         query.push({
             $match: { is_active: req.body.active, Stage: "New" }
@@ -208,6 +210,25 @@ const getAllLead = asyncHandler(async (req, res) => {
         if (req.body.product) {
             query.push({
                 $match: { Product: ObjectId(req.body.product) }
+            });
+        }
+
+        if (req.body.icon) {
+            query.push({
+                $match: { Icon: ObjectId(req.body.icon) }
+            });
+        }
+        if (startdate && enddate) {
+            const start = new Date(startdate);
+            const end = new Date(enddate);
+            end.setDate(end.getDate() + 1);
+            query.push({
+                $match: {
+                    LeadSince: {
+                        $gte: start,
+                        $lt: end
+                    }
+                }
             });
         }
         query.push(
@@ -299,35 +320,23 @@ const getAllLead = asyncHandler(async (req, res) => {
                 },
             },
             {
+                '$lookup': {
+                    'from': 'status',
+                    'localField': 'Status',
+                    'foreignField': '_id',
+                    'as': 'Status'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$Status',
+                    preserveNullAndEmptyArrays: true
+                },
+            },
+            {
                 $sort: { createdAt: -1 }
             }
         );
-
-        if (req.body.month) {
-            if (req.body.month == "this") {
-                const currentMonth = new Date().getMonth() + 1;
-                query.push({
-                    $match: {
-                        $expr: {
-                            $eq: [{ $month: "$LeadSince" }, currentMonth]
-                        }
-                    }
-                });
-            }
-            if (req.body.month == "last") {
-                let currentMonth = new Date().getMonth();
-                if (currentMonth == 0) {
-                    currentMonth = currentMonth + 12;
-                }
-                query.push({
-                    $match: {
-                        $expr: {
-                            $eq: [{ $month: "$LeadSince" }, currentMonth]
-                        }
-                    }
-                });
-            }
-        }
         query.push(
             {
                 $facet: {
@@ -397,11 +406,12 @@ const getLeadById = asyncHandler(async (req, res) => {
         let Icon = Icons(req.conn);
         let Product = Products(req.conn);
         let User = Users(req.conn);
-        let OtherContact = LeadOtherContacts(req.conn);    
+        let OtherContact = leadOtherContact(req.conn);    
         let NextTalk = NextOns(req.conn);      
         let Status = Statuss(req.conn);
 
         let leadList = await Lead.find({ Stage: "New", _id: req.params.id }).populate("Source").populate("Country").populate("State").populate("City").populate("Icon").populate("OtherContact").populate("Product").populate("Sales").populate("NextTalk").populate("addedBy");
+
         let tasklist = await Task.find({ is_active: true, LeadId: req.params.id }).populate("Status").populate("Assign");
         return res.status(200).json({
             success: true,
@@ -424,6 +434,7 @@ const addNext = asyncHandler(async (req, res) => {
 
         let nextOn = await NextOn.create({
             leadId: req.body.leadid,
+            prospectId: null,
             date: req.body.date,
             note: req.body.note,
             user: req.user._id
@@ -503,11 +514,12 @@ const getNext = asyncHandler(async (req, res) => {
 const addOtherContact = asyncHandler(async (req, res) => {
     try {
         let Lead = Leads(req.conn);
-        let LeadOtherContact = LeadOtherContacts(req.conn);    
+        let OtherContact = leadOtherContact(req.conn);    
 
         let leadExist = await Lead.findById(req.body.id);
-        let nextOn = await LeadOtherContact.create({
+        let nextOn = await OtherContact.create({
             LeadId: req.body.id,
+            ProspectId: null,
             Name: req.body.name,
             Mobile: req.body.mobile,
             Email: req.body.email
@@ -532,9 +544,9 @@ const addOtherContact = asyncHandler(async (req, res) => {
 
 const getOtherContact = asyncHandler(async (req, res) => {
     try {       
-        let LeadOtherContact = LeadOtherContacts(req.conn);  
+        let OtherContact = leadOtherContact(req.conn);  
 
-        let otherContact = await LeadOtherContact.find({ LeadId: req.params.id });
+        let otherContact = await OtherContact.find({ LeadId: req.params.id });
         return res.status(200).json({
             success: true,
             msg: "Success",
@@ -552,9 +564,9 @@ const moveToProspect = asyncHandler(async (req, res) => {
     try {
         let Lead = Leads(req.conn);
         let Status = Statuss(req.conn);
-        let NextOn = NextOns(req.conn);  
-        let Prospect = Prospects(req.conn);       
-        let ProNextOn = ProNextOns(req.conn);
+        let NextOn = NextOns(req.conn); 
+        let Task = Tasks(req.conn); 
+        let Prospect = Prospects(req.conn);
         let notificationModel = notificationModels(req.conn);        
 
         let leadExisting = await Lead.findById(req.params.id);
@@ -564,10 +576,6 @@ const moveToProspect = asyncHandler(async (req, res) => {
                 msg: "Lead already moved to prospect. "
             });
         }
-        await Lead.findByIdAndUpdate(req.params.id, {
-            Stage: "Prospect",
-            StageDate: new Date()
-        });
 
         let status = await Status.find({ GroupName: "Prospects" }).lean();
         let interaction = await Prospect.create({
@@ -579,42 +587,71 @@ const moveToProspect = asyncHandler(async (req, res) => {
             Address: leadExisting.Address,
             Mobile: leadExisting.Mobile,
             Email: leadExisting.Email,
-            City: leadExisting.City,
-            State: leadExisting.State,
-            Country: leadExisting.Country,
-            Product: leadExisting.Product,
+            Website:null,
+            City: leadExisting.City || null,
+            State: leadExisting.State || null,
+            Country: leadExisting.Country || null,
+            Product: leadExisting.Product || null,
             Notes: leadExisting.Notes,
-            Sales: leadExisting.Sales,
-            Source: leadExisting.Source,
-            Requirements: leadExisting.Requirements,
-            CustomerRefrence: leadExisting.CustomerRefrence,
+            ProspectAmount: 0,
+            OrderTarget: null,
+            Sales: leadExisting.Sales || null,
             addedBy: req.user._id,
-            Stage: status[0],
+            Stage: status[0]._id,
             StageDate: new Date(),
-            is_active: true
+            Requirements: leadExisting.Requirements,
+            Source:leadExisting.Source,
+            CustomerRefrence: leadExisting.CustomerRefrence,
+            is_active: true,
+            Customer:null
         });
         if (interaction) {
+            await Lead.findByIdAndUpdate(req.params.id, {
+                Stage: "Prospect",
+                StageDate: new Date()
+            });
             const next = await NextOn.find({ leadId: req.params.id }).sort({ date: -1 });
             let insertProspectNext = next.map(f => ({
+                leadId: null,
                 prospectId: interaction._id,
                 date: f.date,
                 note: f.note,
                 user: req.user._id
             }));
             if (insertProspectNext.length > 0) {
-                const savedNotification = await ProNextOn.insertMany(insertProspectNext);
+                const savednext = await NextOn.insertMany(insertProspectNext);
                 let prospectExisting = await Prospect.findByIdAndUpdate(interaction._id, {
-                        NextTalk: savedNotification[0]._id
-                    });
+                    NextTalk: savednext[0]._id
+                });
             }
+            const tasklist = await Task.find({ LeadId: req.params.id });
+            let insertProspecttask = tasklist.map(f => ({
+                LeadId: null,
+                ProspectId: interaction._id,
+                Name: f.Name,
+                Description: f.Description,
+                Status: f.Status || null,
+                Assign: f.Assign || null,
+                Reporter: f.Reporter || null,
+                Priority: f.Priority,
+                StartDate: f.StartDate,
+                EndDate: f.EndDate,
+                is_active: f.is_active,
+                addedBy: req.user._id
+            }));
+            if (insertProspecttask.length > 0) {
+                const savedProspecttask = await Task.insertMany(insertProspecttask);
+            }
+            if (interaction.Sales) {
             let date = new Date();
-            const savedNotification = await notificationModel.create({
-                description: `lead(${interaction.Company}) Moved to prospect`,
-                date: date,
-                link: "Prospects",
-                userId: interaction.Sales._id,
-                Isread: false
-            });
+                const savedNotification = await notificationModel.create({
+                    description: `lead(${interaction.Company}) Moved to prospect`,
+                    date: date,
+                    link: "Prospects",
+                    userId: interaction.Sales,
+                    Isread: false
+                });
+            }
             // let resuser = await User.find({ is_active: true, role: 'SuperAdmin' });
             // let insertdata = resuser.map(f => ({
             //     description: `lead(${interaction.Company}) Moved to prospect`,
