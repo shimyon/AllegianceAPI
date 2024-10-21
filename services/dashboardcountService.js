@@ -2,30 +2,29 @@ const moment = require('moment');
 const DashboardModal = require('../models/dashboardModel')
 const Dashboards = DashboardModal.Dashboard
 const LeadModal = require('../models/leadModel')
-const Leads = LeadModal.LeadsModal;
-const SassMaster = require('../models/saasmasterModel');
-const Products = SassMaster.ProductModal;
+const Lead = LeadModal.LeadsModal;
+const Master = require('../models/masterModel')
+const Product = Master.ProductModal;
 const CustomerModal = require('../models/customerModel')
-const Customers = CustomerModal.CustomerModal
+const Customer = CustomerModal.CustomerModal
 const ProspectModal = require('../models/prospectModel')
-const Prospects = ProspectModal.ProspectsModal;
+const Prospect = ProspectModal.ProspectsModal;
 const ContractModel = require('../models/contractModel')
-const Contracts = ContractModel.ContractModal;
+const Contract = ContractModel.ContractModal;
 const SupportModel = require('../models/supportModel')
-const Supports = SupportModel.SupportModal;
+const Support = SupportModel.SupportModal;
 const RecoveryModel = require('../models/recoveryModel')
-const Recoverys = RecoveryModel.RecoveryModal;
+const Recovery = RecoveryModel.RecoveryModal;
 const OrderModel = require('../models/orderModel')
-const Orders = OrderModel.OrderModal;
-const Users = require('../models/userModel')
+const Order = OrderModel.OrderModal;
 const QuatationModel = require('../models/quatationModel')
-const Quatations = QuatationModel.QuatationModal;
+const Quatation = QuatationModel.QuatationModal;
 const InvoiceModel = require('../models/invoiceModel')
-const Invoices = InvoiceModel.InvoiceModal;
+const Invoice = InvoiceModel.InvoiceModal;
+
 
 const getcount = async (req) => {
     let Dashboard = Dashboards(req.conn);
-    let User = Users(req.conn);
     const newDashboardcount = await Dashboard.find().populate("UserId").lean();
 
     return newDashboardcount;
@@ -33,17 +32,6 @@ const getcount = async (req) => {
 
 const setDashboardCount = async (req) => {
     let Dashboard = Dashboards(req.conn);
-    let Lead = Leads(req.conn);
-    let Prospect = Prospects(req.conn);
-    let Contract = Contracts(req.conn);
-    let Quatation = Quatations(req.conn);
-    let Invoice = Invoices(req.conn);
-    let Support = Supports(req.conn);
-    let Recovery = Recoverys(req.conn);
-    let Order = Orders(req.conn);
-    let Product = Products(req.conn);
-    let Customer = Customers(req.conn);
-
     let newDashboardcount = await getcount(req);
     var dashboardCount = {
         LeadCount: 0,

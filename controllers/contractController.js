@@ -278,7 +278,6 @@ const getProcessById = asyncHandler(async (req, res) => {
         let User = Users(req.conn);        
         let Process = Processs(req.conn);
         let SubProcesss = SubProcess(req.conn);
-        let dailyStatus = DailyStatuss(req.conn);
 
         let ProcessList = await Process.find({ _id: req.body.processId }).populate({
             path: 'subProcess',
