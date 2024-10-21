@@ -25,10 +25,10 @@ const protect = asyncHandler(async (req, res, next) => {
             } else {
                 let Users = User(req.conn)
                 //Get user from the token
-                req.user = await Users.findById(decoded.id).select('-password')
-                // req.user = {
-                //   _id : jwt.decode.id  
-                // };
+                // req.user = await Users.findById(decoded.id).select('-password')
+                req.user = {
+                  _id : jwt.decode.id  
+                };
                 next()
             }
         } catch (error) {

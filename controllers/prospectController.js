@@ -300,6 +300,7 @@ const getAllProspect = asyncHandler(async (req, res) => {
 });
 const lastStatus = asyncHandler(async (req, res) => {
     try {
+             
         let Prospect = Prospects(req.conn);
         await Prospect.findByIdAndUpdate(req.params.id, {
             LastOpen: new Date()

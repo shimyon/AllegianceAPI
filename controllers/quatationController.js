@@ -17,12 +17,6 @@ const ApplicationSettings = SassMaster.ApplicationSettingModal;
 const Statuss = SassMaster.StatusModal;
 const Products = SassMaster.ProductModal;
 const Units = SassMaster.UnitModal;
-const Countrys = SassMaster.CountryModal;
-const States = SassMaster.StateModal;
-const Citys = SassMaster.CityModal;
-const Icons = SassMaster.IconModal;
-const LeadModal = require('../models/leadModel');
-const Leads = LeadModal.LeadsModal;
 const CustomerModal = require('../models/customerModel');
 const Customer = CustomerModal.CustomerModal;
 const BillingAddress = CustomerModal.BillingAddressModal;
@@ -739,13 +733,6 @@ const deleteQuatation = asyncHandler(async (req, res) => {
 });
 
 const duplicateLead = asyncHandler(async (req, res) => {
-    let Quatation = Quatations(req.conn);
-    let Customers = Customer(req.conn);
-    let Country = Countrys(req.conn);
-    let State = States(req.conn);
-    let City = Citys(req.conn);
-    let Icon = Icons(req.conn);
-    let Lead = Leads(req.conn);
     const { quotationId } = req.body;
 
     const quotation = await Quatation.findById(quotationId)

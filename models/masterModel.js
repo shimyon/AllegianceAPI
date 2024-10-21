@@ -399,9 +399,6 @@ const organizationSchema = mongoose.Schema(
             PhoneNo: {
                 type: String
             },
-            CompanyLogo: {
-                type: String
-            },
         },
         {
             timestamps: true,
