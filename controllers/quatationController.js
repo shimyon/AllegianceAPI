@@ -1,17 +1,12 @@
 const asyncHandler = require('express-async-handler')
 const QuatationModal = require('../models/quatationModel')
 const User = require('../models/userModel')
-// const notificationModel = require('../models/notificationModel')
 const Notification = require('../models/notificationModel')
-// const Notification = NotifModal.NotificationModal;
 const Quatations = QuatationModal.QuatationModal
 const QuatationProducts = QuatationModal.QuatationProductModal
 const OrderModal = require('../models/orderModel')
 const Orders = OrderModal.OrderModal
 const OrderProducts = OrderModal.OrderProductModal
-// const Master = require('../models/masterModel')
-// const Status = Master.StatusModal;
-// const ApplicationSetting = Master.ApplicationSettingModal;
 const SassMaster = require('../models/saasmasterModel');
 const ApplicationSettings = SassMaster.ApplicationSettingModal;
 const Statuss = SassMaster.StatusModal;

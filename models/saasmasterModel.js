@@ -104,6 +104,18 @@ const sourceSchema = mongoose.Schema(
     {
         timestamps: true,
     });
+const quatationNameSchema = mongoose.Schema(
+    {
+        Name: {
+            type: String
+        },
+        is_active: {
+            type: Boolean
+        }
+    },
+    {
+        timestamps: true,
+    });
 const unitSchema = mongoose.Schema(
     {
         Name: {
@@ -397,6 +409,7 @@ module.exports = {
     CityModal: (conn) => conn.model('City', citySchema),
     UnitModal: (conn) => conn.model('Units', unitSchema),
     CategoryModal: (conn) => conn.model('Category', categorySchema),
+    QuatationNameModal: (conn) => conn.model('QuatationName', quatationNameSchema),
     SubCategoryModal: (conn) => conn.model('SubCategory', subCategorySchema),
     IconModal: (conn) => conn.model('Icon', iconSchema),
     ModuleModal: (conn) => conn.model('Module_Master', ModuleSchema),

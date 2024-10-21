@@ -2,13 +2,20 @@ const asyncHandler = require('express-async-handler')
 const TaskModal = require('../models/taskModel')
 const Tasks = TaskModal.TaskModal
 const TaskComments = TaskModal.TaskCommentModal
-// const Master = require('../models/masterModel')
-// const Status = Master.StatusModal;
 const { sendMail } = require('../middleware/sendMail')
 const Users = require('../models/userModel')
 const SassMaster = require('../models/saasmasterModel');
 const Statuss = SassMaster.StatusModal;
 const moment = require('moment')
+const LeadModal = require('../models/leadModel')
+const Leads = LeadModal.LeadsModal;
+const ProspectModal = require('../models/prospectModel');
+const Prospects = ProspectModal.ProspectsModal;
+
+const ContractModel = require('../models/contractModel')
+const Processs = ContractModel.ContractProcess;
+const SubProcesss = ContractModel.ContractSubProcess;
+
 const addtask = asyncHandler(async (req, res) => {
     try {
         let Task = Tasks(req.conn);
@@ -184,6 +191,11 @@ const getAlltask = asyncHandler(async (req, res) => {
     let Task = Tasks(req.conn);
     let User = Users(req.conn);
     let Status = Statuss(req.conn);
+    let Lead = Leads(req.conn);
+    let Prospect = Prospects(req.conn);
+    let Process = Processs(req.conn);
+    let SubProcess = SubProcesss(req.conn);
+
 
     var inboxcondition = { is_active: req.body.active, Assign: req.body.user };
     var outboxcondition = { is_active: req.body.active, addedBy: req.body.user, Assign: { $ne: req.body.user } };

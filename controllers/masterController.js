@@ -1,23 +1,6 @@
 const asyncHandler = require('express-async-handler')
 
 const SassMaster = require('../models/saasmasterModel');
-// const Master = require('../models/masterModel')
-// const Product = Master.ProductModal;
-// const Type = Master.TypeModal;
-// const State = Master.StateModal;
-// const Country = Master.CountryModal;
-// const City = Master.CityModal;
-// const Source = Master.SourceModal;
-// const Unit = Master.UnitModal;
-// const Icon = Master.IconModal;
-// const Category = Master.CategoryModal;
-// const SubCategory = Master.SubCategoryModal;
-// const Module = Master.ModuleModal;
-// const moduleRight = require('../models/moduleRightModel');
-// const Role = Master.RoleModal;
-// const Status = Master.StatusModal;
-// const MailAddress = Master.MailAddressModal;
-// const ApplicationSetting = Master.ApplicationSettingModal;
 const ApplicationSettingTenant = SassMaster.ApplicationSettingModal;
 const Products = SassMaster.ProductModal;
 const Types = SassMaster.TypeModal;
@@ -34,7 +17,7 @@ const Statuss = SassMaster.StatusModal;
 const MailAddresss = SassMaster.MailAddressModal;
 const Modules = SassMaster.ModuleModal;
 const ModuleRights = SassMaster.ModuleRightModal;
-
+const QuatationNames = SassMaster.QuatationNameModal;
 const uploadFile = require("../middleware/uploadFileMiddleware");
 
 const Response = require('../models/responseModel')
@@ -1016,6 +999,7 @@ const addQuatationName = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let QuatationName = QuatationNames(req.conn);
         let oldQuatationName = await QuatationName.findOne({ Name: req.body.name });
 
         if (oldQuatationName) {
@@ -1042,6 +1026,7 @@ const editQuatationName = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let QuatationName = QuatationNames(req.conn);
         let oldQuatationName = QuatationName.findById(req.body.id);
 
         if (!oldQuatationName) {
@@ -1067,6 +1052,7 @@ const changeQuatationNameStatus = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
+        let QuatationName = QuatationNames(req.conn);
         let newQuatationName = await QuatationName.findByIdAndUpdate(req.body.id, {
             is_active: req.body.active
         });
@@ -1085,10 +1071,11 @@ const getQuatationNames = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let QuatationNames = await QuatationName.find({ is_active: req.body.active });
+        let QuatationName = QuatationNames(req.conn);
+        let quatationNames = await QuatationName.find({ is_active: req.body.active });
 
         response.success = true;
-        response.data = QuatationNames;
+        response.data = quatationNames;
         return res.status(200).json(response);
     }
     catch (err) {
@@ -1100,10 +1087,11 @@ const getQuatationNameById = asyncHandler(async (req, res) => {
     let response = new Response();
 
     try {
-        let QuatationNames = await QuatationName.findOne({ is_active: true, _id: req.params.id });
+        let QuatationName = QuatationNames(req.conn);
+        let quatationNames = await QuatationName.findOne({ is_active: true, _id: req.params.id });
 
         response.success = true;
-        response.data = QuatationNames;
+        response.data = quatationNames;
         return res.status(200).json(response);
     }
     catch (err) {
@@ -1113,6 +1101,7 @@ const getQuatationNameById = asyncHandler(async (req, res) => {
 })
 const deleteQuatationName = asyncHandler(async (req, res) => {
     try {
+        let QuatationName = QuatationNames(req.conn);
         await QuatationName.deleteOne({ _id: req.params.id }).lean().exec((err, doc) => {
             if (err) {
                 return res.status(401).json({

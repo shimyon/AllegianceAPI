@@ -415,7 +415,7 @@ const StateModal = mongoose.model('MasterStates', stateSchema);
 const CityModal = mongoose.model('MasterCity', citySchema);
 const UnitModal = mongoose.model('MasterUnits', unitSchema);
 const IconModal = mongoose.model('MasterIcon', iconSchema);
-
+const QuatationNameModal = mongoose.model('QuatationName', quatationNameSchema);
 const CategoryModal = mongoose.model('Category', categorySchema);
 const SubCategoryModal = mongoose.model('SubCategory', subCategorySchema);
 const ModuleModal = mongoose.model('MasterModule_Master', ModuleSchema);
@@ -433,7 +433,7 @@ const syncIndex = async () => {
     await StateModal.syncIndexes();
     await CityModal.syncIndexes();
     await UnitModal.syncIndexes();
-    await QuatationNameModal.syncIndexes();
+    // await QuatationNameModal.syncIndexes();
     await IconModal.syncIndexes();
     await CategoryModal.syncIndexes();
     await SubCategoryModal.syncIndexes();
