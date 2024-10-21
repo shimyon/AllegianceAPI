@@ -36,9 +36,6 @@ var test = require('tape')
 var path = require('path')
 const Templates = require('../models/templateModel')
 const { generatePDF } = require('../services/pdfService')
-const LeadModal = require('../models/leadModel')
-const Lead = LeadModal.LeadsModal;
-const Icon = Master.IconModal;
 const addQuatation = asyncHandler(async (req, res) => {
     try {
         let Quatation = Quatations(req.conn);

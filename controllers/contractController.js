@@ -4,11 +4,13 @@ const Contracts = ContractModel.ContractModal;
 const Processs = ContractModel.ContractProcess;
 const SubProcess = ContractModel.ContractSubProcess;
 const TaskModal = require('../models/taskModel');
-const Task = TaskModal.TaskModal;
+const Tasks = TaskModal.TaskModal;
 const DailyStatuss = ContractModel.ProcessDailyStatus;
 const Users = require('../models/userModel')
 const CustomerModal = require('../models/customerModel')
-const Customers = CustomerModal.CustomerModal
+const Customers = CustomerModal.CustomerModal;
+const SassMaster = require('../models/saasmasterModel');
+const Statuss = SassMaster.StatusModal;
 
 const uploadFile = require("../middleware/uploadFileMiddleware");
 
@@ -279,6 +281,8 @@ const getProcessById = asyncHandler(async (req, res) => {
         let Process = Processs(req.conn);
         let SubProcesss = SubProcess(req.conn);
         let dailyStatus = DailyStatuss(req.conn);
+        let Task = Tasks(req.conn);
+        let Status = Statuss(req.conn);
 
         let ProcessList = await Process.find({ _id: req.body.processId }).populate({
             path: 'subProcess',
@@ -537,8 +541,10 @@ const getSubProcessById = asyncHandler(async (req, res) => {
         let User = Users(req.conn); 
         let SubProcesss = SubProcess(req.conn);       
         let DailyStatus = DailyStatuss(req.conn);
-
+        let Task = Tasks(req.conn);
+        let Status = Statuss(req.conn);
         let ProcessList = await SubProcesss.find({ _id: req.body.subProcessId }).populate("dailyStatus").populate("addedBy", "_id name email role");
+        let tasklist = await Task.find({ is_active: true, ProcessId:  req.body.subProcessId }).populate("Status").populate("Assign");
 
         return res.status(200).json({
             success: true,
