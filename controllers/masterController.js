@@ -1831,11 +1831,15 @@ const editConfigurationStatus = asyncHandler(async (req, res) => {
     try {
         let Status = Statuss(req.conn);
         req.body.status.map(async (f) => {
-            let status = await Status.findByIdAndUpdate(f._id, {
-                Role: f.role || null,
-                Assign: f.assign || null,
-                Color: f.color
-            });
+            if (f && f._id) {
+                return await Status.findByIdAndUpdate(f._id, {
+                    Role: f.role || null,
+                    Assign: f.assign || null,
+                    Color: f.color
+                });
+            } else {
+                return null; 
+            }           
         })
         response.success = true;
         response.message = `Status updated successfully`;
@@ -1843,7 +1847,7 @@ const editConfigurationStatus = asyncHandler(async (req, res) => {
 
         return res.status(200).json(response);
     } catch (err) {
-        response.message = "Error in updating Status. " + err.message;
+        response.message = "Error in updating Status.   " + err.message;
         return res.status(400).json(response);
     }
 });

@@ -15,6 +15,8 @@ const addCustomer = asyncHandler(async (req, res) => {
     try {
         let Customers = Customer(req.conn);
         let ApplicationSetting = ApplicationSettingTenant(req.conn);
+        let BillingAddresss = BillingAddress(req.conn);
+        let ShippingAddresss = ShippingAddress(req.conn);
         const existCustomerCode = await Customers.findOne({ $or: [{ CustomerCode: req.body.CustomerCode }] });
         if (existCustomerCode) {
             return res.status(200).json({
@@ -76,7 +78,7 @@ const addCustomer = asyncHandler(async (req, res) => {
             is_active: true
         });
         if (newCustomer) {
-            const newBilling = await BillingAddress.create({
+            const newBilling = await BillingAddresss.create({
                 Customer: newCustomer._id,
                 Address: req.body.address,
                 City: req.body.city||null,
@@ -85,7 +87,7 @@ const addCustomer = asyncHandler(async (req, res) => {
                 is_active: true,
                 is_default: true
             });
-            const newShipping = await ShippingAddress.create({
+            const newShipping = await ShippingAddresss.create({
                 Customer: newCustomer._id,
                 Address: req.body.address,
                 City: req.body.city||null,
@@ -95,7 +97,7 @@ const addCustomer = asyncHandler(async (req, res) => {
                 is_active: true,
                 is_default: true
             });
-            const existCustomer = await Customer.findById(newCustomer._id);
+            const existCustomer = await Customers.findById(newCustomer._id);
             existCustomer.BillingAddress.push(newBilling);
             existCustomer.ShippingAddress.push(newShipping);
             existCustomer.save((err) => {

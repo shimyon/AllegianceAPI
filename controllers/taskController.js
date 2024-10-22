@@ -11,15 +11,35 @@ const LeadModal = require('../models/leadModel')
 const Leads = LeadModal.LeadsModal;
 const ProspectModal = require('../models/prospectModel');
 const Prospects = ProspectModal.ProspectsModal;
-
+const Notificationss = require('../models/notificationModel')
 const ContractModel = require('../models/contractModel')
 const Processs = ContractModel.ContractProcess;
 const SubProcesss = ContractModel.ContractSubProcess;
+const uploadFile = require("../middleware/uploadFileMiddleware");
 
 const addtask = asyncHandler(async (req, res) => {
     try {
+        process.env.UPLOADFILE = "";
+        await uploadFile(req, res, function (err) {
+            if (err) {
+                return ("Error uploading file.");
+            } else {
+                saveTask(req, res, process.env.UPLOADFILE)
+            }
+        })
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in adding data. " + err.message,
+            data: null,
+        });
+    }
+});
+const saveTask = asyncHandler(async (req, res, fileName) => {
+    try {
         let Task = Tasks(req.conn);
         let User = Users(req.conn);
+        let Notifications = Notificationss(req.conn);
         let taskadd = await Task.create({
             LeadId: req.body.LeadId||null,
             ProspectId: req.body.ProspectId||null,
@@ -27,6 +47,7 @@ const addtask = asyncHandler(async (req, res) => {
             SubProcessId: req.body.SubProcessId||null,
             Name: req.body.Name,
             Description: req.body.Description,
+            image: fileName.replace(",", ""),
             Status: req.body.Status||null,
             Assign: req.body.Assign||null,
             Reporter: req.body.Reporter||null,
@@ -41,10 +62,95 @@ const addtask = asyncHandler(async (req, res) => {
             let html =
                 `<html>Hello,<br/><br/>Please take up the following task (${req.body.Name})<br/>${req.body.Description}<br/><br/>Please finish it by ${moment(req.body.EndDate).format("DD-MMM-YY")}<br/><br/>Thank you,<br/><b>${TaskList.addedBy?.name}</b></html>`;
             sendMail(TaskList?.Assign.email, "New Task", html, req);
+            const notification = await Notifications.create({
+                description: `A new task (${taskadd.Name}) has been assigned to you.`,
+                date: new Date(),
+                link: "Tasks", 
+                userId: taskadd.Assign, 
+                Isread: false
+            });
         }
         return res.status(200).json({
             success: true,
             msg: "Task Added.",
+        }).end();
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in creating Task. " + err.message,
+            data: null,
+        });
+    }
+});
+const edittask = asyncHandler(async (req, res) => {
+    try {
+        process.env.UPLOADFILE = "";
+        await uploadFile(req, res, function (err) {
+            if (err) {
+                return ("Error uploading file.");
+            } else {
+                editSave(req, res, process.env.UPLOADFILE)
+            }
+        })
+
+    } catch (err) {
+        return res.status(400).json({
+            success: false,
+            msg: "Error in editing data. " + err.message,
+            data: null,
+        });
+
+    }
+});
+const editSave = asyncHandler(async (req, res) => {
+    try {
+        let Task = Tasks(req.conn);
+        let User = Users(req.conn);
+        let Status = Statuss(req.conn);
+        let Notifications = Notificationss(req.conn);
+        fileName = fileName != "" ? fileName.replace(",", "") : existNews.image;
+        const oldTask = await Task.findById(req.body.id);
+        await Task.findByIdAndUpdate(req.body.id, {
+            Name: req.body.Name,
+            Description: req.body.Description,
+            Status: req.body.Status,
+            Assign: req.body.Assign,
+            Reporter: req.body.Reporter,
+            Priority: req.body.Priority,
+            StartDate: req.body.StartDate,
+            EndDate: req.body.EndDate,
+            image: fileName
+        });
+        const task = await Task.findById(req.body.id).populate("Reporter").populate("Status").populate("Assign").populate("addedBy");
+        if (oldTask.Status !== req.body.Status) {
+            
+            const html = `<html>Hello,<br/><br/>The status of the task (${task.Name}) has been changed to (${task.Status?.Name}).<br/><br/>Thank you,<br/><b>(${task.addedBy?.name})</b></html>`;
+            task.Reporter.forEach((x) => {
+                if (x) {
+                    sendMail(x.email, "Task Status is changed", html, req);
+                    Notifications.create({
+                        description: `The status of the task (${task.Name}) has been updated to ${task.Status?.Name}.`,
+                        date: new Date(),
+                        link: "Tasks",
+                        userId: x._id,
+                        Isread: false
+                    });
+                }
+            })
+            if (task.Assign) {
+                Notifications.create({
+                    description: `The status of the task (${task.Name}) has been updated to ${task.Status?.Name}.`,
+                    date: new Date(),
+                    link: "Tasks",
+                    userId: task.Assign,
+                    Isread: false
+                });
+            }            
+        }
+
+        return res.status(200).json({
+            success: true,
+            msg: "Task Updated",
         }).end();
     } catch (err) {
         return res.status(400).json({
@@ -97,47 +203,8 @@ const getAlltaskcomment = asyncHandler(async (req, res) => {
             data: null,
         });
     }
-})
-const edittask = asyncHandler(async (req, res) => {
-    try {
-        let Task = Tasks(req.conn);
-        let User = Users(req.conn);
-        let Status = Statuss(req.conn);
-
-        const oldTask = await Task.findById(req.body.id);
-        await Task.findByIdAndUpdate(req.body.id, {
-            Name: req.body.Name,
-            Description: req.body.Description,
-            Status: req.body.Status,
-            Assign: req.body.Assign,
-            Reporter: req.body.Reporter,
-            Priority: req.body.Priority,
-            StartDate: req.body.StartDate,
-            EndDate: req.body.EndDate,
-        });
-        if (oldTask.Status !== req.body.Status) {
-            const task = await Task.findById(req.body.id).populate("Reporter").populate("Status").populate("addedBy");
-            const html = `<html>Hello,<br/><br/>The status of the task (${task.Name}) has been changed to (${task.Status?.Name}).<br/><br/>Thank you,<br/><b>(${task.addedBy?.name})</b></html>`;
-            task.Reporter.map((x, i) => {
-                if (x) {
-                    sendMail(x.email, "Task Status is changed", html, req);
-                }
-            })
-        }
-
-        return res.status(200).json({
-            success: true,
-            msg: "Task Updated",
-        }).end();
-    } catch (err) {
-        return res.status(400).json({
-            success: false,
-            msg: "Error in creating Task. " + err.message,
-            data: null,
-        });
-    }
-
 });
+
 const taskreason = asyncHandler(async (req, res) => {
     try {
         let Task = Tasks(req.conn);
