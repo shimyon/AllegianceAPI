@@ -102,14 +102,14 @@ const edittask = asyncHandler(async (req, res) => {
 
     }
 });
-const editSave = asyncHandler(async (req, res) => {
+const editSave = asyncHandler(async (req, res, fileName) => {
     try {
         let Task = Tasks(req.conn);
         let User = Users(req.conn);
         let Status = Statuss(req.conn);
         let Notifications = Notificationss(req.conn);
-        fileName = fileName != "" ? fileName.replace(",", "") : existNews.image;
         const oldTask = await Task.findById(req.body.id);
+        fileName = fileName != "" ? fileName.replace(",", "") : oldTask.image;
         await Task.findByIdAndUpdate(req.body.id, {
             Name: req.body.Name,
             Description: req.body.Description,
