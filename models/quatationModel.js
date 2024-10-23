@@ -16,6 +16,9 @@ const quatationSchema = mongoose.Schema(
         Descriptionofwork: {
             type: String
         },
+        CustomerCode: {
+            type: String
+        },
         Customer: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'Customers'

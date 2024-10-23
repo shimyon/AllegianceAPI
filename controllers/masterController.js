@@ -958,6 +958,7 @@ const addQuatationName = asyncHandler(async (req, res) => {
 
         let newQuatationName = await QuatationName.create({
             Name: req.body.name,
+            TermsAndCondition:req.body.TermsAndCondition,
             is_active: true,
         });
 
@@ -983,7 +984,8 @@ const editQuatationName = asyncHandler(async (req, res) => {
         }
 
         let newQuatationName = await QuatationName.findByIdAndUpdate(req.body.id, {
-            Name: req.body.name
+            Name: req.body.name,
+            TermsAndCondition:req.body.TermsAndCondition,
         });
 
         response.success = true;

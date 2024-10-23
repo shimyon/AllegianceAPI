@@ -74,7 +74,6 @@ const stateSchema = mongoose.Schema(
     {
         timestamps: true,
     });
-
 const citySchema = mongoose.Schema(
     {
         Name: {
@@ -110,6 +109,9 @@ const quatationNameSchema = mongoose.Schema(
         Name: {
             type: String
         },
+        TermsAndCondition: {
+            type: String
+        },
         is_active: {
             type: Boolean
         }
@@ -117,18 +119,18 @@ const quatationNameSchema = mongoose.Schema(
     {
         timestamps: true,
     });
-    const unitSchema = mongoose.Schema(
-        {
-            Name: {
-                type: String
-            },
-            is_active: {
-                type: Boolean
-            }
+const unitSchema = mongoose.Schema(
+    {
+        Name: {
+            type: String
         },
-        {
-            timestamps: true,
-        });
+        is_active: {
+            type: Boolean
+        }
+    },
+    {
+        timestamps: true,
+    });
 const categorySchema = mongoose.Schema(
     {
         Name: {
@@ -412,4 +414,4 @@ const syncIndex = async () => {
 }
 syncIndex();
 
-module.exports = { ProductModal, TypeModal, CountryModal, StateModal, CityModal, SourceModal, UnitModal, QuatationNameModal,IconModal, CategoryModal, SubCategoryModal, ModuleModal, RoleModal, StatusModal, MailAddressModal, ApplicationSettingModal };
+module.exports = { ProductModal, TypeModal, CountryModal, StateModal, CityModal, SourceModal, UnitModal, QuatationNameModal, IconModal, CategoryModal, SubCategoryModal, ModuleModal, RoleModal, StatusModal, MailAddressModal, ApplicationSettingModal };

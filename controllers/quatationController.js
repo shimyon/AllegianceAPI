@@ -59,6 +59,7 @@ const addQuatation = asyncHandler(async (req, res) => {
             QuatationCode: code,
             Customer: req.body.customer,
             QuatationName: req.body.QuatationName,
+            CustomerCode:req.body.CustomerCode,
             Descriptionofwork: req.body.Descriptionofwork,
             ShippingAddress: req.body.shippingAddress || null,
             BillingAddress: req.body.billingAddress || null,
@@ -164,6 +165,7 @@ const editQuatation = asyncHandler(async (req, res) => {
             Customer: req.body.customer,
             QuatationCode: req.body.QuatationCode,
             QuatationName: req.body.QuatationName,
+            CustomerCode:req.body.CustomerCode,
             Descriptionofwork: req.body.Descriptionofwork,
             ShippingAddress: req.body.shippingAddress,
             BillingAddress: req.body.billingAddress,
@@ -528,7 +530,7 @@ const Quatationpdfcreate = asyncHandler(async (req, res) => {
         templateHtml = templateHtml.replace('{{token.OfficeAddress}}', applicationSetting.OfficeAddress?.replace(/(\r\n|\n|\r)/gm, "<br>") || '')
         templateHtml = templateHtml.replace('{{token.QuatationName}}', customerList[0].QuatationName?.Name || '')
         templateHtml = templateHtml.replace('{{token.QuatationNo}}', customerList[0].QuatationCode || '')
-        templateHtml = templateHtml.replace('{{token.CustomerNo}}', customerList[0].Customer?.CustomerCode || '')
+        templateHtml = templateHtml.replace('{{token.CustomerNo}}', customerList[0].CustomerCode || '')
         templateHtml = templateHtml.replace('{{token.date}}', format('dd-MM-yyyy', customerList[0].QuatationDate))
         templateHtml = templateHtml.replace('{{token.validdate}}', format('dd-MM-yyyy', customerList[0].ValidDate))
         templateHtml = templateHtml.replace('{{token.email}}', customerList[0].Customer?.Email || '')
