@@ -165,6 +165,8 @@ const addtaskcomment = asyncHandler(async (req, res) => {
     try {
         let TaskComment = TaskComments(req.conn);
         let Task = Tasks(req.conn);
+        let Notifications = Notificationss(req.conn);
+        let User = Users(req.conn);      
         let taskCommentadd = await TaskComment.create({
             taskId: req.body.taskId,
             TaskComment: req.body.Taskcomment,
@@ -174,6 +176,33 @@ const addtaskcomment = asyncHandler(async (req, res) => {
             await Task.findByIdAndUpdate(req.body.taskId, {
                 LastComment: taskCommentadd._id
             });
+        
+            const task = await Task.findById(req.body.taskId).populate("Assign").populate("Reporter").populate("addedBy");
+          
+            const isAssigneeComment = task.Assign.equals(req.user._id);
+            const isReporterComment = task.Reporter.some(reporterId => reporterId.equals(req.user._id));
+
+            let notificationUserIds = [];
+            
+            if (isAssigneeComment) {
+                notificationUserIds = task.Reporter.map(reporter => reporter._id);;
+            } 
+        
+            else if (isReporterComment) {
+                notificationUserIds = [task.Assign._id]; 
+            }
+
+            for (const userId of notificationUserIds) {
+                if (userId) {
+                    await Notifications.create({
+                        description: `A new comment has been added to your task (${task.Name}).`,
+                        date: new Date(),
+                        link: "Tasks",
+                        userId: userId, 
+                        Isread: false
+                    });
+                }
+            }
         }
         return res.status(200).json({
             success: true,
@@ -271,13 +300,15 @@ const getAlltask = asyncHandler(async (req, res) => {
         outboxcondition.Status = req.body.status;
     }
     try {
+        let AllList = await Task.find({is_active: req.body.active}).populate("Status").populate("Assign", "_id name").populate("addedBy", "_id name").populate("LeadId").populate("ProspectId").populate("ProcessId").populate("SubProcessId")
+            .sort({ createdAt: -1 })
         let inboxList = await Task.find(inboxcondition).populate("Status").populate("Assign", "_id name").populate("addedBy", "_id name").populate("LeadId").populate("ProspectId").populate("ProcessId").populate("SubProcessId")
             .sort({ createdAt: -1 })
         let outboxList = await Task.find(outboxcondition).populate("Status").populate("Assign", "_id name").populate("addedBy", "_id name").populate("LeadId").populate("ProspectId").populate("ProcessId").populate("SubProcessId")
             .sort({ createdAt: -1 })
         return res.status(200).json({
             success: true,
-            data: { 'Inbox': inboxList, 'Outbox': outboxList }
+            data: { 'Inbox': inboxList, 'Outbox': outboxList, AllList }
         }).end();
     } catch (err) {
         return res.status(400).json({
